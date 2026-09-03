@@ -1,0 +1,12 @@
+# Rác hệ điều hành
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Thư mục biên tập
+.vscode/
+.idea/
+
+# File tạm
+*.log
+*.tmp

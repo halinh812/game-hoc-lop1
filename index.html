@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vở Tiếng Anh Của Bo</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&family=Baloo+2:wght@700;800&display=swap">
+<style>
+  :root{
+    --paper:#FAF6EC;
+    --rule:#CBDCEA;
+    --margin:#D6524B;
+    --ink:#1F3550;
+    --ink-soft:#5C7188;
+    --gold:#E8A33D;
+    --success:#2F8F5B;
+    --wrong:#B24A43;
+    --card-bg:#FFFFFF;
+    --card-border:rgba(31,53,80,0.14);
+    --shadow:rgba(31,53,80,0.22);
+    --chip-bg:rgba(31,53,80,0.06);
+    --chip-active:#1F3550;
+    --chip-active-text:#FAF6EC;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#16241D;
+      --rule:rgba(255,255,255,0.14);
+      --margin:#E8898A;
+      --ink:#F2EFE0;
+      --ink-soft:rgba(242,239,224,0.68);
+      --gold:#F0C05A;
+      --success:#7BD69B;
+      --wrong:#F09A94;
+      --card-bg:rgba(255,255,255,0.07);
+      --card-border:rgba(255,255,255,0.22);
+      --shadow:rgba(0,0,0,0.55);
+      --chip-bg:rgba(255,255,255,0.08);
+      --chip-active:#F0C05A;
+      --chip-active-text:#16241D;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#16241D;
+    --rule:rgba(255,255,255,0.14);
+    --margin:#E8898A;
+    --ink:#F2EFE0;
+    --ink-soft:rgba(242,239,224,0.68);
+    --gold:#F0C05A;
+    --success:#7BD69B;
+    --wrong:#F09A94;
+    --card-bg:rgba(255,255,255,0.07);
+    --card-border:rgba(255,255,255,0.22);
+    --shadow:rgba(0,0,0,0.55);
+    --chip-bg:rgba(255,255,255,0.08);
+    --chip-active:#F0C05A;
+    --chip-active-text:#16241D;
+    color-scheme: dark;
+  }
+
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    background: var(--paper);
+    background-image: radial-gradient(ellipse at top, color-mix(in srgb, var(--rule) 40%, transparent), transparent 60%);
+    background-attachment: fixed;
+    font-family:'Be Vietnam Pro', system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--ink);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding: 20px 14px 40px;
+  }
+  h1,h2,h3{ text-wrap: balance; margin:0; }
+  button{ font-family:inherit; }
+  .stage{ width:min(440px,100%); }
+
+  .notebook{
+    position:relative;
+    background:var(--paper);
+    border-radius:22px;
+    box-shadow: 0 24px 55px var(--shadow), 0 0 0 1px var(--card-border);
+    overflow:hidden;
+    animation: settle .45s ease-out both;
+  }
+  @keyframes settle{ from{ opacity:0; transform: translateY(10px) scale(.99);} to{opacity:1; transform:none;} }
+
+  .notebook__rules{
+    position:absolute; inset:0;
+    background-image: repeating-linear-gradient(to bottom, transparent 0 33px, var(--rule) 33px 34px);
+    opacity:.9; pointer-events:none;
+  }
+  .notebook__margin{
+    position:absolute; top:0; bottom:0; left:44px; width:2px;
+    background:var(--margin); opacity:.6; pointer-events:none;
+  }
+  .notebook__content{ position:relative; z-index:1; padding:20px 18px 22px 60px; }
+
+  .topbar{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand h1{ font-size:1.28rem; font-weight:800; line-height:1.15; }
+  .brand span.sub{ display:block; font-size:.74rem; font-weight:600; color:var(--ink-soft); letter-spacing:.02em; }
+
+  .stampcount{
+    display:flex; align-items:center; gap:5px;
+    background:var(--chip-bg); border-radius:999px; padding:6px 11px;
+    font-weight:800; font-size:.86rem; font-variant-numeric:tabular-nums;
+    color:var(--ink); white-space:nowrap;
+  }
+  .stampcount svg{ color:var(--margin); flex:none; }
+
+  .iconbtn{
+    border:none; background:var(--chip-bg); color:var(--ink);
+    width:34px; height:34px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; flex:none;
+  }
+  .iconbtn:hover{ background:var(--card-border); }
+
+  .bubble{
+    display:flex; gap:10px; align-items:flex-start;
+    background:var(--card-bg); border:1px solid var(--card-border);
+    border-radius:14px; padding:12px 13px; margin-bottom:16px;
+  }
+  .bubble .owl{ flex:none; margin-top:-2px; }
+  .bubble p{ margin:0; font-size:.92rem; line-height:1.45; color:var(--ink); }
+  .bubble b{ color:var(--margin); }
+
+  .chiprow{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px; }
+  .chip{
+    border:1px solid var(--card-border); background:var(--card-bg); color:var(--ink);
+    padding:7px 13px; border-radius:999px; font-size:.84rem; font-weight:600;
+    cursor:pointer; display:flex; align-items:center; gap:6px;
+  }
+  .chip[aria-pressed="true"]{ background:var(--chip-active); color:var(--chip-active-text); border-color:transparent; }
+
+  .progresswrap{ margin-bottom:18px; }
+  .progresswrap .label{ display:flex; justify-content:space-between; font-size:.78rem; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
+  .progresswrap .label b{ color:var(--ink); font-variant-numeric:tabular-nums; }
+  .bar{ height:10px; border-radius:999px; background:var(--chip-bg); overflow:hidden; }
+  .bar__fill{ height:100%; border-radius:999px; background:linear-gradient(90deg,var(--gold),var(--success)); transition:width .4s ease; }
+
+  .stampbtn{
+    width:100%; border:none; border-radius:14px; padding:15px 18px;
+    background:var(--margin); color:#FAF6EC; font-weight:800; font-size:1.05rem;
+    cursor:pointer; letter-spacing:.01em;
+    box-shadow: 0 6px 0 color-mix(in srgb, var(--margin) 60%, #000 20%);
+    transition: transform .08s ease, box-shadow .08s ease;
+  }
+  .stampbtn:active{ transform: translateY(4px); box-shadow:none; }
+
+  .resetlink{ display:block; text-align:center; margin-top:14px; font-size:.76rem; color:var(--ink-soft); background:none; border:none; text-decoration:underline; cursor:pointer; padding:6px; width:100%; }
+  .confirmrow{ display:flex; gap:8px; justify-content:center; align-items:center; margin-top:10px; font-size:.8rem; color:var(--ink-soft); }
+  .confirmrow button{ border:1px solid var(--card-border); background:var(--card-bg); color:var(--ink); border-radius:8px; padding:5px 10px; cursor:pointer; font-weight:700; }
+
+  /* quiz screen */
+  .dots{ display:flex; gap:6px; flex:1; flex-wrap:wrap; }
+  .dot{ width:9px; height:9px; border-radius:50%; background:var(--chip-bg); border:1px solid var(--card-border); }
+  .dot[data-state="done"]{ background:var(--success); border-color:transparent; }
+  .dot[data-state="current"]{ background:var(--gold); border-color:transparent; }
+
+  .cardwrap{ position:relative; display:flex; justify-content:center; margin: 6px 0 16px; }
+  .flashcard{
+    width:172px; height:172px; border-radius:50%;
+    background:var(--card-bg); border:1px solid var(--card-border);
+    box-shadow: 0 10px 24px var(--shadow);
+    display:flex; align-items:center; justify-content:center;
+    font-size:4.4rem; line-height:1;
+  }
+  .flashcard.shake{ animation: shake .38s ease; }
+  @keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-7px);} 75%{transform:translateX(7px);} }
+
+  .speakbtn{
+    position:absolute; bottom:-6px; left:50%; transform:translateX(-50%);
+    border:1px solid var(--card-border); background:var(--card-bg); color:var(--ink);
+    border-radius:999px; padding:6px 14px; font-size:.78rem; font-weight:700;
+    display:flex; align-items:center; gap:6px; cursor:pointer;
+  }
+
+  .stamp-pop{
+    position:absolute; top:-6px; right:calc(50% - 100px);
+    color:var(--margin); opacity:0; transform: scale(.4) rotate(-18deg);
+  }
+  .stamp-pop.show{ animation: stampin .5s cubic-bezier(.2,1.4,.4,1) forwards; }
+  @keyframes stampin{ 0%{opacity:0; transform:scale(.3) rotate(-25deg);} 60%{opacity:1; transform:scale(1.15) rotate(8deg);} 100%{opacity:1; transform:scale(1) rotate(-8deg);} }
+
+  .options{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px; }
+  .opt{
+    border:1px solid var(--card-border); background:var(--card-bg); color:var(--ink);
+    border-radius:12px; padding:14px 8px; text-align:center; cursor:pointer;
+    font-family:'Baloo 2', 'Be Vietnam Pro', sans-serif; font-weight:700; font-size:1.12rem;
+    box-shadow: 0 2px 0 var(--card-border);
+  }
+  .opt:active{ transform: translateY(1px); }
+  .opt[data-state="correct"]{ background: color-mix(in srgb, var(--success) 18%, var(--card-bg)); border-color:var(--success); color:var(--success); }
+  .opt[data-state="wrong"]{ background: color-mix(in srgb, var(--wrong) 16%, var(--card-bg)); border-color:var(--wrong); color:var(--wrong); }
+  .opt:disabled{ cursor:default; }
+
+  .nextbtn{
+    width:100%; border:none; border-radius:12px; padding:13px; margin-top:2px;
+    background:var(--ink); color:var(--paper); font-weight:800; font-size:.98rem; cursor:pointer;
+  }
+
+  .backrow{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+
+  /* summary */
+  .summary h2{ font-size:1.5rem; font-weight:800; margin-bottom:4px; }
+  .summary .big{ text-align:center; padding:10px 0 6px; }
+  .statgrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0; }
+  .stat{ background:var(--card-bg); border:1px solid var(--card-border); border-radius:12px; padding:12px; text-align:center; }
+  .stat b{ display:block; font-size:1.5rem; font-variant-numeric:tabular-nums; color:var(--margin); }
+  .stat span{ font-size:.76rem; color:var(--ink-soft); font-weight:600; }
+  .btnrow{ display:flex; flex-direction:column; gap:10px; }
+  .ghostbtn{ border:1px solid var(--card-border); background:var(--card-bg); color:var(--ink); border-radius:12px; padding:12px; font-weight:700; cursor:pointer; }
+
+  .vi-reveal{ color:var(--ink-soft); font-weight:600; }
+
+  @media (prefers-reduced-motion: reduce){
+    .notebook{ animation:none; }
+    .flashcard.shake{ animation:none; }
+    .stamp-pop.show{ animation:none; opacity:1; transform:none; }
+  }
+
+  button:focus-visible, .chip:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="notebook">
+    <div class="notebook__rules" aria-hidden="true"></div>
+    <div class="notebook__margin" aria-hidden="true"></div>
+    <div class="notebook__content" id="root"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var OWL_SVG = '<svg class="owl" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true">'+
+    '<ellipse cx="32" cy="36" rx="22" ry="24" fill="var(--gold)"/>'+
+    '<path d="M10 40 Q3 28 15 18" stroke="var(--gold)" stroke-width="7" fill="none" stroke-linecap="round"/>'+
+    '<path d="M54 40 Q61 28 49 18" stroke="var(--gold)" stroke-width="7" fill="none" stroke-linecap="round"/>'+
+    '<circle cx="22" cy="30" r="9" fill="#FFFDF7"/>'+
+    '<circle cx="42" cy="30" r="9" fill="#FFFDF7"/>'+
+    '<circle cx="22" cy="30" r="4" fill="var(--ink)"/>'+
+    '<circle cx="42" cy="30" r="4" fill="var(--ink)"/>'+
+    '<path d="M28.5 38 L32 44.5 L35.5 38 Z" fill="var(--margin)"/>'+
+    '</svg>';
+  var STAR_SVG = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.7.7-5 4.5 1.4 6.6L12 16.9l-6 3.5 1.4-6.6-5-4.5 6.7-.7z" fill="currentColor"/></svg>';
+  var STAR_BIG_SVG = '<svg viewBox="0 0 24 24" width="34" height="34"><path d="M12 2.5l2.9 6.1 6.7.7-5 4.5 1.4 6.6L12 16.9l-6 3.5 1.4-6.6-5-4.5 6.7-.7z" fill="currentColor"/></svg>';
+  var SPEAK_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.4 8.6a5 5 0 010 6.8" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round"/></svg>';
+  var CLOSE_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg>';
+
+  var WORDS = [
+    {id:'red',en:'red',vi:'màu đỏ',emoji:'🔴',cat:'color'},
+    {id:'blue',en:'blue',vi:'màu xanh dương',emoji:'🔵',cat:'color'},
+    {id:'yellow',en:'yellow',vi:'màu vàng',emoji:'🟡',cat:'color'},
+    {id:'green',en:'green',vi:'màu xanh lá',emoji:'🟢',cat:'color'},
+    {id:'black',en:'black',vi:'màu đen',emoji:'⚫',cat:'color'},
+    {id:'white',en:'white',vi:'màu trắng',emoji:'⚪',cat:'color'},
+    {id:'cat',en:'cat',vi:'con mèo',emoji:'🐱',cat:'animal'},
+    {id:'dog',en:'dog',vi:'con chó',emoji:'🐶',cat:'animal'},
+    {id:'fish',en:'fish',vi:'con cá',emoji:'🐟',cat:'animal'},
+    {id:'bird',en:'bird',vi:'con chim',emoji:'🐦',cat:'animal'},
+    {id:'elephant',en:'elephant',vi:'con voi',emoji:'🐘',cat:'animal'},
+    {id:'lion',en:'lion',vi:'sư tử',emoji:'🦁',cat:'animal'},
+    {id:'one',en:'one',vi:'số 1 - một',emoji:'1️⃣',cat:'number'},
+    {id:'two',en:'two',vi:'số 2 - hai',emoji:'2️⃣',cat:'number'},
+    {id:'three',en:'three',vi:'số 3 - ba',emoji:'3️⃣',cat:'number'},
+    {id:'four',en:'four',vi:'số 4 - bốn',emoji:'4️⃣',cat:'number'},
+    {id:'five',en:'five',vi:'số 5 - năm',emoji:'5️⃣',cat:'number'},
+    {id:'six',en:'six',vi:'số 6 - sáu',emoji:'6️⃣',cat:'number'},
+    {id:'seven',en:'seven',vi:'số 7 - bảy',emoji:'7️⃣',cat:'number'},
+    {id:'eight',en:'eight',vi:'số 8 - tám',emoji:'8️⃣',cat:'number'},
+    {id:'nine',en:'nine',vi:'số 9 - chín',emoji:'9️⃣',cat:'number'},
+    {id:'ten',en:'ten',vi:'số 10 - mười',emoji:'🔟',cat:'number'},
+    {id:'apple',en:'apple',vi:'quả táo',emoji:'🍎',cat:'fruit'},
+    {id:'banana',en:'banana',vi:'quả chuối',emoji:'🍌',cat:'fruit'},
+    {id:'orange',en:'orange',vi:'quả cam',emoji:'🍊',cat:'fruit'},
+    {id:'grape',en:'grape',vi:'quả nho',emoji:'🍇',cat:'fruit'},
+    {id:'mango',en:'mango',vi:'quả xoài',emoji:'🥭',cat:'fruit'},
+    {id:'mother',en:'mother',vi:'mẹ',emoji:'👩',cat:'family'},
+    {id:'father',en:'father',vi:'bố',emoji:'👨',cat:'family'},
+    {id:'sister',en:'sister',vi:'chị / em gái',emoji:'👧',cat:'family'},
+    {id:'brother',en:'brother',vi:'anh / em trai',emoji:'👦',cat:'family'},
+    {id:'baby',en:'baby',vi:'em bé',emoji:'👶',cat:'family'}
+  ];
+
+  var CATEGORIES = [
+    {id:'all', label:'Tất cả'},
+    {id:'color', label:'Màu sắc', icon:'🎨'},
+    {id:'animal', label:'Con vật', icon:'🐾'},
+    {id:'number', label:'Số đếm', icon:'🔢'},
+    {id:'fruit', label:'Trái cây', icon:'🍎'},
+    {id:'family', label:'Gia đình', icon:'👪'}
+  ];
+
+  var INTERVALS_MIN = [0, 10, 60*24, 60*24*3, 60*24*7, 60*24*14];
+  var STORE_KEY = 'bo-hoc-tienganh-progress-v1';
+
+  function loadProgress(){
+    try{
+      var raw = localStorage.getItem(STORE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    }catch(e){ return {}; }
+  }
+  function saveProgress(p){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(p)); }catch(e){}
+  }
+  var progress = loadProgress();
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t=a[i]; a[i]=a[j]; a[j]=t;
+    }
+    return a;
+  }
+
+  function speak(text){
+    try{
+      if(!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      var u = new SpeechSynthesisUtterance(text);
+      u.lang='en-US'; u.rate=0.82; u.pitch=1.05;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  function wordsInCat(catId){
+    return catId==='all' ? WORDS.slice() : WORDS.filter(function(w){return w.cat===catId;});
+  }
+  function masteredCount(catId){
+    return wordsInCat(catId).filter(function(w){
+      var p = progress[w.id];
+      return p && p.level>=4;
+    }).length;
+  }
+
+  function updateWordProgress(id, correct){
+    var p = progress[id] || {level:0, next:0, seen:false};
+    p.seen = true;
+    p.level = correct ? Math.min(5, p.level+1) : Math.max(0, p.level-1);
+    p.next = Date.now() + INTERVALS_MIN[p.level]*60000;
+    progress[id] = p;
+    saveProgress(progress);
+    return p.level;
+  }
+
+  function buildRound(catId){
+    var now = Date.now();
+    var pool = wordsInCat(catId);
+    var due = pool.filter(function(w){ var p=progress[w.id]; return p && p.seen && p.next<=now; });
+    var brandNew = pool.filter(function(w){ var p=progress[w.id]; return !p || !p.seen; });
+    due.sort(function(a,b){
+      var pa=progress[a.id], pb=progress[b.id];
+      return (pa.level-pb.level) || (pa.next-pb.next);
+    });
+    var size = Math.min(8, pool.length);
+    var round = due.slice(0, size);
+    if(round.length < size){
+      round = round.concat(shuffle(brandNew).slice(0, size-round.length));
+    }
+    if(round.length===0){
+      round = shuffle(pool.slice()).slice(0, size);
+    }
+    return shuffle(round);
+  }
+
+  function pickOptions(word){
+    var sameCat = WORDS.filter(function(w){return w.cat===word.cat && w.id!==word.id;});
+    var others = WORDS.filter(function(w){return w.cat!==word.cat && w.id!==word.id;});
+    var distractors = shuffle(sameCat).slice(0,3);
+    if(distractors.length<3){
+      distractors = distractors.concat(shuffle(others).slice(0,3-distractors.length));
+    }
+    return shuffle([word].concat(distractors));
+  }
+
+  var state = { screen:'home', category:'all', round:[], idx:0, correct:0, answered:false, confirmReset:false };
+  var root = document.getElementById('root');
+
+  function el(html){
+    var d = document.createElement('div');
+    d.innerHTML = html.trim();
+    return d.firstElementChild;
+  }
+
+  function render(){
+    if(state.screen==='home') renderHome();
+    else if(state.screen==='quiz') renderQuiz();
+    else renderSummary();
+  }
+
+  function homeMessage(){
+    var total = WORDS.length;
+    var mastered = masteredCount('all');
+    var anySeen = WORDS.some(function(w){ return progress[w.id] && progress[w.id].seen; });
+    var anyDue = WORDS.some(function(w){ var p=progress[w.id]; return p && p.seen && p.next<=Date.now(); });
+    if(!anySeen) return 'Chào bé! Mình là Bo. Cùng học những từ tiếng Anh đầu tiên nhé!';
+    if(anyDue) return 'Đến giờ ôn bài rồi đó — ôn lại để nhớ thật lâu nha!';
+    if(mastered>=total) return 'Bé đã thuộc hết rồi, giỏi quá! Chơi lại để nhớ thật chắc nhé.';
+    return 'Bé giỏi lắm! Cùng học thêm vài từ mới nào.';
+  }
+
+  function renderHome(){
+    var total = wordsInCat(state.category).length;
+    var mastered = masteredCount(state.category);
+    var pct = total ? Math.round(mastered/total*100) : 0;
+
+    root.innerHTML =
+      '<div class="topbar">'+
+        '<div class="brand">'+ OWL_SVG +
+          '<div><h1>Vở Tiếng Anh Của Bo</h1><span class="sub">Học từ vựng &middot; ôn lại đều để nhớ lâu</span></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="bubble"><div class="owl">'+ OWL_SVG.replace('width="40" height="40"','width="30" height="30"') +'</div><p>'+ homeMessage() +'</p></div>'+
+      '<div class="chiprow" id="chiprow"></div>'+
+      '<div class="progresswrap">'+
+        '<div class="label"><span>Đã thuộc</span><b>'+ mastered +' / '+ total +' từ</b></div>'+
+        '<div class="bar"><div class="bar__fill" style="width:'+ pct +'%"></div></div>'+
+      '</div>'+
+      '<button class="stampbtn" id="startBtn">Bắt đầu học</button>'+
+      '<button class="resetlink" id="resetLink">Xoá tiến trình đã lưu</button>'+
+      '<div id="confirmZone"></div>';
+
+    var chiprow = document.getElementById('chiprow');
+    CATEGORIES.forEach(function(c){
+      var chip = el('<button class="chip" type="button" aria-pressed="'+(state.category===c.id)+'">'+
+        (c.icon? '<span aria-hidden="true">'+c.icon+'</span>':'') + '<span>'+c.label+'</span></button>');
+      chip.addEventListener('click', function(){
+        state.category = c.id;
+        render();
+      });
+      chiprow.appendChild(chip);
+    });
+
+    document.getElementById('startBtn').addEventListener('click', function(){
+      state.round = buildRound(state.category);
+      state.idx = 0;
+      state.correct = 0;
+      state.answered = false;
+      state.screen = 'quiz';
+      render();
+    });
+
+    var confirmZone = document.getElementById('confirmZone');
+    document.getElementById('resetLink').addEventListener('click', function(){
+      state.confirmReset = true;
+      confirmZone.innerHTML = '<div class="confirmrow"><span>Xoá hết tiến trình?</span></div>';
+      var row = confirmZone.querySelector('.confirmrow');
+      var yes = el('<button type="button">Xoá</button>');
+      var no = el('<button type="button">Huỷ</button>');
+      yes.addEventListener('click', function(){
+        progress = {};
+        saveProgress(progress);
+        render();
+      });
+      no.addEventListener('click', function(){
+        confirmZone.innerHTML='';
+      });
+      row.appendChild(yes);
+      row.appendChild(no);
+    });
+  }
+
+  function renderQuiz(){
+    var word = state.round[state.idx];
+    var options = state.currentOptions || (state.currentOptions = pickOptions(word));
+
+    var dots = state.round.map(function(w,i){
+      var st = i<state.idx ? 'done' : (i===state.idx ? 'current' : '');
+      return '<span class="dot" data-state="'+st+'"></span>';
+    }).join('');
+
+    root.innerHTML =
+      '<div class="backrow">'+
+        '<button class="iconbtn" id="homeBtn" aria-label="Về trang chủ">'+ CLOSE_SVG +'</button>'+
+        '<div class="dots">'+ dots +'</div>'+
+      '</div>'+
+      '<div class="cardwrap">'+
+        '<div class="flashcard" id="flashcard">'+ word.emoji +'</div>'+
+        '<div class="stamp-pop" id="stampPop">'+ STAR_BIG_SVG +'</div>'+
+      '</div>'+
+      '<div style="display:flex;justify-content:center;margin-bottom:20px;">'+
+        '<button class="speakbtn" id="speakBtn">'+ SPEAK_SVG +'<span>Nghe từ</span></button>'+
+      '</div>'+
+      '<div class="options" id="options"></div>'+
+      '<div class="bubble" id="feedbackBubble" style="display:none;"><div class="owl">'+ OWL_SVG.replace('width="40" height="40"','width="30" height="30"') +'</div><p id="feedbackText"></p></div>'+
+      '<button class="nextbtn" id="nextBtn" style="display:none;"></button>';
+
+    document.getElementById('homeBtn').addEventListener('click', function(){
+      state.screen='home'; state.currentOptions=null; render();
+    });
+    document.getElementById('speakBtn').addEventListener('click', function(){
+      speak(word.en);
+    });
+
+    var optionsEl = document.getElementById('options');
+    options.forEach(function(opt){
+      var btn = el('<button class="opt" type="button">'+ opt.en +'</button>');
+      btn.addEventListener('click', function(){ handleAnswer(opt, word, btn, optionsEl); });
+      optionsEl.appendChild(btn);
+    });
+  }
+
+  function handleAnswer(chosen, correctWord, btnEl, optionsEl){
+    if(state.answered) return;
+    state.answered = true;
+    var isCorrect = chosen.id === correctWord.id;
+
+    Array.prototype.forEach.call(optionsEl.children, function(b){ b.disabled = true; });
+    Array.prototype.forEach.call(optionsEl.children, function(b, i){
+      var opt = state.currentOptions[i];
+      if(opt.id===correctWord.id) b.setAttribute('data-state','correct');
+      else if(opt.id===chosen.id) b.setAttribute('data-state','wrong');
+    });
+
+    if(isCorrect) state.correct++;
+    updateWordProgress(correctWord.id, isCorrect);
+    speak(correctWord.en);
+
+    var flashcard = document.getElementById('flashcard');
+    if(isCorrect){
+      var pop = document.getElementById('stampPop');
+      pop.classList.add('show');
+    } else {
+      flashcard.classList.add('shake');
+    }
+
+    var bubble = document.getElementById('feedbackBubble');
+    var text = document.getElementById('feedbackText');
+    bubble.style.display = 'flex';
+    if(isCorrect){
+      text.innerHTML = '<b>Đúng rồi!</b> '+ correctWord.en +' = <span class="vi-reveal">'+ correctWord.vi +'</span>';
+    } else {
+      text.innerHTML = 'Chưa đúng. Từ này là <b>'+ correctWord.en +'</b> = <span class="vi-reveal">'+ correctWord.vi +'</span>';
+    }
+
+    var isLast = state.idx >= state.round.length-1;
+    var nextBtn = document.getElementById('nextBtn');
+    nextBtn.style.display = 'block';
+    nextBtn.textContent = isLast ? 'Xem kết quả' : 'Câu tiếp theo';
+    nextBtn.addEventListener('click', function(){
+      if(isLast){
+        state.screen='summary';
+      } else {
+        state.idx++;
+        state.currentOptions = null;
+      }
+      state.answered = false;
+      render();
+    });
+  }
+
+  function renderSummary(){
+    var total = state.round.length;
+    var pct = total ? Math.round(state.correct/total*100) : 0;
+    var mastered = masteredCount('all');
+    var msg;
+    if(pct>=80) msg = 'Xuất sắc! Bé nhớ từ rất giỏi luôn!';
+    else if(pct>=50) msg = 'Cố lên nào, ôn thêm chút nữa là thuộc hết!';
+    else msg = 'Không sao đâu, học lại vài lần nữa bé sẽ nhớ thôi!';
+
+    root.innerHTML =
+      '<div class="summary">'+
+        '<div class="big">'+ OWL_SVG.replace('width="40" height="40"','width="56" height="56"') +'</div>'+
+        '<h2 style="text-align:center;">Xong một lượt học!</h2>'+
+        '<p style="text-align:center;color:var(--ink-soft);font-weight:600;margin:6px 0 0;">'+ msg +'</p>'+
+        '<div class="statgrid">'+
+          '<div class="stat"><b>'+ state.correct +'/'+ total +'</b><span>Trả lời đúng</span></div>'+
+          '<div class="stat"><b>'+ mastered +'/'+ WORDS.length +'</b><span>Từ đã thuộc</span></div>'+
+        '</div>'+
+        '<div class="btnrow">'+
+          '<button class="stampbtn" id="againBtn">Học tiếp</button>'+
+          '<button class="ghostbtn" id="homeBtn2">Về trang chủ</button>'+
+        '</div>'+
+      '</div>';
+
+    document.getElementById('againBtn').addEventListener('click', function(){
+      state.round = buildRound(state.category);
+      state.idx = 0; state.correct = 0; state.answered=false; state.currentOptions=null;
+      state.screen = 'quiz';
+      render();
+    });
+    document.getElementById('homeBtn2').addEventListener('click', function(){
+      state.screen='home'; render();
+    });
+  }
+
+  render();
+})();
+</script>
+
+</body>
+</html>
