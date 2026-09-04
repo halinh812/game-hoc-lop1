@@ -1,0 +1,40 @@
+{
+  "$comment": "Schema mẫu cho 1 gói nội dung (content pack). Dùng chung cho mọi môn học sau này, không riêng Tiếng Anh.",
+  "pack_id": "english_animals_v1",
+  "subject": "english",
+  "category": "animal",
+  "category_label_vi": "Con vật",
+  "items": [
+    {
+      "id": "animal_tiger",
+      "type": "vocab",
+      "prompt_audio_text": "Tiger",
+      "answer": {
+        "text_en": "Tiger",
+        "text_vi": "Hổ",
+        "image": "assets/animals/tiger.svg"
+      },
+      "difficulty": 1
+    },
+    {
+      "id": "animal_elephant",
+      "type": "vocab",
+      "prompt_audio_text": "Elephant",
+      "answer": {
+        "text_en": "Elephant",
+        "text_vi": "Voi",
+        "image": "assets/animals/elephant.svg"
+      },
+      "difficulty": 1
+    }
+  ],
+  "$field_notes": {
+    "pack_id": "Định danh duy nhất cho cả gói, dùng để quản lý version nội dung",
+    "subject": "Mã môn học (english, math, vietnamese...) — engine không phụ thuộc giá trị cụ thể",
+    "category": "Nhóm chủ đề trong môn học, dùng để lọc/khởi động theo chủ đề",
+    "items[].id": "Định danh duy nhất toàn hệ thống, KHÔNG đổi sau khi đã phát hành (Progress Store dùng id này để lưu tiến độ — đổi id sẽ mất tiến độ đã lưu của trẻ với từ đó)",
+    "items[].type": "Loại kiến thức: vocab (từ vựng) — sau này mở rộng: grammar, sentence...",
+    "items[].prompt_audio_text": "Văn bản tiếng Anh đưa vào AudioProvider để đọc (Web Speech API hiện tại, hoặc audio thu sẵn sau này)",
+    "items[].difficulty": "1-5, dùng để Learning Engine cân nhắc thứ tự giới thiệu từ mới"
+  }
+}
