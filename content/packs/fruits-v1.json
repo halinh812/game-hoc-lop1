@@ -1,0 +1,14 @@
+{
+  "pack_id": "english_fruits_v1",
+  "subject": "english",
+  "category": "fruit",
+  "category_label_vi": "Trái cây",
+  "category_icon": "🍎",
+  "items": [
+    { "id": "apple", "type": "vocab", "prompt_audio_text": "apple", "answer": { "text_en": "apple", "text_vi": "quả táo", "emoji": "🍎" }, "difficulty": 1 },
+    { "id": "banana", "type": "vocab", "prompt_audio_text": "banana", "answer": { "text_en": "banana", "text_vi": "quả chuối", "emoji": "🍌" }, "difficulty": 1 },
+    { "id": "orange", "type": "vocab", "prompt_audio_text": "orange", "answer": { "text_en": "orange", "text_vi": "quả cam", "emoji": "🍊" }, "difficulty": 1 },
+    { "id": "grape", "type": "vocab", "prompt_audio_text": "grape", "answer": { "text_en": "grape", "text_vi": "quả nho", "emoji": "🍇" }, "difficulty": 2 },
+    { "id": "mango", "type": "vocab", "prompt_audio_text": "mango", "answer": { "text_en": "mango", "text_vi": "quả xoài", "emoji": "🥭" }, "difficulty": 2 }
+  ]
+}

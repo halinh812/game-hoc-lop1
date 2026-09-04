@@ -1,0 +1,19 @@
+{
+  "pack_id": "english_numbers_v1",
+  "subject": "english",
+  "category": "number",
+  "category_label_vi": "Số đếm",
+  "category_icon": "🔢",
+  "items": [
+    { "id": "one", "type": "vocab", "prompt_audio_text": "one", "answer": { "text_en": "one", "text_vi": "số 1 - một", "emoji": "1️⃣" }, "difficulty": 1 },
+    { "id": "two", "type": "vocab", "prompt_audio_text": "two", "answer": { "text_en": "two", "text_vi": "số 2 - hai", "emoji": "2️⃣" }, "difficulty": 1 },
+    { "id": "three", "type": "vocab", "prompt_audio_text": "three", "answer": { "text_en": "three", "text_vi": "số 3 - ba", "emoji": "3️⃣" }, "difficulty": 1 },
+    { "id": "four", "type": "vocab", "prompt_audio_text": "four", "answer": { "text_en": "four", "text_vi": "số 4 - bốn", "emoji": "4️⃣" }, "difficulty": 1 },
+    { "id": "five", "type": "vocab", "prompt_audio_text": "five", "answer": { "text_en": "five", "text_vi": "số 5 - năm", "emoji": "5️⃣" }, "difficulty": 1 },
+    { "id": "six", "type": "vocab", "prompt_audio_text": "six", "answer": { "text_en": "six", "text_vi": "số 6 - sáu", "emoji": "6️⃣" }, "difficulty": 2 },
+    { "id": "seven", "type": "vocab", "prompt_audio_text": "seven", "answer": { "text_en": "seven", "text_vi": "số 7 - bảy", "emoji": "7️⃣" }, "difficulty": 2 },
+    { "id": "eight", "type": "vocab", "prompt_audio_text": "eight", "answer": { "text_en": "eight", "text_vi": "số 8 - tám", "emoji": "8️⃣" }, "difficulty": 2 },
+    { "id": "nine", "type": "vocab", "prompt_audio_text": "nine", "answer": { "text_en": "nine", "text_vi": "số 9 - chín", "emoji": "9️⃣" }, "difficulty": 2 },
+    { "id": "ten", "type": "vocab", "prompt_audio_text": "ten", "answer": { "text_en": "ten", "text_vi": "số 10 - mười", "emoji": "🔟" }, "difficulty": 2 }
+  ]
+}

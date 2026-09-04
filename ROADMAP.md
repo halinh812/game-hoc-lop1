@@ -31,7 +31,7 @@ cấp thêm yếu tố tốc độ phản hồi, không viết lại từ đầu
 ## Trạng thái các Phase
 
 - [x] Phase 0 — Định hướng & Thiết kế nền tảng (Ngày 1–2)
-- [ ] Phase 1 — Nền móng kỹ thuật (Ngày 3–6)
+- [x] Phase 1 — Nền móng kỹ thuật (Ngày 3–6)
 - [ ] Phase 2 — Game lõi: Bắt thú Sở thú (Ngày 7–11)
 - [ ] Phase 3 — Giao diện & cảm giác AAA (Ngày 12–15)
 - [ ] Phase 4 — Hệ thống biên soạn nội dung + Game #2 (Ngày 16–18)
@@ -50,8 +50,8 @@ Mục tiêu: chốt mọi quyết định lớn trước khi code để không p
 - [x] Chốt schema nội dung JSON dùng chung cho mọi môn học
 - [x] Thử demo con vật bằng SVG tự code (2 vòng: cartoon nặng nét, rồi tả
       thực) — **không đạt độ giống thật cần thiết**, xem quyết định bên dưới
-- [ ] Danh sách chủ đề khởi động cho Tiếng Anh (màu sắc, con vật, số đếm,
-      trái cây, gia đình)
+- [x] Danh sách chủ đề khởi động cho Tiếng Anh (màu sắc, con vật, số đếm,
+      trái cây, gia đình) — nay là 5 content pack trong `content/packs/`
 - [x] Quyết định nguồn hình ảnh: **đổi hướng** — dùng AI-ảnh-ngoài (raster
       PNG) cho nhân vật con vật cần độ giống thật; SVG tự code chỉ dùng cho
       icon/UI đơn giản không cần giống thật (nút bấm, huy hiệu, biểu tượng
@@ -74,17 +74,25 @@ Mục tiêu: chốt mọi quyết định lớn trước khi code để không p
 Tách `index.html` hiện tại thành các module rõ ràng, không đổi hành vi hiện
 có, chỉ tổ chức lại để dễ mở rộng.
 
-- [ ] Content Loader: đọc JSON theo schema, validate dữ liệu
-- [ ] Learning Engine: nâng cấp hệ `level`/`INTERVALS_MIN` có sẵn, thêm
+- [x] Content Loader: đọc JSON theo schema, validate dữ liệu
+      (`js/content-loader.js`, 5 pack trong `content/packs/`)
+- [x] Learning Engine: nâng cấp hệ `level`/`INTERVALS_MIN` có sẵn, thêm
       `response_time_ms`, phân loại đúng-nhanh / đúng-chậm / sai, đưa từ sai
-      quay lại sớm hơn trong cùng phiên
-- [ ] Hàm chọn từ tiếp theo: ưu tiên từ đến hạn ôn + tỉ lệ sai cao, trộn
-      từ mới, tránh lặp liên tiếp
-- [ ] Progress Store: bọc localStorage với version dữ liệu (an toàn khi
-      đổi cấu trúc sau này)
-- [ ] AudioProvider: lớp trừu tượng phát âm thanh (fallback Web Speech API)
+      quay lại sớm hơn trong cùng phiên (`js/learning-engine.js`, hàng đợi
+      phiên động qua `createSessionQueue`/`requeueAfterAnswer`)
+- [x] Hàm chọn từ tiếp theo: ưu tiên từ đến hạn ôn + tỉ lệ sai cao, trộn
+      từ mới, tránh lặp liên tiếp (`buildRound`, sắp theo `wrongRate`)
+- [x] Progress Store: bọc localStorage với version dữ liệu (an toàn khi
+      đổi cấu trúc sau này) (`js/progress-store.js`, giữ nguyên `STORE_KEY`
+      cũ + migration v1→v2 tự động, đã kiểm chứng không mất dữ liệu cũ)
+- [x] AudioProvider: lớp trừu tượng phát âm thanh (fallback Web Speech API)
+      (`js/audio-provider.js`)
 
-**Đầu ra:** engine chạy được, test bằng dữ liệu giả.
+**Đầu ra:** engine chạy được, test bằng dữ liệu giả —
+`tools/test-learning-engine.mjs` (21/21 test qua), và kiểm chứng bằng
+trình duyệt thật (Playwright): tiến độ cũ (định dạng trước Phase 1) migrate
+đúng, chơi hết 1 lượt học, từ trả lời sai xuất hiện lại trong cùng phiên,
+tiến độ được lưu lại đúng định dạng mới.
 
 ---
 
