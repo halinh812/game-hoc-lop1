@@ -161,8 +161,8 @@ riêng (Nông trại), không trộn chung với Sở thú.
 - [x] Vịt (Duck)
 - [x] Lợn/Heo (Pig)
 - [x] Bò (Cow)
-- [ ] Trâu (Water Buffalo)
-- [ ] Ngựa (Horse)
+- [x] Trâu (Water Buffalo)
+- [x] Ngựa (Horse)
 - [x] Dê (Goat)
 - [x] Thỏ (Rabbit)
 
