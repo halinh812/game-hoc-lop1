@@ -75,13 +75,13 @@ bé nhận ra nhanh khi chơi), và đi/di chuyển được rõ ràng bằng �
 tạo ảnh (mỗi con cần tạo + duyệt thủ công).
 
 - [x] Hổ (Tiger)
-- [ ] Sư Tử (Lion)
+- [x] Sư Tử (Lion)
 - [x] Voi (Elephant)
-- [ ] Hươu Cao Cổ (Giraffe)
+- [x] Hươu Cao Cổ (Giraffe)
 - [x] Ngựa Vằn (Zebra)
 - [x] Khỉ (Monkey)
 - [x] Gấu (Bear)
-- [ ] Chuột Túi (Kangaroo)
+- [x] Chuột Túi (Kangaroo)
 - [ ] Gấu Trúc (Panda)
 - [x] Cá Sấu (Crocodile)
 
@@ -157,7 +157,7 @@ riêng (Nông trại), không trộn chung với Sở thú.
 
 - [x] Chó (Dog)
 - [x] Mèo (Cat)
-- [ ] Gà (Chicken/Hen)
+- [x] Gà (Chicken/Hen)
 - [x] Vịt (Duck)
 - [ ] Lợn/Heo (Pig)
 - [x] Bò (Cow)
