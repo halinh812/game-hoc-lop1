@@ -82,7 +82,7 @@ tạo ảnh (mỗi con cần tạo + duyệt thủ công).
 - [x] Khỉ (Monkey)
 - [x] Gấu (Bear)
 - [x] Chuột Túi (Kangaroo)
-- [ ] Gấu Trúc (Panda)
+- [x] Gấu Trúc (Panda)
 - [x] Cá Sấu (Crocodile)
 
 ### Prompt riêng cho từng con
@@ -159,12 +159,12 @@ riêng (Nông trại), không trộn chung với Sở thú.
 - [x] Mèo (Cat)
 - [x] Gà (Chicken/Hen)
 - [x] Vịt (Duck)
-- [ ] Lợn/Heo (Pig)
+- [x] Lợn/Heo (Pig)
 - [x] Bò (Cow)
 - [ ] Trâu (Water Buffalo)
 - [ ] Ngựa (Horse)
-- [ ] Dê (Goat)
-- [ ] Thỏ (Rabbit)
+- [x] Dê (Goat)
+- [x] Thỏ (Rabbit)
 
 ### Prompt riêng cho từng con
 
