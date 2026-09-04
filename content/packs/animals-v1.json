@@ -1,0 +1,15 @@
+{
+  "pack_id": "english_animals_v1",
+  "subject": "english",
+  "category": "animal",
+  "category_label_vi": "Con vật",
+  "category_icon": "🐾",
+  "items": [
+    { "id": "cat", "type": "vocab", "prompt_audio_text": "cat", "answer": { "text_en": "cat", "text_vi": "con mèo", "emoji": "🐱" }, "difficulty": 1 },
+    { "id": "dog", "type": "vocab", "prompt_audio_text": "dog", "answer": { "text_en": "dog", "text_vi": "con chó", "emoji": "🐶" }, "difficulty": 1 },
+    { "id": "fish", "type": "vocab", "prompt_audio_text": "fish", "answer": { "text_en": "fish", "text_vi": "con cá", "emoji": "🐟" }, "difficulty": 1 },
+    { "id": "bird", "type": "vocab", "prompt_audio_text": "bird", "answer": { "text_en": "bird", "text_vi": "con chim", "emoji": "🐦" }, "difficulty": 1 },
+    { "id": "elephant", "type": "vocab", "prompt_audio_text": "elephant", "answer": { "text_en": "elephant", "text_vi": "con voi", "emoji": "🐘" }, "difficulty": 2 },
+    { "id": "lion", "type": "vocab", "prompt_audio_text": "lion", "answer": { "text_en": "lion", "text_vi": "sư tử", "emoji": "🦁" }, "difficulty": 2 }
+  ]
+}

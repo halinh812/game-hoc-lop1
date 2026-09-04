@@ -1,0 +1,14 @@
+{
+  "pack_id": "english_family_v1",
+  "subject": "english",
+  "category": "family",
+  "category_label_vi": "Gia đình",
+  "category_icon": "👪",
+  "items": [
+    { "id": "mother", "type": "vocab", "prompt_audio_text": "mother", "answer": { "text_en": "mother", "text_vi": "mẹ", "emoji": "👩" }, "difficulty": 1 },
+    { "id": "father", "type": "vocab", "prompt_audio_text": "father", "answer": { "text_en": "father", "text_vi": "bố", "emoji": "👨" }, "difficulty": 1 },
+    { "id": "sister", "type": "vocab", "prompt_audio_text": "sister", "answer": { "text_en": "sister", "text_vi": "chị / em gái", "emoji": "👧" }, "difficulty": 2 },
+    { "id": "brother", "type": "vocab", "prompt_audio_text": "brother", "answer": { "text_en": "brother", "text_vi": "anh / em trai", "emoji": "👦" }, "difficulty": 2 },
+    { "id": "baby", "type": "vocab", "prompt_audio_text": "baby", "answer": { "text_en": "baby", "text_vi": "em bé", "emoji": "👶" }, "difficulty": 1 }
+  ]
+}

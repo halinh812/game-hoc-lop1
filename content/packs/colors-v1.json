@@ -1,0 +1,15 @@
+{
+  "pack_id": "english_colors_v1",
+  "subject": "english",
+  "category": "color",
+  "category_label_vi": "Màu sắc",
+  "category_icon": "🎨",
+  "items": [
+    { "id": "red", "type": "vocab", "prompt_audio_text": "red", "answer": { "text_en": "red", "text_vi": "màu đỏ", "emoji": "🔴" }, "difficulty": 1 },
+    { "id": "blue", "type": "vocab", "prompt_audio_text": "blue", "answer": { "text_en": "blue", "text_vi": "màu xanh dương", "emoji": "🔵" }, "difficulty": 1 },
+    { "id": "yellow", "type": "vocab", "prompt_audio_text": "yellow", "answer": { "text_en": "yellow", "text_vi": "màu vàng", "emoji": "🟡" }, "difficulty": 1 },
+    { "id": "green", "type": "vocab", "prompt_audio_text": "green", "answer": { "text_en": "green", "text_vi": "màu xanh lá", "emoji": "🟢" }, "difficulty": 1 },
+    { "id": "black", "type": "vocab", "prompt_audio_text": "black", "answer": { "text_en": "black", "text_vi": "màu đen", "emoji": "⚫" }, "difficulty": 1 },
+    { "id": "white", "type": "vocab", "prompt_audio_text": "white", "answer": { "text_en": "white", "text_vi": "màu trắng", "emoji": "⚪" }, "difficulty": 1 }
+  ]
+}
