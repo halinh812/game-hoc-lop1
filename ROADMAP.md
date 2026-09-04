@@ -45,14 +45,23 @@ cấp thêm yếu tố tốc độ phản hồi, không viết lại từ đầu
 
 Mục tiêu: chốt mọi quyết định lớn trước khi code để không phải đập đi làm lại.
 
-- [ ] Viết Game Design Document (GDD) ngắn: đối tượng chơi, vòng lặp chơi
+- [x] Viết Game Design Document (GDD) ngắn: đối tượng chơi, vòng lặp chơi
       chính, thời lượng 1 buổi chơi phù hợp trẻ lớp 1
-- [ ] Chốt schema nội dung JSON dùng chung cho mọi môn học
-- [ ] Demo 1 con vật mẫu bằng SVG để duyệt phong cách mỹ thuật
+- [x] Chốt schema nội dung JSON dùng chung cho mọi môn học
+- [x] Thử demo con vật bằng SVG tự code (2 vòng: cartoon nặng nét, rồi tả
+      thực) — **không đạt độ giống thật cần thiết**, xem quyết định bên dưới
 - [ ] Danh sách chủ đề khởi động cho Tiếng Anh (màu sắc, con vật, số đếm,
       trái cây, gia đình)
-- [ ] Quyết định nguồn hình ảnh: SVG vector tự code (nhân vật/icon) +
-      AI-ảnh-ngoài (bối cảnh nền) — đã chốt hybrid
+- [x] Quyết định nguồn hình ảnh: **đổi hướng** — dùng AI-ảnh-ngoài (raster
+      PNG) cho nhân vật con vật cần độ giống thật; SVG tự code chỉ dùng cho
+      icon/UI đơn giản không cần giống thật (nút bấm, huy hiệu, biểu tượng
+      trang trí). Lý do: vẽ SVG bằng cách gõ tọa độ không có vòng lặp
+      "nhìn rồi chỉnh" như họa sĩ thật, nên khó đạt độ giống thật cho chủ
+      thể phức tạp như động vật — xem `ANIMAL_ART_PIPELINE.md`
+- [ ] Con vật đi lại: dùng 1 ảnh tư thế đang bước + di chuyển ngang qua màn
+      hình + nhấp nhô nhẹ (bob) bằng CSS — không làm khớp chân động (cần
+      nhiều khung hình đồng nhất mà AI ảnh khó giữ nhất quán giữa các lần
+      tạo)
 - [ ] Quyết định âm thanh: Web Speech API trước, có lớp AudioProvider để
       nâng cấp TTS chất lượng cao sau — đã chốt
 
@@ -144,8 +153,9 @@ có, chỉ tổ chức lại để dễ mở rộng.
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
   / thu âm giọng thật (thương mại, chưa làm ngay)
-- Ảnh: SVG vector tự code cho nhân vật/icon (rẻ, nhẹ, dễ animate) + AI-ảnh
-  ngoài cho bối cảnh nền phức tạp
+- Ảnh: AI-ảnh-ngoài (raster PNG) cho nhân vật con vật cần giống thật; SVG
+  tự code chỉ cho icon/UI đơn giản (nút bấm, huy hiệu). Quy trình chi tiết
+  ở `ANIMAL_ART_PIPELINE.md`
 - localStorage dùng theo origin (`halinh812.github.io`), không phụ thuộc
   nội dung code — cập nhật code không làm mất tiến độ đã lưu của bé, miễn
   không đổi `STORE_KEY` hoặc cấu trúc dữ liệu mà không viết migration
