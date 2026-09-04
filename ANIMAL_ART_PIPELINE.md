@@ -48,8 +48,9 @@ Tải ảnh về (PNG), gửi trực tiếp vào cuộc trò chuyện này.
 
 ## Bước 3 — Tôi xử lý (tự động)
 
-1. Chạy `tools/remove_white_bg.py` (đã có sẵn trong repo) để tách nền
-   trắng → nền trong suốt
+1. Chạy `tools/remove_white_bg.py` (đã có sẵn trong repo, dùng kỹ thuật
+   tô loang từ viền ảnh — không đục lỗ vào lông trắng bên trong con vật)
+   để tách nền trắng → nền trong suốt
 2. Tối ưu kích thước file cho web/mobile
 3. Đặt tên theo đúng chuẩn trong `content-schema.json`
    (`assets/animals/tiger.png`)
@@ -66,9 +67,85 @@ chân động từng khung hình. Đây là kỹ thuật phổ biến trong game
 không phụ thuộc việc AI tạo nhiều khung hình giống hệt nhau (rất khó với
 công cụ ảnh AI hiện tại).
 
-## Bước 5 — Nhân rộng cho các con vật khác
+## Bước 5 — Danh sách 10 con vật MVP (Sở thú)
 
-Sau khi duyệt xong con Hổ, dùng lại đúng "Khung phong cách" ở trên, chỉ đổi
-đoạn prompt riêng (tên con vật, đặc điểm màu lông/hoa văn) cho từng con:
-Voi, Sư Tử, Khỉ, Hươu Cao Cổ... để giữ đồng bộ phong cách trên toàn bộ Sở
-thú.
+Chọn theo 3 tiêu chí: quen thuộc với trẻ lớp 1, dáng vẻ khác biệt rõ (để
+bé nhận ra nhanh khi chơi), và đi/di chuyển được rõ ràng bằng ảnh tĩnh.
+10 con là đủ đa dạng cho vòng học ngắt quãng mà không quá tải công sức
+tạo ảnh (mỗi con cần tạo + duyệt thủ công).
+
+- [x] Hổ (Tiger)
+- [ ] Sư Tử (Lion)
+- [ ] Voi (Elephant)
+- [ ] Hươu Cao Cổ (Giraffe)
+- [ ] Ngựa Vằn (Zebra)
+- [ ] Khỉ (Monkey)
+- [ ] Gấu (Bear)
+- [ ] Chuột Túi (Kangaroo)
+- [ ] Gấu Trúc (Panda)
+- [ ] Cá Sấu (Crocodile)
+
+### Prompt riêng cho từng con
+
+```
+Sư Tử (Lion):
+A male African lion, walking to the right, front-right leg stepping
+forward and back-left leg stepping forward (diagonal walking gait),
+thick golden-brown mane framing the face, tail relaxed with a dark
+tuft at the tip, calm confident expression, tawny golden coat, lighter
+cream underbelly.
+
+Voi (Elephant):
+An Asian elephant, walking to the right, front-right leg stepping
+forward and back-left leg stepping forward (walking gait), large
+flapping ears, trunk gently curled forward, small tusks, gentle calm
+expression, grey wrinkled skin, rounded body.
+
+Hươu Cao Cổ (Giraffe):
+A giraffe, walking to the right, front-right leg stepping forward and
+back-left leg stepping forward (walking gait), very long neck held
+upright, short horn-like ossicones on top of the head, long thin legs,
+calm gentle expression, tan coat with brown patchwork spots, lighter
+cream underbelly and legs.
+
+Ngựa Vằn (Zebra):
+A zebra, walking to the right, front-right leg stepping forward and
+back-left leg stepping forward (walking gait), short upright mane,
+tail with a dark tuft at the tip, alert friendly expression, white
+coat with bold black stripes covering the whole body including the
+legs and mane.
+
+Khỉ (Monkey):
+A brown capuchin monkey, walking to the right on all four limbs,
+front-right hand stepping forward and back-left foot stepping forward
+(walking gait), long curved tail raised slightly, curious playful
+expression, light brown fur with a paler face and chest.
+
+Gấu (Bear):
+A brown bear, walking to the right, front-right leg stepping forward
+and back-left leg stepping forward (walking gait), round ears, short
+tail, sturdy heavy build, calm gentle expression, thick brown fur
+coat.
+
+Chuột Túi (Kangaroo):
+A kangaroo, captured mid-hop moving to the right, both powerful hind
+legs pushing off the ground together, small front paws held close to
+the chest, thick tail extended back for balance, alert friendly
+expression, sandy brown fur, lighter cream underbelly and a visible
+front pouch.
+
+Gấu Trúc (Panda):
+A giant panda, walking to the right, front-right leg stepping forward
+and back-left leg stepping forward (walking gait), round body, black
+ears and black patches around the eyes, gentle calm expression, white
+coat with bold black patches on the ears, eyes, legs, and shoulders.
+
+Cá Sấu (Crocodile):
+A crocodile, walking to the right on all four short legs (low
+sprawling walking gait, body close to the ground), long snout with
+visible teeth, textured bumpy skin, tail extended straight back, alert
+expression, olive-green scaly skin with a lighter cream underside.
+```
+
+Sau 10 con này, thêm con mới chỉ cần lặp lại đúng công thức: Khung phong
+cách (không đổi) + 1 đoạn mô tả riêng theo mẫu trên.
