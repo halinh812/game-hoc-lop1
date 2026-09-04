@@ -149,3 +149,84 @@ expression, olive-green scaly skin with a lighter cream underside.
 
 Sau 10 con này, thêm con mới chỉ cần lặp lại đúng công thức: Khung phong
 cách (không đổi) + 1 đoạn mô tả riêng theo mẫu trên.
+
+## Bước 6 — Danh sách 10 "Thú nuôi gần gũi" (chủ đề thứ 2, ngoài Sở thú)
+
+Nhóm vật nuôi/nông trại quen thuộc với trẻ Việt Nam — dùng cho 1 chủ đề
+riêng (Nông trại), không trộn chung với Sở thú.
+
+- [ ] Chó (Dog)
+- [ ] Mèo (Cat)
+- [ ] Gà (Chicken/Hen)
+- [ ] Vịt (Duck)
+- [ ] Lợn/Heo (Pig)
+- [ ] Bò (Cow)
+- [ ] Trâu (Water Buffalo)
+- [ ] Ngựa (Horse)
+- [ ] Dê (Goat)
+- [ ] Thỏ (Rabbit)
+
+### Prompt riêng cho từng con
+
+```
+Chó (Dog):
+A Shiba Inu dog, walking to the right, front-right leg stepping forward
+and back-left leg stepping forward (walking gait), fluffy curled tail
+held up, perked triangular ears, friendly happy expression with tongue
+slightly out, cream and orange-brown fur coat, white chest and paws.
+
+Mèo (Cat):
+A domestic short-hair cat, walking to the right, front-right leg
+stepping forward and back-left leg stepping forward (walking gait),
+tail raised with a gentle curve at the tip, upright pointed ears, calm
+curious expression, orange tabby fur with darker stripe markings, white
+chest and paws.
+
+Gà (Chicken/Hen):
+A hen, walking to the right, taking a step with one leg forward in a
+bird's walking gait, small wings held close to the body, red comb on
+top of the head and a small red wattle under the beak, alert curious
+expression, warm brown and cream speckled feathers.
+
+Vịt (Duck):
+A white duck, walking to the right with a gentle waddling gait, one
+webbed foot stepping forward, wings held close to the body, orange flat
+bill and orange webbed feet, friendly calm expression, plush white
+feathers.
+
+Lợn/Heo (Pig):
+A pink pig, walking to the right, front-right leg stepping forward and
+back-left leg stepping forward (walking gait), round snout, small
+upright triangular ears, curly short tail, cheerful friendly
+expression, smooth pink skin with a plump rounded body.
+
+Bò (Cow):
+A dairy cow, walking to the right, front-right leg stepping forward and
+back-left leg stepping forward (walking gait), short curved horns, long
+tail with a tuft at the tip swaying gently, gentle calm expression,
+white coat with black patches.
+
+Trâu (Water Buffalo):
+A water buffalo, walking to the right, front-right leg stepping forward
+and back-left leg stepping forward (walking gait), long curved
+backward-sweeping horns, sturdy heavy build, calm gentle expression,
+dark grey wet-looking skin.
+
+Ngựa (Horse):
+A brown horse, walking to the right, front-right leg stepping forward
+and back-left leg stepping forward (walking gait), flowing dark mane
+and tail, alert gentle expression, glossy chestnut brown coat, black
+lower legs and hooves.
+
+Dê (Goat):
+A white goat, walking to the right, front-right leg stepping forward
+and back-left leg stepping forward (walking gait), short curved horns,
+a small tuft of beard fur under the chin, alert curious expression,
+white shaggy coat.
+
+Thỏ (Rabbit):
+A white rabbit, captured mid-hop moving to the right, both powerful
+hind legs pushing off the ground together, front paws tucked close to
+the chest, long upright ears, round fluffy tail, gentle curious
+expression, soft white fur with pink inner ears.
+```
