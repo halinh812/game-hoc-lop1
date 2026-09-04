@@ -151,6 +151,11 @@
     transition: transform .08s ease, box-shadow .08s ease;
   }
   .stampbtn:active{ transform: translateY(4px); box-shadow:none; }
+  .stampbtn.alt{
+    background:var(--success);
+    box-shadow: 0 6px 0 color-mix(in srgb, var(--success) 60%, #000 20%);
+    margin-top:10px;
+  }
 
   .resetlink{ display:block; text-align:center; margin-top:14px; font-size:.76rem; color:var(--ink-soft); background:none; border:none; text-decoration:underline; cursor:pointer; padding:6px; width:100%; }
   .confirmrow{ display:flex; gap:8px; justify-content:center; align-items:center; margin-top:10px; font-size:.8rem; color:var(--ink-soft); }
@@ -170,6 +175,7 @@
     display:flex; align-items:center; justify-content:center;
     font-size:4.4rem; line-height:1;
   }
+  .flashcard img{ width:72%; height:72%; object-fit:contain; }
   .flashcard.shake{ animation: shake .38s ease; }
   @keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-7px);} 75%{transform:translateX(7px);} }
 
@@ -217,6 +223,39 @@
   .ghostbtn{ border:1px solid var(--card-border); background:var(--card-bg); color:var(--ink); border-radius:12px; padding:12px; font-weight:700; cursor:pointer; }
 
   .vi-reveal{ color:var(--ink-soft); font-weight:600; }
+
+  /* Zoo Catch mini-game */
+  .zoo-instructions{ text-align:center; font-size:.86rem; font-weight:700; color:var(--ink-soft); margin:2px 0 12px; }
+  .zoo-lanes{ display:flex; flex-direction:column; gap:10px; margin-bottom:16px; }
+  .zoolane{
+    position:relative; height:74px; overflow:hidden; border-radius:14px;
+    background:var(--chip-bg); border:1px solid var(--card-border);
+    cursor:pointer;
+  }
+  .zoolane__mover{
+    position:absolute; top:4px; left:0; width:66px;
+    animation-name: zoowalk; animation-timing-function: linear; animation-iteration-count: infinite;
+  }
+  .zoolane__mover img{
+    display:block; width:100%; height:auto;
+    animation-name: zoobob; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate;
+  }
+  @keyframes zoowalk{ from{ transform:translateX(-74px); } to{ transform:translateX(340px); } }
+  @keyframes zoobob{ from{ transform:translateY(0); } to{ transform:translateY(-7px); } }
+
+  .zoo-stage.answered .zoolane__mover,
+  .zoo-stage.answered .zoolane__mover img{ animation-play-state: paused; }
+
+  .zoolane.caught{ background: color-mix(in srgb, var(--success) 20%, var(--card-bg)); border-color:var(--success); }
+  .zoolane.caught .zoolane__mover img{ transform: scale(1.14); transition: transform .25s ease; }
+
+  .zoolane.nudge{ animation: nudgeFlash .4s ease; }
+  @keyframes nudgeFlash{ 0%,100%{ box-shadow:none; } 50%{ box-shadow: 0 0 0 3px var(--wrong) inset; } }
+
+  @media (prefers-reduced-motion: reduce){
+    .zoolane__mover, .zoolane__mover img{ animation:none; }
+    .zoolane__mover{ left:50%; transform:translateX(-50%); }
+  }
 
   @media (prefers-reduced-motion: reduce){
     .notebook{ animation:none; }

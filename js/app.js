@@ -47,6 +47,7 @@ var store = { words: {} };
 
 var state = {
   screen: 'loading',
+  mode: 'flashcard', // 'flashcard' | 'zoocatch' — quyết định màn "chơi lại" và về nhà nào được dùng
   category: 'all',
   round: [],
   idx: 0,
@@ -93,10 +94,9 @@ function homeMessage() {
 }
 
 function cardGlyph(word) {
-  // Ưu tiên emoji cho khung tròn flashcard hiện tại (kích thước nhỏ, emoji
-  // đọc rõ hơn). Ảnh AI (word.image) dành cho các mini-game sau này (Zoo
-  // Catch, Phase 2) — chưa dùng ở màn ôn từ này.
-  return word.emoji || '❓';
+  if (word.emoji) return word.emoji;
+  if (word.image) return '<img src="' + word.image + '" alt="' + word.en + '">';
+  return '❓';
 }
 
 function render() {
@@ -104,6 +104,7 @@ function render() {
   else if (state.screen === 'error') renderError();
   else if (state.screen === 'home') renderHome();
   else if (state.screen === 'quiz') renderQuiz();
+  else if (state.screen === 'zoocatch') renderZooCatch();
   else renderSummary();
 }
 
@@ -143,6 +144,7 @@ function renderHome() {
     '<div class="bar"><div class="bar__fill" style="width:' + pct + '%"></div></div>' +
     '</div>' +
     '<button class="stampbtn" id="startBtn">Bắt đầu học</button>' +
+    '<button class="stampbtn alt" id="zooBtn">🦁 Bắt thú Sở thú (mini-game mới)</button>' +
     '<button class="resetlink" id="resetLink">Xoá tiến trình đã lưu</button>' +
     '<div id="confirmZone"></div>';
 
@@ -159,6 +161,9 @@ function renderHome() {
 
   document.getElementById('startBtn').addEventListener('click', function () {
     startSession();
+  });
+  document.getElementById('zooBtn').addEventListener('click', function () {
+    startZooCatch();
   });
 
   var confirmZone = document.getElementById('confirmZone');
@@ -187,8 +192,130 @@ function startSession() {
   state.answered = false;
   state.currentOptions = null;
   state.requeueCounts = {};
+  state.mode = 'flashcard';
   state.screen = 'quiz';
   render();
+}
+
+function startZooCatch() {
+  var pool = wordsInCat('animal');
+  state.round = createSessionQueue(buildRound(pool, store.words, { size: 8 }));
+  state.idx = 0;
+  state.correct = 0;
+  state.answered = false;
+  state.currentOptions = null;
+  state.requeueCounts = {};
+  state.mode = 'zoocatch';
+  state.screen = 'zoocatch';
+  render();
+}
+
+// --- Zoo Catch: bé nghe tên con vật bằng tiếng Anh, bấm đúng con đang đi
+// qua màn hình. Bấm nhầm chỉ nhắc nhẹ + cho thử lại ngay (không mất lượt,
+// không giới hạn thời gian) — đúng nguyên tắc "không tạo áp lực" trong GDD.
+// Mỗi lượt bấm sai vẫn được ghi nhận vào Learning Engine (liên kết yếu đi),
+// còn hàng đợi phiên chỉ được chèn lại 1 lần dựa trên kết quả cuối cùng.
+
+var ZOO_LANE_DURATIONS = [5.5, 7, 6.2, 8];
+
+function renderZooCatch() {
+  var word = state.round[state.idx];
+  var options = state.currentOptions || (state.currentOptions = pickOptions(word, wordsInCat('animal')));
+  state.cardShownAt = Date.now();
+
+  var dots = state.round.map(function (w, i) {
+    var st = i < state.idx ? 'done' : (i === state.idx ? 'current' : '');
+    return '<span class="dot" data-state="' + st + '"></span>';
+  }).join('');
+
+  var lanes = options.map(function (opt, i) {
+    var dur = ZOO_LANE_DURATIONS[i % ZOO_LANE_DURATIONS.length];
+    var delay = (i * 0.6).toFixed(1);
+    return '<div class="zoolane" data-id="' + opt.id + '">' +
+      '<div class="zoolane__mover" style="animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">' +
+      '<img src="' + opt.image + '" alt="' + opt.en + '">' +
+      '</div></div>';
+  }).join('');
+
+  root.innerHTML =
+    '<div class="backrow">' +
+    '<button class="iconbtn" id="homeBtn" aria-label="Về trang chủ">' + CLOSE_SVG + '</button>' +
+    '<div class="dots">' + dots + '</div>' +
+    '</div>' +
+    '<p class="zoo-instructions">🦁 Bấm đúng con: <b>' + word.en + '</b></p>' +
+    '<div style="display:flex;justify-content:center;margin-bottom:12px;">' +
+    '<button class="speakbtn" id="speakBtn">' + SPEAK_SVG + '<span>Nghe lại</span></button>' +
+    '</div>' +
+    '<div class="zoo-lanes zoo-stage" id="zooStage">' + lanes + '</div>' +
+    '<div class="bubble" id="feedbackBubble" style="display:none;"><div class="owl">' + OWL_SVG.replace('width="40" height="40"', 'width="30" height="30"') + '</div><p id="feedbackText"></p></div>' +
+    '<button class="nextbtn" id="nextBtn" style="display:none;"></button>';
+
+  document.getElementById('homeBtn').addEventListener('click', function () {
+    state.mode = 'flashcard'; state.screen = 'home'; state.currentOptions = null; render();
+  });
+  document.getElementById('speakBtn').addEventListener('click', function () {
+    speak(word.promptAudioText || word.en);
+  });
+
+  speak(word.promptAudioText || word.en);
+
+  var stageEl = document.getElementById('zooStage');
+  Array.prototype.forEach.call(stageEl.querySelectorAll('.zoolane'), function (laneEl) {
+    laneEl.addEventListener('click', function () {
+      var chosen = options.filter(function (o) { return o.id === laneEl.getAttribute('data-id'); })[0];
+      handleZooCatchAnswer(chosen, word, laneEl, stageEl);
+    });
+  });
+}
+
+function handleZooCatchAnswer(chosen, correctWord, laneEl, stageEl) {
+  if (state.answered) return;
+  var isCorrect = chosen.id === correctWord.id;
+
+  if (!isCorrect) {
+    applyAnswer(store.words, correctWord.id, 'wrong');
+    saveProgress(store);
+    laneEl.classList.remove('nudge');
+    void laneEl.offsetWidth; // buộc trình duyệt tính lại để animation chạy lại được
+    laneEl.classList.add('nudge');
+    var bubble = document.getElementById('feedbackBubble');
+    var text = document.getElementById('feedbackText');
+    bubble.style.display = 'flex';
+    text.innerHTML = 'Chưa đúng, bé thử bắt lại nhé!';
+    return;
+  }
+
+  state.answered = true;
+  state.correct++;
+  var responseTimeMs = Date.now() - state.cardShownAt;
+  var outcome = classifyAnswer(true, responseTimeMs);
+  applyAnswer(store.words, correctWord.id, outcome);
+  saveProgress(store);
+  state.round = requeueAfterAnswer(state.round, state.idx, correctWord, outcome, state.requeueCounts);
+  speak(correctWord.promptAudioText || correctWord.en);
+
+  stageEl.classList.add('answered');
+  laneEl.classList.add('caught');
+
+  var bubble2 = document.getElementById('feedbackBubble');
+  var text2 = document.getElementById('feedbackText');
+  bubble2.style.display = 'flex';
+  text2.innerHTML = '<b>Bắt được rồi!</b> ' + correctWord.en + ' = <span class="vi-reveal">' + correctWord.vi + '</span>';
+
+  var isLast = state.idx >= state.round.length - 1;
+  var nextBtn = document.getElementById('nextBtn');
+  nextBtn.style.display = 'block';
+  nextBtn.textContent = isLast ? 'Xem kết quả' : 'Con tiếp theo';
+  nextBtn.addEventListener('click', function () {
+    if (isLast) {
+      state.screen = 'summary';
+    } else {
+      state.idx++;
+      state.currentOptions = null;
+    }
+    state.answered = false;
+    render();
+  });
 }
 
 function renderQuiz() {
@@ -304,15 +431,17 @@ function renderSummary() {
     '<div class="stat"><b>' + mastered + '/' + WORDS.length + '</b><span>Từ đã thuộc</span></div>' +
     '</div>' +
     '<div class="btnrow">' +
-    '<button class="stampbtn" id="againBtn">Học tiếp</button>' +
+    '<button class="stampbtn" id="againBtn">' + (state.mode === 'zoocatch' ? 'Bắt thú tiếp' : 'Học tiếp') + '</button>' +
     '<button class="ghostbtn" id="homeBtn2">Về trang chủ</button>' +
     '</div>' +
     '</div>';
 
   document.getElementById('againBtn').addEventListener('click', function () {
-    startSession();
+    if (state.mode === 'zoocatch') startZooCatch();
+    else startSession();
   });
   document.getElementById('homeBtn2').addEventListener('click', function () {
+    state.mode = 'flashcard';
     state.screen = 'home'; render();
   });
 }

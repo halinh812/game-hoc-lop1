@@ -32,7 +32,7 @@ cấp thêm yếu tố tốc độ phản hồi, không viết lại từ đầu
 
 - [x] Phase 0 — Định hướng & Thiết kế nền tảng (Ngày 1–2)
 - [x] Phase 1 — Nền móng kỹ thuật (Ngày 3–6)
-- [ ] Phase 2 — Game lõi: Bắt thú Sở thú (Ngày 7–11)
+- [x] Phase 2 — Game lõi: Bắt thú Sở thú (Ngày 7–11)
 - [ ] Phase 3 — Giao diện & cảm giác AAA (Ngày 12–15)
 - [ ] Phase 4 — Hệ thống biên soạn nội dung + Game #2 (Ngày 16–18)
 - [ ] Phase 5 — Playtest thật với bé & tinh chỉnh (Ngày 19–21)
@@ -98,13 +98,30 @@ tiến độ được lưu lại đúng định dạng mới.
 
 ## Phase 2 — Game lõi: Bắt thú Sở thú (Ngày 7–11)
 
-- [ ] Con vật xuất hiện, di chuyển trong màn hình sở thú
-- [ ] Phát âm gọi tên qua AudioProvider
-- [ ] Ghi nhận đúng/sai + response_time, đẩy vào Learning Engine
-- [ ] Con vật trả lời sai xuất hiện lại nhiều hơn
-- [ ] Độ khó tăng dần theo % đúng gần nhất
+- [x] Con vật xuất hiện, di chuyển trong màn hình sở thú (4 "làn" đi lại
+      bằng CSS translateX + nhấp nhô, dùng ảnh AI thật của 10 con Sở thú
+      đã vẽ ở Phase 0 — nội dung mục "Con vật" nay trỏ thẳng vào bộ ảnh này
+      thay vì emoji)
+- [x] Phát âm gọi tên qua AudioProvider (tự đọc khi vào câu + nút "Nghe lại")
+- [x] Ghi nhận đúng/sai + response_time, đẩy vào Learning Engine (dùng lại
+      nguyên `applyAnswer`/`classifyAnswer`/`requeueAfterAnswer` từ Phase 1,
+      không viết logic học riêng cho mini-game này)
+- [x] Con vật trả lời sai xuất hiện lại nhiều hơn (bấm nhầm chỉ nhắc nhẹ,
+      cho bắt lại ngay — không mất lượt/không áp lực thời gian, đúng
+      GDD mục 4; mỗi lần bấm sai vẫn được ghi nhận vào Learning Engine)
+- [x] Độ khó tăng dần theo % đúng gần nhất (kế thừa nguyên `buildRound` ưu
+      tiên tỉ lệ sai cao từ Phase 1 — không cần thêm cơ chế riêng)
 
-**Đầu ra:** 1 mini-game chơi được đầu-cuối, kết nối đúng Learning Engine.
+**Đầu ra:** 1 mini-game chơi được đầu-cuối, kết nối đúng Learning Engine —
+kiểm chứng bằng Playwright: bấm sai không mất lượt, bấm đúng ghi tiến độ +
+chuyển câu, phiên chơi hoàn tất, màn ôn từ flashcard vẫn hoạt động đúng với
+nội dung ảnh mới.
+
+Ghi chú: mục "Con vật" trong màn ôn từ trước đây gồm cat/dog/fish/bird (chỉ
+có emoji, không có ảnh) — nay đổi thành đúng 10 con Sở thú đã có ảnh AI, để
+dùng chung 1 vốn từ cho cả 2 chế độ chơi (đúng nguyên tắc "kiến thức là lõi,
+trò chơi là vỏ" trong GDD). Tiến độ đã lưu cho 4 từ cũ (cat/dog/fish/bird)
+không bị xoá nhưng không còn dùng tới.
 
 ---
 
