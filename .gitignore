@@ -10,3 +10,7 @@ desktop.ini
 # File tạm
 *.log
 *.tmp
+
+# Python
+__pycache__/
+*.pyc

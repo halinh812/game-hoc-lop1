@@ -76,14 +76,14 @@ tạo ảnh (mỗi con cần tạo + duyệt thủ công).
 
 - [x] Hổ (Tiger)
 - [ ] Sư Tử (Lion)
-- [ ] Voi (Elephant)
+- [x] Voi (Elephant)
 - [ ] Hươu Cao Cổ (Giraffe)
-- [ ] Ngựa Vằn (Zebra)
-- [ ] Khỉ (Monkey)
-- [ ] Gấu (Bear)
+- [x] Ngựa Vằn (Zebra)
+- [x] Khỉ (Monkey)
+- [x] Gấu (Bear)
 - [ ] Chuột Túi (Kangaroo)
 - [ ] Gấu Trúc (Panda)
-- [ ] Cá Sấu (Crocodile)
+- [x] Cá Sấu (Crocodile)
 
 ### Prompt riêng cho từng con
 
@@ -155,12 +155,12 @@ cách (không đổi) + 1 đoạn mô tả riêng theo mẫu trên.
 Nhóm vật nuôi/nông trại quen thuộc với trẻ Việt Nam — dùng cho 1 chủ đề
 riêng (Nông trại), không trộn chung với Sở thú.
 
-- [ ] Chó (Dog)
-- [ ] Mèo (Cat)
+- [x] Chó (Dog)
+- [x] Mèo (Cat)
 - [ ] Gà (Chicken/Hen)
-- [ ] Vịt (Duck)
+- [x] Vịt (Duck)
 - [ ] Lợn/Heo (Pig)
-- [ ] Bò (Cow)
+- [x] Bò (Cow)
 - [ ] Trâu (Water Buffalo)
 - [ ] Ngựa (Horse)
 - [ ] Dê (Goat)
