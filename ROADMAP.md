@@ -156,10 +156,14 @@ mini-game giờ phải khai báo rõ nó luyện kỹ năng nào.
       chỉ có lời chào + lưới 8 ô trò chơi (2 cột x 4 dòng, 1 ô chạy được
       "Thế giới động vật", 7 ô còn lại "Sắp ra mắt")
 - [x] **Trang 2 — Thế giới động vật** (đổi tên từ "Bắt thú Sở thú", bối
-      cảnh đổi từ sở thú sang khu rừng): 4 con vật đi lại trong rừng cùng
-      lúc, quản trò đọc câu tiếng Anh động "Catch the {tên con vật}!" qua
-      AudioProvider, bắt đúng tổng cộng 10 lần (đếm dồn, có thể lặp con) thì
-      thắng — mỗi lần bắt đúng chỉ cập nhật LV kỹ năng **Nghe** của từ đó
+      cảnh đổi từ sở thú sang khu rừng): 4 con vật **chạy tự do trong
+      khung cảnh rừng** (4 đường mòn vòng kín riêng theo % vị trí, không
+      phải làn ngang cố định), 2 bụi cây SVG cố định che khuất con vật một
+      đoạn trên đường đi rồi để lộ ra tiếp — đã kiểm chứng bằng ảnh chụp
+      đúng khoảnh khắc che khuất, không chỉ tin vào toán học CSS. Quản trò
+      đọc câu tiếng Anh động "Catch the {tên con vật}!" qua AudioProvider,
+      bắt đúng tổng cộng 10 lần (đếm dồn, có thể lặp con) thì thắng — mỗi
+      lần bắt đúng chỉ cập nhật LV kỹ năng **Nghe** của từ đó
 - [x] **Trang 3 — Trang phụ huynh:** giao diện cố tình KHÁC hẳn 2 trang kia
       (sạch, kiểu báo cáo, không phải thế giới game) — bảng LV theo từng
       kỹ năng (Nghe/Nói/Đọc/Viết/Nhìn) cho mỗi từ bé đã chơi
