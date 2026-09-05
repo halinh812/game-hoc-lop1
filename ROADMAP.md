@@ -289,6 +289,55 @@ phụ huynh vẫn dùng nền sáng trung tính, đọc tốt trong mọi điề
 
 ---
 
+## Công cụ quản trị nội dung — chạy LOCAL trên máy
+
+Lý do: mỗi lần đổi ảnh/video cho 1 từ trước đây đều phải nhờ Claude sửa
+code + git commit/push — tốn token cho việc lặp đi lặp lại, không tương
+xứng với việc chỉ đơn giản là "đổi ảnh 1 con vật". Chuyển việc này thành
+1 công cụ tự phục vụ (self-service) chạy trên máy người dùng, tách khỏi
+2 trang của trẻ (Trang trò chơi) và không đụng vào code mỗi lần cần đổi
+nội dung nữa.
+
+- `package.json` (mới — trước đó dự án không cần Node vì là web tĩnh
+  thuần) + `tools/admin-server.mjs`: server Express chạy local, phục vụ
+  2 trang trên cùng 1 cổng — `/index.html` (trò chơi, y hệt bản deploy)
+  và `/admin.html` (trang quản trị, MỚI). Chỉ chạy được trên máy có Node
+  cài `npm install` — không deploy `admin.html`/server này lên GitHub
+  Pages vì Pages là static hosting, không có chỗ chạy backend để ghi file.
+- `admin.html`: chọn 1 trong 5 bộ từ (Con vật/Màu sắc/Số đếm/Gia đình/
+  Trái cây) → chọn 1 từ có sẵn để thay ảnh/video, hoặc "➕ Thêm từ mới"
+  (tự gợi ý id từ chữ tiếng Anh, có thể sửa tay) → xem ảnh/video hiện có →
+  tải ảnh/video mới lên → bấm Lưu. Không cần biết code/JSON.
+- Xử lý tự động khi lưu (API `POST /api/items`):
+  - Ảnh: `sharp` co vừa tối đa 900px chiều dài nhất (giữ tỉ lệ, không
+    phóng to ảnh nhỏ), xuất PNG, lưu vào `assets/<bộ từ>/<id>.png`.
+  - Video: `ffmpeg-static` (kèm sẵn binary ffmpeg, không cần cài riêng)
+    nén về H.264/mp4 chuẩn (mọi trình duyệt đọc được), co chiều rộng tối
+    đa 640px, bỏ audio (video trong game luôn `muted`) — thực tế giảm
+    ~87% dung lượng (video mẫu con hổ: 3.97MB → 500KB) mà độ nét vẫn dư
+    so với ô hiển thị chỉ ~150-250px trong game.
+  - Nếu chỉ tải video mà chưa có ảnh riêng: tự trích khung hình đầu video
+    (`ffmpeg -vframes 1`) làm ảnh "poster"/dự phòng — khỏi phải chuẩn bị
+    2 file cho 1 từ.
+  - Tự ghi thẳng vào đúng `content/packs/<bộ từ>-v1.json` (dò theo
+    `category` bên trong file, không đoán tên file) — thêm mới nếu là từ
+    mới, cập nhật đúng field nếu là từ có sẵn (giữ nguyên các field không
+    đổi, ví dụ chỉ đổi video thì ảnh cũ không bị mất). Tự bỏ `emoji` khi
+    từ đã có ảnh/video thật (game ưu tiên ảnh hơn emoji).
+- Nút "🚀 Xuất bản" (API `POST /api/publish`): `git add` CHỈ trong phạm vi
+  `content/` và `assets/` (không bao giờ `git add -A`, tránh cuốn theo
+  thay đổi code dở dang khác) rồi `commit` + `push` — đẩy thẳng nội dung
+  mới lên GitHub Pages công khai, không cần mở terminal/nhờ ai.
+- Đã kiểm thử qua Playwright thao tác thật trên `admin.html` (không chỉ
+  gọi thẳng API): chọn từ có sẵn tự điền đúng dữ liệu, tải video qua ô
+  chọn file thật rồi lưu thành công + xem trước video cập nhật ngay,
+  thêm từ mới tự gợi ý id + lưu thành công + tự chọn lại đúng từ vừa
+  thêm trong danh sách; cũng kiểm thử qua `curl` các trường hợp lỗi (id
+  sai định dạng, thiếu bộ từ, từ chưa có ảnh/video/emoji nào) đều báo lỗi
+  rõ ràng bằng tiếng Việt và KHÔNG ghi đè file khi có lỗi. Game
+  (`index.html`) chạy qua server mới này vẫn hoạt động y hệt trước (đã
+  chạy lại bộ kiểm thử luồng chơi 2x2 grid, kết quả không đổi).
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
