@@ -71,6 +71,17 @@ function owlMascot(size) {
     '</svg>';
 }
 
+function bushHtml(left, top, size) {
+  size = size || 66;
+  return '<div class="bush" style="left:' + left + '; top:' + top + ';">' +
+    '<svg width="' + size + '" height="' + size + '" viewBox="0 0 64 64" aria-hidden="true">' +
+    '<ellipse cx="32" cy="55" rx="23" ry="6" fill="rgba(20,40,25,.2)"/>' +
+    '<circle cx="20" cy="38" r="16" fill="#8FC48A"/>' +
+    '<circle cx="40" cy="34" r="18" fill="#4E8F58"/>' +
+    '<circle cx="30" cy="45" r="15" fill="#356B44"/>' +
+    '</svg></div>';
+}
+
 function worldBg() {
   return '<div class="world-bg" aria-hidden="true">' +
     '<div class="sun-glow"></div>' +
@@ -232,9 +243,7 @@ function renderHome() {
     '<div class="greet">Chào ' + profile.name + '! <span>Chọn trò chơi để bắt đầu nhé</span></div>' +
     '</div>' +
     '<div class="gamegrid" id="gameGrid">' + tiles + '</div>' +
-    '<div style="text-align:center;margin-top:14px;">' +
-    '<button type="button" class="parentlink" id="parentLink">Dành cho phụ huynh</button>' +
-    '</div>' +
+    '<button type="button" class="parentbtn" id="parentLink">👪 Dành cho phụ huynh</button>' +
     '</div>';
 
   document.getElementById('avatarEditBtn').addEventListener('click', function () {
@@ -279,14 +288,19 @@ function renderForest() {
     starsRow += starMarkup.replace('<svg ', '<svg class="' + (lit ? 'lit' : '') + '" ');
   }
 
-  var lanes = options.map(function (opt, i) {
-    var durations = [6.2, 7.4, 8.1, 6.8];
-    var dur = durations[i % durations.length];
-    var delay = (i * 0.7).toFixed(1);
-    return '<div class="path" data-id="' + opt.id + '">' +
-      '<div class="path__mover" style="animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">' +
-      '<img src="' + opt.image + '" alt="' + opt.en + '"></div></div>';
+  // 4 con vật chạy tự do theo 4 "đường mòn" vòng kín khác nhau (không phải
+  // làn ngang cố định) — path-a/path-b cố tình đi ngang qua sau 2 bụi cây
+  // (z-index bụi cao hơn con vật) để tạo cảm giác núp rồi thò đầu ra.
+  var PATH_NAMES = ['path-a', 'path-b', 'path-c', 'path-d'];
+  var DURATIONS = [11, 13, 10.5, 12];
+  var critters = options.map(function (opt, i) {
+    var pathName = PATH_NAMES[i % PATH_NAMES.length];
+    var dur = DURATIONS[i % DURATIONS.length];
+    var delay = (i * 1.3).toFixed(1);
+    return '<div class="critter" data-id="' + opt.id + '" style="animation-name:' + pathName + '; animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">' +
+      '<span class="critter-shake"><img src="' + opt.image + '" alt="' + opt.en + '"></span></div>';
   }).join('');
+  var bushes = bushHtml('14%', '48%', 66) + bushHtml('58%', '26%', 70);
 
   root.innerHTML = worldBg() +
     '<div class="content">' +
@@ -297,7 +311,7 @@ function renderForest() {
     '</div>' +
     '<div class="ribbon">🦁 Bắt con: <b>' + word.en + '</b></div>' +
     '<button class="soundbtn" id="speakBtn" aria-label="Nghe lại">' + SPEAK_SVG + '</button>' +
-    '<div class="paths" id="forestStage">' + lanes + '</div>' +
+    '<div class="forest-scene" id="forestStage">' + bushes + critters + '</div>' +
     '<div class="glasscard" id="feedbackBubble" style="display:none;margin-top:12px;"><p id="feedbackText" style="margin:0;font-weight:600;font-size:.9rem;"></p></div>' +
     '<button class="chunkybtn green" id="nextBtn" style="display:none;margin-top:12px;"></button>' +
     '</div>';
@@ -310,24 +324,25 @@ function renderForest() {
   sayIt();
 
   var stage = document.getElementById('forestStage');
-  Array.prototype.forEach.call(stage.querySelectorAll('.path'), function (laneEl) {
-    laneEl.addEventListener('click', function () {
-      var chosen = options.filter(function (o) { return o.id === laneEl.getAttribute('data-id'); })[0];
-      handleForestAnswer(chosen, word, laneEl, stage);
+  Array.prototype.forEach.call(stage.querySelectorAll('.critter'), function (critterEl) {
+    critterEl.addEventListener('click', function () {
+      var chosen = options.filter(function (o) { return o.id === critterEl.getAttribute('data-id'); })[0];
+      handleForestAnswer(chosen, word, critterEl);
     });
   });
 }
 
-function handleForestAnswer(chosen, correctWord, laneEl, stage) {
+function handleForestAnswer(chosen, correctWord, critterEl) {
   if (state.answered) return;
   var isCorrect = chosen.id === correctWord.id;
 
   if (!isCorrect) {
     applyAnswer(store.words, correctWord.id, 'listen', 'wrong');
     saveProgress(store);
-    laneEl.classList.remove('nudge');
-    void laneEl.offsetWidth;
-    laneEl.classList.add('nudge');
+    var shakeEl = critterEl.querySelector('.critter-shake');
+    shakeEl.classList.remove('nudge');
+    void shakeEl.offsetWidth;
+    shakeEl.classList.add('nudge');
     var bubble = document.getElementById('feedbackBubble');
     var text = document.getElementById('feedbackText');
     bubble.style.display = 'block';
@@ -344,8 +359,7 @@ function handleForestAnswer(chosen, correctWord, laneEl, stage) {
   state.round = requeueAfterAnswer(state.round, state.idx, correctWord, outcome, state.requeueCounts);
   speak(correctWord.en);
 
-  stage.classList.add('answered');
-  laneEl.classList.add('caught');
+  critterEl.classList.add('caught');
 
   var bubble2 = document.getElementById('feedbackBubble');
   var text2 = document.getElementById('feedbackText');

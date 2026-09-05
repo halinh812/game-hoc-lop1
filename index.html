@@ -71,9 +71,10 @@
     width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center;
     cursor:pointer; flex:none; box-shadow:0 6px 14px rgba(20,40,25,.16);
   }
-  .parentlink{
-    border:none; background:none; color:var(--ink-soft); font-size:.72rem; font-weight:600;
-    cursor:pointer; padding:6px 4px; text-decoration:underline; text-underline-offset:2px;
+  .parentbtn{
+    display:flex; align-items:center; gap:6px; justify-content:center; margin:14px auto 0; width:fit-content;
+    background:var(--glass); border:1px solid var(--glass-border); color:var(--ink); font-weight:700; font-size:.8rem;
+    padding:9px 18px; border-radius:999px; cursor:pointer; box-shadow:0 6px 14px rgba(20,40,25,.22);
   }
 
   .chunkybtn{
@@ -112,12 +113,20 @@
     overflow-y:auto; padding:4px;
   }
   .avatarbtn{
-    border:2px solid transparent; background:var(--glass); border-radius:16px; padding:6px;
+    position:relative; border:3px solid transparent; background:var(--glass); border-radius:16px; padding:6px;
     display:flex; align-items:center; justify-content:center; cursor:pointer;
-    box-shadow:0 4px 10px rgba(20,40,25,.14); transition:transform .1s ease, border-color .15s ease;
+    box-shadow:0 4px 10px rgba(20,40,25,.14); transition:transform .1s ease, border-color .15s ease, background .15s ease;
     aspect-ratio:1;
   }
-  .avatarbtn[aria-pressed="true"]{ border-color:var(--gold); transform:scale(1.08); box-shadow:0 6px 16px rgba(244,169,59,.5); }
+  .avatarbtn[aria-pressed="true"]{
+    border-color:var(--coral); border-width:4px; background:#fff;
+    transform:scale(1.12); box-shadow:0 8px 20px rgba(228,99,63,.55);
+  }
+  .avatarbtn[aria-pressed="true"]::after{
+    content:'✓'; position:absolute; top:-8px; right:-8px; width:24px; height:24px; border-radius:50%;
+    background:var(--coral); color:#fff; font-size:14px; font-weight:800; line-height:24px; text-align:center;
+    box-shadow:0 2px 6px rgba(0,0,0,.3), 0 0 0 2px #fff;
+  }
   .avatarbtn svg{ width:100%; height:100%; }
 
   /* ---------- home / game grid ---------- */
@@ -166,21 +175,48 @@
     animation:pulsering 2s ease-out infinite;
   }
   @keyframes pulsering{ 0%{ transform:scale(.9); opacity:.8;} 100%{ transform:scale(1.4); opacity:0;} }
-  .paths{ display:flex; flex-direction:column; gap:12px; flex:1; }
-  .path{
-    position:relative; height:76px; border-radius:16px; overflow:hidden; cursor:pointer;
-    background:linear-gradient(180deg,rgba(255,255,255,.4),rgba(255,255,255,.14));
-    border:1px solid var(--glass-border);
+  /* Con vật chạy tự do trong khung cảnh rừng (không phải 4 làn ngang cố
+     định) — mỗi con đi theo 1 trong vài "đường mòn" vòng kín riêng, có 2
+     đường mòn cố tình đi ngang qua sau bụi cây (z-index bụi cao hơn con
+     vật) để tạo cảm giác núp rồi thò đầu ra. */
+  .forest-scene{ position:relative; height:340px; flex:1; margin-bottom:6px; }
+  .bush{ position:absolute; z-index:3; pointer-events:none; filter:drop-shadow(0 4px 3px rgba(20,40,25,.3)); }
+  .critter{
+    position:absolute; width:60px; z-index:2; cursor:pointer;
+    animation-timing-function:linear; animation-iteration-count:infinite;
+    padding:14px; margin:-14px; /* mở rộng vùng bấm cho tay bé, không đổi vị trí hiển thị */
   }
-  .path__mover{ position:absolute; bottom:6px; animation:walklane linear infinite; }
-  .path__mover img{ display:block; width:60px; filter:drop-shadow(0 6px 4px rgba(20,40,25,.35)); animation:bob 1.1s ease-in-out infinite alternate; }
-  @keyframes walklane{ from{ transform:translateX(-70px);} to{ transform:translateX(340px);} }
+  .critter img{ display:block; width:60px; filter:drop-shadow(0 6px 4px rgba(20,40,25,.35)); animation:bob 1.1s ease-in-out infinite alternate; }
   @keyframes bob{ from{ transform:translateY(0);} to{ transform:translateY(-6px);} }
-  .path.caught{ background:linear-gradient(180deg,rgba(111,203,132,.45),rgba(47,143,91,.28)); }
-  .path.caught .path__mover{ animation-play-state:paused; }
-  .path.caught .path__mover img{ animation-play-state:paused; transform:scale(1.16); }
-  .path.nudge{ animation:nudgeFlash .4s ease; }
-  @keyframes nudgeFlash{ 0%,100%{ box-shadow:none;} 50%{ box-shadow:0 0 0 3px var(--wrong,#B24A43) inset;} }
+
+  /* 4 đường mòn vòng kín, toạ độ theo % để co giãn đúng theo khung cảnh.
+     path-a và path-b cố tình đi qua đúng vị trí 2 bụi cây (xem app.js). */
+  @keyframes path-a{
+    0%{ left:6%; top:58%; } 20%{ left:20%; top:64%; } 38%{ left:20%; top:52%; }
+    58%{ left:42%; top:32%; } 80%{ left:14%; top:18%; } 100%{ left:6%; top:58%; }
+  }
+  @keyframes path-b{
+    0%{ left:58%; top:12%; } 24%{ left:68%; top:34%; } 40%{ left:64%; top:42%; }
+    62%{ left:44%; top:54%; } 82%{ left:54%; top:68%; } 100%{ left:58%; top:12%; }
+  }
+  @keyframes path-c{
+    0%{ left:34%; top:68%; } 30%{ left:54%; top:74%; } 55%{ left:68%; top:56%; }
+    80%{ left:48%; top:42%; } 100%{ left:34%; top:68%; }
+  }
+  @keyframes path-d{
+    0%{ left:14%; top:8%; } 25%{ left:34%; top:6%; } 50%{ left:48%; top:20%; }
+    75%{ left:28%; top:28%; } 100%{ left:14%; top:8%; }
+  }
+
+  .critter.caught{ animation-play-state:paused; z-index:4; }
+  .critter.caught img{ animation-play-state:paused; transform:scale(1.2); filter:drop-shadow(0 0 0 4px rgba(47,143,91,.4)) drop-shadow(0 6px 4px rgba(20,40,25,.35)); }
+  /* Lắc nhẹ khi bấm sai: đặt trên 1 span bọc riêng (không phải .critter hay
+     img) để không đụng animation vị trí (path-X trên .critter, đặt qua
+     inline style) hay animation nhấp nhô (bob trên img) — 3 tầng animation
+     transform độc lập vẫn cộng dồn hiển thị bình thường vì nằm khác phần
+     tử. */
+  .critter-shake.nudge{ display:block; animation:nudgeShake .4s ease; }
+  @keyframes nudgeShake{ 0%,100%{ transform:translateX(0);} 25%{ transform:translateX(-6px);} 75%{ transform:translateX(6px);} }
 
   /* ---------- forest summary ---------- */
   .summary-mid{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; }
@@ -220,7 +256,7 @@
   .emptystate{ text-align:center; color:#8B968E; font-size:.86rem; padding:40px 10px; line-height:1.6; }
 
   @media (prefers-reduced-motion: reduce){
-    .sun-glow,.cloud,.blade,.owl-wing,.owl-blink,.path__mover,.path__mover img,.soundbtn::after,.starburst svg,.fall,.starsrow svg{ animation:none !important; }
+    .sun-glow,.cloud,.blade,.owl-wing,.owl-blink,.critter,.critter img,.critter-shake,.soundbtn::after,.starburst svg,.fall,.starsrow svg{ animation:none !important; }
   }
   button:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
 </style>
