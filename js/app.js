@@ -15,13 +15,10 @@ import {
   SKILL_LABELS,
   MAX_LEVEL,
   buildRound,
-  createSessionQueue,
-  requeueAfterAnswer,
-  pickOptions,
   applyAnswer,
   classifyAnswer,
   getSkillProgress,
-  shuffle
+  wrongRate
 } from './learning-engine.js';
 import { createAudioProvider } from './audio-provider.js';
 import { getAvatars, avatarSvg } from './avatars.js';
@@ -117,14 +114,12 @@ var state = {
   screen: 'loading',
   onboardName: '',
   onboardAvatar: null,
-  round: [],
-  idx: 0,
   correct: 0,
-  answered: false,
-  currentOptions: null,
-  requeueCounts: {},
+  answered: false, // true trong lúc khoá bấm (đang chờ tự chuyển câu)
   cardShownAt: 0,
-  forestPool: []
+  forestPool: [],
+  slots: [],      // 4 từ đang hiển thị trên 4 hàng, giữ nguyên xuyên suốt
+  targetIdx: 0    // slot nào đang là đáp án đúng của câu hỏi hiện tại
 };
 
 function el(html) {
@@ -267,21 +262,46 @@ function renderHome() {
 
 // ---------------- Trò chơi: Thế giới động vật ----------------
 
+// Chọn slot nào (trong 4 slot đang hiển thị) sẽ là câu hỏi tiếp theo —
+// ưu tiên từ đã đến hạn ôn, trong đó ưu tiên tỉ lệ sai cao hơn, LV thấp
+// hơn; có yếu tố ngẫu nhiên để không luôn rơi vào cùng 1 slot khi các từ
+// đang ngang điểm nhau (vd lúc mới bắt đầu, chưa từ nào được học).
+function pickTargetIndex(slots) {
+  var now = Date.now();
+  var scored = slots.map(function (w, i) {
+    var p = getSkillProgress(store.words, w.id, 'listen');
+    var due = (p && p.seen && p.next <= now) ? 1 : 0;
+    return { i: i, due: due, wr: wrongRate(p), level: p ? p.level : 0, rnd: Math.random() };
+  });
+  scored.sort(function (a, b) {
+    return (b.due - a.due) || (b.wr - a.wr) || (a.level - b.level) || (a.rnd - b.rnd);
+  });
+  return scored[0].i;
+}
+
+// Chọn từ mới thay cho slot vừa được hỏi — loại trừ cả 4 từ đang hiển thị
+// (kể cả từ vừa hỏi) để tránh lặp lại ngay, ưu tiên due/tỉ lệ sai cao
+// trong số từ còn lại của bộ.
+function pickReplacementWord(replaceIdx) {
+  var exclude = {};
+  state.slots.forEach(function (w) { exclude[w.id] = true; });
+  var candidates = state.forestPool.filter(function (w) { return !exclude[w.id]; });
+  if (!candidates.length) candidates = state.forestPool.filter(function (w) { return w.id !== state.slots[replaceIdx].id; });
+  if (!candidates.length) candidates = state.forestPool.slice();
+  return buildRound(candidates, store.words, 'listen', { size: 1 })[0];
+}
+
 function startForestGame() {
   state.forestPool = wordsInCat('animal');
-  state.round = createSessionQueue(buildRound(state.forestPool, store.words, 'listen', { size: 10 }));
-  state.idx = 0;
+  state.slots = buildRound(state.forestPool, store.words, 'listen', { size: 4 });
+  state.targetIdx = pickTargetIndex(state.slots);
   state.correct = 0;
   state.answered = false;
-  state.currentOptions = null;
-  state.requeueCounts = {};
   state.screen = 'forest';
   render();
 }
 
 function renderForest() {
-  var word = state.round[state.idx];
-  var options = state.currentOptions || (state.currentOptions = pickOptions(word, state.forestPool));
   state.cardShownAt = Date.now();
 
   var starsRow = '';
@@ -291,19 +311,19 @@ function renderForest() {
     starsRow += starMarkup.replace('<svg ', '<svg class="' + (lit ? 'lit' : '') + '" ');
   }
 
-  // Mỗi con vật có 1 "dải ngang" riêng (band-a..d), chia đều chiều cao
-  // khung cảnh — chỉ đi ngang trong dải của mình nên không bao giờ chạm
-  // con vật ở dải khác, dù to cỡ nào.
-  var BAND_NAMES = ['band-a', 'band-b', 'band-c', 'band-d'];
-  var DURATIONS = [11, 13, 10.5, 12];
-  var critters = options.map(function (opt, i) {
-    var bandName = BAND_NAMES[i % BAND_NAMES.length];
+  // 4 hàng cố định, mỗi hàng 1 con đi ngang qua lại suốt — chỉ đúng 1 hàng
+  // (hàng vừa được hỏi) bị đổi con sau mỗi câu, 3 hàng kia giữ nguyên.
+  var DURATIONS = [9, 11, 8.5, 10];
+  var lanes = state.slots.map(function (w, i) {
     var dur = DURATIONS[i % DURATIONS.length];
-    var delay = (i * 1.3).toFixed(1);
-    var w = CRITTER_WIDTH_PX[opt.id] || 130;
-    return '<div class="critter" data-id="' + opt.id + '" style="width:' + w + 'px; animation-name:' + bandName + '; animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">' +
-      '<span class="critter-shake"><img src="' + opt.image + '" alt="' + opt.en + '"></span></div>';
+    var delay = (i * 1.4).toFixed(1);
+    var width = CRITTER_WIDTH_PX[w.id] || 100;
+    return '<div class="lane" data-idx="' + i + '">' +
+      '<div class="lane__mover" style="width:' + width + 'px; animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">' +
+      '<img src="' + w.image + '" alt="' + w.en + '"></div></div>';
   }).join('');
+
+  var targetWord = state.slots[state.targetIdx];
 
   root.innerHTML = worldBg() +
     '<div class="content">' +
@@ -312,80 +332,72 @@ function renderForest() {
     '<div class="starsrow" style="margin:0;">' + starsRow + '</div>' +
     '<span style="width:38px;"></span>' +
     '</div>' +
-    '<div class="ribbon">🦁 Bắt con: <b>' + word.en + '</b></div>' +
+    '<div class="ribbon">🦁 Bắt con: <b>' + targetWord.en + '</b></div>' +
     '<button class="soundbtn" id="speakBtn" aria-label="Nghe lại">' + SPEAK_SVG + '</button>' +
-    '<div class="forest-scene" id="forestStage">' + critters + '</div>' +
-    '<div class="glasscard" id="feedbackBubble" style="display:none;margin-top:12px;"><p id="feedbackText" style="margin:0;font-weight:600;font-size:.9rem;"></p></div>' +
-    '<button class="chunkybtn green" id="nextBtn" style="display:none;margin-top:12px;"></button>' +
+    '<div class="lane-list" id="laneList">' + lanes + '</div>' +
+    '<div class="glasscard" id="feedbackBubble" style="display:none;"><p id="feedbackText" style="margin:0;font-weight:600;font-size:.9rem;"></p></div>' +
     '</div>';
 
   document.getElementById('homeBtn').addEventListener('click', function () {
-    state.screen = 'home'; state.currentOptions = null; render();
+    state.screen = 'home'; render();
   });
-  var sayIt = function () { speak('Catch the ' + word.en + '!'); };
+  var sayIt = function () { speak('Catch the ' + targetWord.en + '!'); };
   document.getElementById('speakBtn').addEventListener('click', sayIt);
   sayIt();
 
-  var stage = document.getElementById('forestStage');
-  Array.prototype.forEach.call(stage.querySelectorAll('.critter'), function (critterEl) {
-    critterEl.addEventListener('click', function () {
-      var chosen = options.filter(function (o) { return o.id === critterEl.getAttribute('data-id'); })[0];
-      handleForestAnswer(chosen, word, critterEl);
+  var laneList = document.getElementById('laneList');
+  Array.prototype.forEach.call(laneList.querySelectorAll('.lane'), function (laneEl) {
+    laneEl.addEventListener('click', function () {
+      handleForestAnswer(parseInt(laneEl.getAttribute('data-idx'), 10));
     });
   });
 }
 
-function handleForestAnswer(chosen, correctWord, critterEl) {
+function handleForestAnswer(idx) {
   if (state.answered) return;
-  var isCorrect = chosen.id === correctWord.id;
-
-  if (!isCorrect) {
-    applyAnswer(store.words, correctWord.id, 'listen', 'wrong');
-    saveProgress(store);
-    var shakeEl = critterEl.querySelector('.critter-shake');
-    shakeEl.classList.remove('nudge');
-    void shakeEl.offsetWidth;
-    shakeEl.classList.add('nudge');
-    var bubble = document.getElementById('feedbackBubble');
-    var text = document.getElementById('feedbackText');
-    bubble.style.display = 'block';
-    text.textContent = 'Chưa đúng, bé thử bắt lại nhé!';
-    return;
-  }
-
   state.answered = true;
-  state.correct++;
+
+  var laneEls = document.getElementById('laneList').querySelectorAll('.lane');
+  var targetWord = state.slots[state.targetIdx];
+  var isCorrect = idx === state.targetIdx;
   var responseTimeMs = Date.now() - state.cardShownAt;
-  var outcome = classifyAnswer(true, responseTimeMs);
-  applyAnswer(store.words, correctWord.id, 'listen', outcome);
-  saveProgress(store);
-  state.round = requeueAfterAnswer(state.round, state.idx, correctWord, outcome, state.requeueCounts);
-  speak(correctWord.en);
 
-  critterEl.classList.add('caught');
+  var bubble = document.getElementById('feedbackBubble');
+  var text = document.getElementById('feedbackText');
+  bubble.style.display = 'block';
 
-  var bubble2 = document.getElementById('feedbackBubble');
-  var text2 = document.getElementById('feedbackText');
-  bubble2.style.display = 'block';
-  text2.innerHTML = '<b>Bắt được rồi!</b> 🎉 ' + correctWord.en;
+  if (isCorrect) {
+    var outcome = classifyAnswer(true, responseTimeMs);
+    applyAnswer(store.words, targetWord.id, 'listen', outcome);
+    saveProgress(store);
+    state.correct++;
+    speak(targetWord.en);
+    laneEls[idx].classList.add('correct');
+    text.innerHTML = '<b>Bắt được rồi!</b> 🎉 ' + targetWord.en;
 
-  var isDone = state.correct >= FOREST_WIN_TARGET;
-  var nextBtn = document.getElementById('nextBtn');
-  nextBtn.style.display = 'block';
-  nextBtn.textContent = isDone ? 'Xem kết quả! 🎉' : 'Con tiếp theo';
-  nextBtn.addEventListener('click', function () {
-    if (isDone) {
-      state.screen = 'forestSummary';
-    } else {
-      state.idx++;
-      if (state.idx >= state.round.length) {
-        state.round = state.round.concat(createSessionQueue(shuffle(state.forestPool)));
-      }
-      state.currentOptions = null;
-    }
-    state.answered = false;
-    render();
-  });
+    var isDone = state.correct >= FOREST_WIN_TARGET;
+    setTimeout(function () {
+      if (isDone) { state.screen = 'forestSummary'; render(); }
+      else advanceForestRound(state.targetIdx);
+    }, isDone ? 500 : 800);
+  } else {
+    applyAnswer(store.words, targetWord.id, 'listen', 'wrong');
+    saveProgress(store);
+    laneEls[idx].classList.add('wrong');
+    laneEls[state.targetIdx].classList.add('correct');
+    speak(targetWord.en);
+    text.innerHTML = 'Chưa đúng. Đây là <b>' + targetWord.en + '</b>';
+    setTimeout(function () { advanceForestRound(state.targetIdx); }, 3000);
+  }
+}
+
+// Chỉ thay từ ở slot vừa được hỏi (replaceIdx) — 3 slot kia giữ nguyên con
+// đang hiển thị, không đổi.
+function advanceForestRound(replaceIdx) {
+  state.slots[replaceIdx] = pickReplacementWord(replaceIdx);
+  state.targetIdx = pickTargetIndex(state.slots);
+  state.answered = false;
+  render();
 }
 
 function renderForestSummary() {
