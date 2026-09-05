@@ -1,20 +1,30 @@
 // App — nối Content Loader + Progress Store + Learning Engine + AudioProvider
-// với UI. Toàn bộ HTML/CSS trong index.html giữ nguyên; file này chỉ thay
-// thế phần <script> nội tuyến trước đây, tổ chức lại thành module nhưng
-// KHÔNG đổi cảm giác chơi hiện có (trừ các nâng cấp Learning Engine đã ghi
-// trong ROADMAP.md Phase 1: response time, hàng đợi phiên động).
+// + bộ avatar với giao diện. Cấu trúc 3 trang thuần game cho trẻ em:
+//   1. Trang chủ: hồ sơ bé (tên + avatar) + lưới chọn trò chơi (2 cột x 4)
+//   2. Trò chơi: "Thế giới động vật" — nghe tên tiếng Anh, bắt đúng con vật
+//      đang đi trong rừng (chỉ luyện kỹ năng "Nghe" của Learning Engine)
+//   3. Trang phụ huynh: xem LV của từng kỹ năng (Nghe/Nói/Đọc/Viết/Nhìn)
+//
+// Không hiển thị số liệu học tập (số từ đã thuộc...) ở bất kỳ đâu trẻ nhìn
+// thấy — chỉ trang phụ huynh mới có số liệu.
 
 import { loadContentPacks } from './content-loader.js';
-import { loadProgress, saveProgress, clearProgress } from './progress-store.js';
+import { loadProgress, saveProgress, setProfile, getProfile } from './progress-store.js';
 import {
+  SKILLS,
+  SKILL_LABELS,
+  MAX_LEVEL,
   buildRound,
   createSessionQueue,
   requeueAfterAnswer,
   pickOptions,
   applyAnswer,
-  classifyAnswer
+  classifyAnswer,
+  getSkillProgress,
+  shuffle
 } from './learning-engine.js';
 import { createAudioProvider } from './audio-provider.js';
+import { getAvatars, avatarSvg } from './avatars.js';
 
 var CONTENT_PACKS = [
   'content/packs/colors-v1.json',
@@ -24,38 +34,83 @@ var CONTENT_PACKS = [
   'content/packs/family-v1.json'
 ];
 
-var OWL_SVG = '<svg class="owl" viewBox="0 0 64 64" width="40" height="40" aria-hidden="true">' +
-  '<ellipse cx="32" cy="36" rx="22" ry="24" fill="var(--gold)"/>' +
-  '<path d="M10 40 Q3 28 15 18" stroke="var(--gold)" stroke-width="7" fill="none" stroke-linecap="round"/>' +
-  '<path d="M54 40 Q61 28 49 18" stroke="var(--gold)" stroke-width="7" fill="none" stroke-linecap="round"/>' +
-  '<circle cx="22" cy="30" r="9" fill="#FFFDF7"/>' +
-  '<circle cx="42" cy="30" r="9" fill="#FFFDF7"/>' +
-  '<circle cx="22" cy="30" r="4" fill="var(--ink)"/>' +
-  '<circle cx="42" cy="30" r="4" fill="var(--ink)"/>' +
-  '<path d="M28.5 38 L32 44.5 L35.5 38 Z" fill="var(--margin)"/>' +
-  '</svg>';
-var STAR_BIG_SVG = '<svg viewBox="0 0 24 24" width="34" height="34"><path d="M12 2.5l2.9 6.1 6.7.7-5 4.5 1.4 6.6L12 16.9l-6 3.5 1.4-6.6-5-4.5 6.7-.7z" fill="currentColor"/></svg>';
-var SPEAK_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16.4 8.6a5 5 0 010 6.8" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round"/></svg>';
+var FOREST_WIN_TARGET = 10;
+
+var GAMES = [
+  { id: 'forest', title: 'Thế giới động vật', emoji: '🦁', skill: 'listen', available: true },
+  { id: 'g2', title: 'Sắp ra mắt', emoji: '🔒', available: false },
+  { id: 'g3', title: 'Sắp ra mắt', emoji: '🔒', available: false },
+  { id: 'g4', title: 'Sắp ra mắt', emoji: '🔒', available: false },
+  { id: 'g5', title: 'Sắp ra mắt', emoji: '🔒', available: false },
+  { id: 'g6', title: 'Sắp ra mắt', emoji: '🔒', available: false },
+  { id: 'g7', title: 'Sắp ra mắt', emoji: '🔒', available: false },
+  { id: 'g8', title: 'Sắp ra mắt', emoji: '🔒', available: false }
+];
+
+function starIcon(fill, size, stroke) {
+  return '<svg viewBox="0 0 24 24" width="' + (size || 16) + '" height="' + (size || 16) + '" aria-hidden="true"><path d="M12 2l2.9 6.1 6.7.7-5 4.5 1.4 6.6L12 16.9l-6 3.5 1.4-6.6-5-4.5 6.7-.7z" fill="' + fill + '" stroke="' + (stroke || 'none') + '" stroke-width="1.2"/></svg>';
+}
+var BACK_SVG = '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 var CLOSE_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg>';
+var SPEAK_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="#E4633F"/><path d="M16.4 8.6a5 5 0 010 6.8" stroke="#E4633F" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>';
+
+function owlMascot(size) {
+  size = size || 64;
+  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 100 100" aria-hidden="true">' +
+    '<ellipse cx="50" cy="58" rx="34" ry="37" fill="#F4A93B"/>' +
+    '<ellipse cx="50" cy="60" rx="26" ry="29" fill="#FBC46C"/>' +
+    '<path class="owl-wing" d="M20 55 Q4 46 8 26 Q22 32 26 52 Z" fill="#E4633F"/>' +
+    '<path d="M80 62 Q94 58 92 42 Q80 46 76 58 Z" fill="#E4633F"/>' +
+    '<circle class="owl-blink" cx="38" cy="52" r="13" fill="#FFFDF7"/>' +
+    '<circle class="owl-blink" cx="62" cy="52" r="13" fill="#FFFDF7"/>' +
+    '<circle cx="39" cy="52" r="6" fill="#2A3B2E"/><circle cx="63" cy="52" r="6" fill="#2A3B2E"/>' +
+    '<circle cx="41" cy="49" r="1.8" fill="#fff"/><circle cx="65" cy="49" r="1.8" fill="#fff"/>' +
+    '<ellipse cx="27" cy="66" rx="5" ry="3.4" fill="#F3958A" opacity=".8"/><ellipse cx="73" cy="66" rx="5" ry="3.4" fill="#F3958A" opacity=".8"/>' +
+    '<path d="M46 60 L50 68 L54 60 Z" fill="#E4633F"/>' +
+    '<path d="M28 32 L20 12 L36 24 Z" fill="#F4A93B"/><path d="M72 32 L80 12 L64 24 Z" fill="#F4A93B"/>' +
+    '</svg>';
+}
+
+function worldBg() {
+  return '<div class="world-bg" aria-hidden="true">' +
+    '<div class="sun-glow"></div>' +
+    '<div class="cloud c1"></div><div class="cloud c2"></div>' +
+    '<div class="canopy-band"><svg viewBox="0 0 400 88" preserveAspectRatio="none">' +
+    '<path d="M-10 50 Q40 14 100 46 T220 40 T340 50 T410 28 V-10 H-10 Z" fill="#8FC48A"/>' +
+    '<path d="M-10 66 Q50 32 130 62 T280 54 T410 50 V-10 H-10 Z" fill="#4E8F58"/>' +
+    '<rect x="55" y="52" width="14" height="18" rx="6" fill="#7A5636"/>' +
+    '<rect x="326" y="48" width="16" height="22" rx="6" fill="#7A5636"/>' +
+    '</svg></div>' +
+    '<div class="ground-band"><svg viewBox="0 0 400 112" preserveAspectRatio="none">' +
+    '<path d="M0 30 Q100 5 200 25 T400 15 V112 H0 Z" fill="#8FC48A" opacity=".4"/>' +
+    '<path d="M0 55 Q100 35 200 50 T400 42 V112 H0 Z" fill="#4B8A57"/>' +
+    '<path d="M0 78 H400 V112 H0 Z" fill="#356B44"/>' +
+    '<g stroke="#356B44" stroke-width="3.4" stroke-linecap="round">' +
+    '<path class="blade" d="M20 80 Q15 64 22 52"/><path class="blade" d="M40 80 Q45 62 38 50"/>' +
+    '<path class="blade" d="M360 80 Q355 64 362 52"/><path class="blade" d="M380 80 Q385 62 378 50"/>' +
+    '<path class="blade" d="M200 80 Q195 64 202 52"/>' +
+    '</g></svg></div>' +
+    '</div>';
+}
 
 var audio = createAudioProvider();
 var root = document.getElementById('root');
 
 var WORDS = [];
-var CATEGORIES = [{ id: 'all', label: 'Tất cả' }];
-var store = { words: {} };
+var store = { version: 3, profile: null, words: {} };
 
 var state = {
   screen: 'loading',
-  mode: 'flashcard', // 'flashcard' | 'zoocatch' — quyết định màn "chơi lại" và về nhà nào được dùng
-  category: 'all',
+  onboardName: '',
+  onboardAvatar: null,
   round: [],
   idx: 0,
   correct: 0,
   answered: false,
   currentOptions: null,
   requeueCounts: {},
-  cardShownAt: 0
+  cardShownAt: 0,
+  forestPool: []
 };
 
 function el(html) {
@@ -69,219 +124,214 @@ function speak(text) {
 }
 
 function wordsInCat(catId) {
-  return catId === 'all' ? WORDS.slice() : WORDS.filter(function (w) { return w.cat === catId; });
-}
-
-function masteredCount(catId) {
-  return wordsInCat(catId).filter(function (w) {
-    var p = store.words[w.id];
-    return p && p.level >= 4;
-  }).length;
-}
-
-function homeMessage() {
-  var total = WORDS.length;
-  var mastered = masteredCount('all');
-  var anySeen = WORDS.some(function (w) { return store.words[w.id] && store.words[w.id].seen; });
-  var anyDue = WORDS.some(function (w) {
-    var p = store.words[w.id];
-    return p && p.seen && p.next <= Date.now();
-  });
-  if (!anySeen) return 'Chào bé! Mình là Bo. Cùng học những từ tiếng Anh đầu tiên nhé!';
-  if (anyDue) return 'Đến giờ ôn bài rồi đó — ôn lại để nhớ thật lâu nha!';
-  if (mastered >= total) return 'Bé đã thuộc hết rồi, giỏi quá! Chơi lại để nhớ thật chắc nhé.';
-  return 'Bé giỏi lắm! Cùng học thêm vài từ mới nào.';
-}
-
-function cardGlyph(word) {
-  if (word.emoji) return word.emoji;
-  if (word.image) return '<img src="' + word.image + '" alt="' + word.en + '">';
-  return '❓';
+  return WORDS.filter(function (w) { return w.cat === catId; });
 }
 
 function render() {
   if (state.screen === 'loading') renderLoading();
   else if (state.screen === 'error') renderError();
+  else if (state.screen === 'onboarding') renderOnboarding();
   else if (state.screen === 'home') renderHome();
-  else if (state.screen === 'quiz') renderQuiz();
-  else if (state.screen === 'zoocatch') renderZooCatch();
-  else renderSummary();
+  else if (state.screen === 'forest') renderForest();
+  else if (state.screen === 'forestSummary') renderForestSummary();
+  else if (state.screen === 'parent') renderParent();
 }
 
 function renderLoading() {
-  root.innerHTML =
-    '<div class="topbar"><div class="brand">' + OWL_SVG +
-    '<div><h1>Vở học Tiếng Anh của Bòng</h1><span class="sub">Đang tải bài học...</span></div></div></div>' +
-    '<div class="bubble"><div class="owl">' + OWL_SVG.replace('width="40" height="40"', 'width="30" height="30"') + '</div><p>Chờ mình xíu nhé...</p></div>';
+  root.innerHTML = worldBg() +
+    '<div class="content" style="align-items:center;justify-content:center;">' +
+    owlMascot(64) + '<p style="font-weight:700;color:var(--ink);margin-top:10px;">Đang tải...</p></div>';
 }
 
 function renderError() {
-  root.innerHTML =
-    '<div class="topbar"><div class="brand">' + OWL_SVG +
-    '<div><h1>Vở học Tiếng Anh của Bòng</h1><span class="sub">Có lỗi khi tải bài học</span></div></div></div>' +
-    '<div class="bubble"><div class="owl">' + OWL_SVG.replace('width="40" height="40"', 'width="30" height="30"') + '</div><p>Không tải được nội dung bài học. Bé nhờ người lớn kiểm tra kết nối rồi thử lại nhé.</p></div>' +
-    '<button class="stampbtn" id="retryBtn">Thử lại</button>';
-  document.getElementById('retryBtn').addEventListener('click', function () {
-    boot();
-  });
+  root.innerHTML = worldBg() +
+    '<div class="content" style="align-items:center;justify-content:center;text-align:center;">' +
+    owlMascot(64) +
+    '<p style="font-weight:700;color:var(--ink);margin:12px 0 16px;">Không tải được trò chơi.<br>Nhờ người lớn kiểm tra mạng nhé!</p>' +
+    '<button class="chunkybtn coral" id="retryBtn" style="max-width:200px;">Thử lại</button></div>';
+  document.getElementById('retryBtn').addEventListener('click', boot);
 }
+
+// ---------------- Onboarding: tên + avatar ----------------
+
+function renderOnboarding() {
+  var avatars = getAvatars();
+  var existing = getProfile(store);
+  if (existing && !state.onboardAvatar) {
+    state.onboardName = existing.name;
+    state.onboardAvatar = existing.avatarId;
+  }
+
+  var avatarTiles = avatars.map(function (a) {
+    var pressed = state.onboardAvatar === a.id;
+    return '<button type="button" class="avatarbtn" data-id="' + a.id + '" aria-pressed="' + pressed + '" aria-label="' + a.label + '">' + avatarSvg(a.id, 48) + '</button>';
+  }).join('');
+
+  root.innerHTML = worldBg() +
+    '<div class="content">' +
+    '<div style="text-align:center;margin-bottom:6px;">' + owlMascot(60) + '</div>' +
+    '<h1 class="onboard-title">Bé tên là gì nhỉ?</h1>' +
+    '<p class="onboard-sub">Chọn 1 bạn thú làm đại diện cho mình nhé!</p>' +
+    '<input type="text" id="nameInput" class="nameinput" placeholder="Nhập tên của bé" maxlength="20" value="' + (state.onboardName || '') + '">' +
+    '<div class="avatargrid" id="avatarGrid" style="max-height:230px;">' + avatarTiles + '</div>' +
+    '<button class="chunkybtn coral" id="startPlayBtn" disabled>Bắt đầu chơi! 🎉</button>' +
+    '</div>';
+
+  var nameInput = document.getElementById('nameInput');
+  var startBtn = document.getElementById('startPlayBtn');
+  var grid = document.getElementById('avatarGrid');
+
+  function refreshBtn() {
+    var ready = nameInput.value.trim().length > 0 && !!state.onboardAvatar;
+    startBtn.disabled = !ready;
+  }
+
+  nameInput.addEventListener('input', function () {
+    state.onboardName = nameInput.value;
+    refreshBtn();
+  });
+
+  grid.addEventListener('click', function (e) {
+    var btn = e.target.closest('.avatarbtn');
+    if (!btn) return;
+    state.onboardAvatar = btn.getAttribute('data-id');
+    Array.prototype.forEach.call(grid.children, function (c) {
+      c.setAttribute('aria-pressed', c === btn ? 'true' : 'false');
+    });
+    refreshBtn();
+  });
+
+  startBtn.addEventListener('click', function () {
+    var name = nameInput.value.trim();
+    if (!name || !state.onboardAvatar) return;
+    setProfile(store, { name: name, avatarId: state.onboardAvatar });
+    state.screen = 'home';
+    render();
+  });
+
+  refreshBtn();
+}
+
+// ---------------- Trang chủ: hồ sơ + lưới chọn trò chơi ----------------
 
 function renderHome() {
-  var total = wordsInCat(state.category).length;
-  var mastered = masteredCount(state.category);
-  var pct = total ? Math.round(mastered / total * 100) : 0;
+  var profile = getProfile(store);
 
-  root.innerHTML =
-    '<div class="topbar">' +
-    '<div class="brand">' + OWL_SVG +
-    '<div><h1>Vở học Tiếng Anh của Bòng</h1><span class="sub">Học từ vựng &middot; ôn lại đều để nhớ lâu</span></div>' +
+  var tiles = GAMES.map(function (g) {
+    if (g.available) {
+      return '<button type="button" class="gametile" data-id="' + g.id + '">' +
+        '<span class="emoji">' + g.emoji + '</span><span class="name">' + g.title + '</span></button>';
+    }
+    return '<div class="gametile locked"><span class="emoji">' + g.emoji + '</span><span class="name">' + g.title + '</span></div>';
+  }).join('');
+
+  root.innerHTML = worldBg() +
+    '<div class="content">' +
+    '<div class="profilebar">' +
+    '<button type="button" class="avatarcircle" id="avatarEditBtn" aria-label="Đổi hồ sơ">' + avatarSvg(profile.avatarId, 44) + '</button>' +
+    '<div class="greet">Chào ' + profile.name + '! <span>Chọn trò chơi để bắt đầu nhé</span></div>' +
     '</div>' +
+    '<div class="gamegrid" id="gameGrid">' + tiles + '</div>' +
+    '<div style="text-align:center;margin-top:14px;">' +
+    '<button type="button" class="parentlink" id="parentLink">Dành cho phụ huynh</button>' +
     '</div>' +
-    '<div class="bubble"><div class="owl">' + OWL_SVG.replace('width="40" height="40"', 'width="30" height="30"') + '</div><p>' + homeMessage() + '</p></div>' +
-    '<div class="chiprow" id="chiprow"></div>' +
-    '<div class="progresswrap">' +
-    '<div class="label"><span>Đã thuộc</span><b>' + mastered + ' / ' + total + ' từ</b></div>' +
-    '<div class="bar"><div class="bar__fill" style="width:' + pct + '%"></div></div>' +
-    '</div>' +
-    '<button class="stampbtn" id="startBtn">Bắt đầu học</button>' +
-    '<button class="stampbtn alt" id="zooBtn">🦁 Bắt thú Sở thú (mini-game mới)</button>' +
-    '<button class="resetlink" id="resetLink">Xoá tiến trình đã lưu</button>' +
-    '<div id="confirmZone"></div>';
+    '</div>';
 
-  var chiprow = document.getElementById('chiprow');
-  CATEGORIES.forEach(function (c) {
-    var chip = el('<button class="chip" type="button" aria-pressed="' + (state.category === c.id) + '">' +
-      (c.icon ? '<span aria-hidden="true">' + c.icon + '</span>' : '') + '<span>' + c.label + '</span></button>');
-    chip.addEventListener('click', function () {
-      state.category = c.id;
-      render();
-    });
-    chiprow.appendChild(chip);
+  document.getElementById('avatarEditBtn').addEventListener('click', function () {
+    state.onboardAvatar = null;
+    state.screen = 'onboarding';
+    render();
   });
-
-  document.getElementById('startBtn').addEventListener('click', function () {
-    startSession();
+  document.getElementById('parentLink').addEventListener('click', function () {
+    state.screen = 'parent';
+    render();
   });
-  document.getElementById('zooBtn').addEventListener('click', function () {
-    startZooCatch();
-  });
-
-  var confirmZone = document.getElementById('confirmZone');
-  document.getElementById('resetLink').addEventListener('click', function () {
-    confirmZone.innerHTML = '<div class="confirmrow"><span>Xoá hết tiến trình?</span></div>';
-    var row = confirmZone.querySelector('.confirmrow');
-    var yes = el('<button type="button">Xoá</button>');
-    var no = el('<button type="button">Huỷ</button>');
-    yes.addEventListener('click', function () {
-      store = clearProgress();
-      render();
-    });
-    no.addEventListener('click', function () {
-      confirmZone.innerHTML = '';
-    });
-    row.appendChild(yes);
-    row.appendChild(no);
+  document.getElementById('gameGrid').addEventListener('click', function (e) {
+    var tile = e.target.closest('.gametile[data-id]');
+    if (!tile) return;
+    if (tile.getAttribute('data-id') === 'forest') startForestGame();
   });
 }
 
-function startSession() {
-  var pool = wordsInCat(state.category);
-  state.round = createSessionQueue(buildRound(pool, store.words, { size: 8 }));
+// ---------------- Trò chơi: Thế giới động vật ----------------
+
+function startForestGame() {
+  state.forestPool = wordsInCat('animal');
+  state.round = createSessionQueue(buildRound(state.forestPool, store.words, 'listen', { size: 10 }));
   state.idx = 0;
   state.correct = 0;
   state.answered = false;
   state.currentOptions = null;
   state.requeueCounts = {};
-  state.mode = 'flashcard';
-  state.screen = 'quiz';
+  state.screen = 'forest';
   render();
 }
 
-function startZooCatch() {
-  var pool = wordsInCat('animal');
-  state.round = createSessionQueue(buildRound(pool, store.words, { size: 8 }));
-  state.idx = 0;
-  state.correct = 0;
-  state.answered = false;
-  state.currentOptions = null;
-  state.requeueCounts = {};
-  state.mode = 'zoocatch';
-  state.screen = 'zoocatch';
-  render();
-}
-
-// --- Zoo Catch: bé nghe tên con vật bằng tiếng Anh, bấm đúng con đang đi
-// qua màn hình. Bấm nhầm chỉ nhắc nhẹ + cho thử lại ngay (không mất lượt,
-// không giới hạn thời gian) — đúng nguyên tắc "không tạo áp lực" trong GDD.
-// Mỗi lượt bấm sai vẫn được ghi nhận vào Learning Engine (liên kết yếu đi),
-// còn hàng đợi phiên chỉ được chèn lại 1 lần dựa trên kết quả cuối cùng.
-
-var ZOO_LANE_DURATIONS = [5.5, 7, 6.2, 8];
-
-function renderZooCatch() {
+function renderForest() {
   var word = state.round[state.idx];
-  var options = state.currentOptions || (state.currentOptions = pickOptions(word, wordsInCat('animal')));
+  var options = state.currentOptions || (state.currentOptions = pickOptions(word, state.forestPool));
   state.cardShownAt = Date.now();
 
-  var dots = state.round.map(function (w, i) {
-    var st = i < state.idx ? 'done' : (i === state.idx ? 'current' : '');
-    return '<span class="dot" data-state="' + st + '"></span>';
-  }).join('');
+  var starsRow = '';
+  for (var i = 0; i < FOREST_WIN_TARGET; i++) {
+    var lit = i < state.correct;
+    var starMarkup = starIcon(lit ? '#FFD25A' : 'rgba(255,255,255,.55)', 16, 'rgba(35,58,42,.35)');
+    starsRow += starMarkup.replace('<svg ', '<svg class="' + (lit ? 'lit' : '') + '" ');
+  }
 
   var lanes = options.map(function (opt, i) {
-    var dur = ZOO_LANE_DURATIONS[i % ZOO_LANE_DURATIONS.length];
-    var delay = (i * 0.6).toFixed(1);
-    return '<div class="zoolane" data-id="' + opt.id + '">' +
-      '<div class="zoolane__mover" style="animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">' +
-      '<img src="' + opt.image + '" alt="' + opt.en + '">' +
-      '</div></div>';
+    var durations = [6.2, 7.4, 8.1, 6.8];
+    var dur = durations[i % durations.length];
+    var delay = (i * 0.7).toFixed(1);
+    return '<div class="path" data-id="' + opt.id + '">' +
+      '<div class="path__mover" style="animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">' +
+      '<img src="' + opt.image + '" alt="' + opt.en + '"></div></div>';
   }).join('');
 
-  root.innerHTML =
-    '<div class="backrow">' +
+  root.innerHTML = worldBg() +
+    '<div class="content">' +
+    '<div class="topbar">' +
     '<button class="iconbtn" id="homeBtn" aria-label="Về trang chủ">' + CLOSE_SVG + '</button>' +
-    '<div class="dots">' + dots + '</div>' +
+    '<div class="starsrow" style="margin:0;">' + starsRow + '</div>' +
+    '<span style="width:38px;"></span>' +
     '</div>' +
-    '<p class="zoo-instructions">🦁 Bấm đúng con: <b>' + word.en + '</b></p>' +
-    '<div style="display:flex;justify-content:center;margin-bottom:12px;">' +
-    '<button class="speakbtn" id="speakBtn">' + SPEAK_SVG + '<span>Nghe lại</span></button>' +
-    '</div>' +
-    '<div class="zoo-lanes zoo-stage" id="zooStage">' + lanes + '</div>' +
-    '<div class="bubble" id="feedbackBubble" style="display:none;"><div class="owl">' + OWL_SVG.replace('width="40" height="40"', 'width="30" height="30"') + '</div><p id="feedbackText"></p></div>' +
-    '<button class="nextbtn" id="nextBtn" style="display:none;"></button>';
+    '<div class="ribbon">🦁 Bắt con: <b>' + word.en + '</b></div>' +
+    '<button class="soundbtn" id="speakBtn" aria-label="Nghe lại">' + SPEAK_SVG + '</button>' +
+    '<div class="paths" id="forestStage">' + lanes + '</div>' +
+    '<div class="glasscard" id="feedbackBubble" style="display:none;margin-top:12px;"><p id="feedbackText" style="margin:0;font-weight:600;font-size:.9rem;"></p></div>' +
+    '<button class="chunkybtn green" id="nextBtn" style="display:none;margin-top:12px;"></button>' +
+    '</div>';
 
   document.getElementById('homeBtn').addEventListener('click', function () {
-    state.mode = 'flashcard'; state.screen = 'home'; state.currentOptions = null; render();
+    state.screen = 'home'; state.currentOptions = null; render();
   });
-  document.getElementById('speakBtn').addEventListener('click', function () {
-    speak(word.promptAudioText || word.en);
-  });
+  var sayIt = function () { speak('Catch the ' + word.en + '!'); };
+  document.getElementById('speakBtn').addEventListener('click', sayIt);
+  sayIt();
 
-  speak(word.promptAudioText || word.en);
-
-  var stageEl = document.getElementById('zooStage');
-  Array.prototype.forEach.call(stageEl.querySelectorAll('.zoolane'), function (laneEl) {
+  var stage = document.getElementById('forestStage');
+  Array.prototype.forEach.call(stage.querySelectorAll('.path'), function (laneEl) {
     laneEl.addEventListener('click', function () {
       var chosen = options.filter(function (o) { return o.id === laneEl.getAttribute('data-id'); })[0];
-      handleZooCatchAnswer(chosen, word, laneEl, stageEl);
+      handleForestAnswer(chosen, word, laneEl, stage);
     });
   });
 }
 
-function handleZooCatchAnswer(chosen, correctWord, laneEl, stageEl) {
+function handleForestAnswer(chosen, correctWord, laneEl, stage) {
   if (state.answered) return;
   var isCorrect = chosen.id === correctWord.id;
 
   if (!isCorrect) {
-    applyAnswer(store.words, correctWord.id, 'wrong');
+    applyAnswer(store.words, correctWord.id, 'listen', 'wrong');
     saveProgress(store);
     laneEl.classList.remove('nudge');
-    void laneEl.offsetWidth; // buộc trình duyệt tính lại để animation chạy lại được
+    void laneEl.offsetWidth;
     laneEl.classList.add('nudge');
     var bubble = document.getElementById('feedbackBubble');
     var text = document.getElementById('feedbackText');
-    bubble.style.display = 'flex';
-    text.innerHTML = 'Chưa đúng, bé thử bắt lại nhé!';
+    bubble.style.display = 'block';
+    text.textContent = 'Chưa đúng, bé thử bắt lại nhé!';
     return;
   }
 
@@ -289,28 +339,31 @@ function handleZooCatchAnswer(chosen, correctWord, laneEl, stageEl) {
   state.correct++;
   var responseTimeMs = Date.now() - state.cardShownAt;
   var outcome = classifyAnswer(true, responseTimeMs);
-  applyAnswer(store.words, correctWord.id, outcome);
+  applyAnswer(store.words, correctWord.id, 'listen', outcome);
   saveProgress(store);
   state.round = requeueAfterAnswer(state.round, state.idx, correctWord, outcome, state.requeueCounts);
-  speak(correctWord.promptAudioText || correctWord.en);
+  speak(correctWord.en);
 
-  stageEl.classList.add('answered');
+  stage.classList.add('answered');
   laneEl.classList.add('caught');
 
   var bubble2 = document.getElementById('feedbackBubble');
   var text2 = document.getElementById('feedbackText');
-  bubble2.style.display = 'flex';
-  text2.innerHTML = '<b>Bắt được rồi!</b> ' + correctWord.en + ' = <span class="vi-reveal">' + correctWord.vi + '</span>';
+  bubble2.style.display = 'block';
+  text2.innerHTML = '<b>Bắt được rồi!</b> 🎉 ' + correctWord.en;
 
-  var isLast = state.idx >= state.round.length - 1;
+  var isDone = state.correct >= FOREST_WIN_TARGET;
   var nextBtn = document.getElementById('nextBtn');
   nextBtn.style.display = 'block';
-  nextBtn.textContent = isLast ? 'Xem kết quả' : 'Con tiếp theo';
+  nextBtn.textContent = isDone ? 'Xem kết quả! 🎉' : 'Con tiếp theo';
   nextBtn.addEventListener('click', function () {
-    if (isLast) {
-      state.screen = 'summary';
+    if (isDone) {
+      state.screen = 'forestSummary';
     } else {
       state.idx++;
+      if (state.idx >= state.round.length) {
+        state.round = state.round.concat(createSessionQueue(shuffle(state.forestPool)));
+      }
       state.currentOptions = null;
     }
     state.answered = false;
@@ -318,130 +371,82 @@ function handleZooCatchAnswer(chosen, correctWord, laneEl, stageEl) {
   });
 }
 
-function renderQuiz() {
-  var word = state.round[state.idx];
-  var options = state.currentOptions || (state.currentOptions = pickOptions(word, WORDS));
-  state.cardShownAt = Date.now();
+function renderForestSummary() {
+  root.innerHTML = worldBg() +
+    '<div class="content">' +
+    '<div class="summary-mid" id="summaryMid">' +
+    '<div class="starburst">' + starIcon('#FFD25A', 28) + starIcon('#F4A93B', 36) + starIcon('#FFD25A', 28) + '</div>' +
+    owlMascot(64) +
+    '<h2>Giỏi quá!</h2>' +
+    '<p>Bé bắt được hết các bạn thú rồi!</p>' +
+    '<div class="summary-btns">' +
+    '<button class="chunkybtn coral" id="againBtn">Chơi lại</button>' +
+    '<button class="ghostbtn" id="homeBtn2">Chọn trò khác</button>' +
+    '</div></div></div>';
 
-  var dots = state.round.map(function (w, i) {
-    var st = i < state.idx ? 'done' : (i === state.idx ? 'current' : '');
-    return '<span class="dot" data-state="' + st + '"></span>';
+  var mid = document.getElementById('summaryMid');
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var colors = ['#F4A93B', '#E4633F', '#2F8F5B', '#FFD25A'];
+    for (var i = 0; i < 14; i++) {
+      var f = document.createElement('div');
+      f.className = 'fall';
+      f.style.left = (10 + Math.random() * 90) + '%';
+      f.style.width = '7px'; f.style.height = '11px';
+      f.style.background = colors[i % colors.length];
+      f.style.animationDuration = (2 + Math.random() * 1.4) + 's';
+      f.style.animationDelay = (Math.random() * 2.4) + 's';
+      mid.appendChild(f);
+    }
+  }
+
+  document.getElementById('againBtn').addEventListener('click', startForestGame);
+  document.getElementById('homeBtn2').addEventListener('click', function () {
+    state.screen = 'home'; render();
+  });
+}
+
+// ---------------- Trang phụ huynh ----------------
+
+function levelColor(level) {
+  if (level === 0) return '#C7C2AE';
+  var t = level / MAX_LEVEL;
+  var r = Math.round(244 - t * (244 - 47));
+  var g = Math.round(169 + t * (143 - 169));
+  var b = Math.round(59 + t * (91 - 59));
+  return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
+
+function renderParent() {
+  var profile = getProfile(store);
+  var touchedWords = WORDS.filter(function (w) {
+    return store.words[w.id] && store.words[w.id].skills &&
+      SKILLS.some(function (s) { return store.words[w.id].skills[s]; });
+  });
+
+  var rows = touchedWords.map(function (w) {
+    var cells = SKILLS.map(function (s) {
+      var p = getSkillProgress(store.words, w.id, s);
+      var lv = p ? p.level : 0;
+      return '<div class="lvpill" style="background:' + levelColor(lv) + '" title="' + SKILL_LABELS[s] + '">' + lv + '</div>';
+    }).join('');
+    var thumb = w.image ? '<img src="' + w.image + '" alt="">' : '<span>' + (w.emoji || '❓') + '</span>';
+    return '<div class="wordrow"><div class="wname">' + thumb + '<span>' + w.en + '</span></div>' + cells + '</div>';
   }).join('');
 
-  root.innerHTML =
-    '<div class="backrow">' +
-    '<button class="iconbtn" id="homeBtn" aria-label="Về trang chủ">' + CLOSE_SVG + '</button>' +
-    '<div class="dots">' + dots + '</div>' +
-    '</div>' +
-    '<div class="cardwrap">' +
-    '<div class="flashcard" id="flashcard">' + cardGlyph(word) + '</div>' +
-    '<div class="stamp-pop" id="stampPop">' + STAR_BIG_SVG + '</div>' +
-    '</div>' +
-    '<div style="display:flex;justify-content:center;margin-bottom:20px;">' +
-    '<button class="speakbtn" id="speakBtn">' + SPEAK_SVG + '<span>Nghe từ</span></button>' +
-    '</div>' +
-    '<div class="options" id="options"></div>' +
-    '<div class="bubble" id="feedbackBubble" style="display:none;"><div class="owl">' + OWL_SVG.replace('width="40" height="40"', 'width="30" height="30"') + '</div><p id="feedbackText"></p></div>' +
-    '<button class="nextbtn" id="nextBtn" style="display:none;"></button>';
-
-  document.getElementById('homeBtn').addEventListener('click', function () {
-    state.screen = 'home'; state.currentOptions = null; render();
-  });
-  document.getElementById('speakBtn').addEventListener('click', function () {
-    speak(word.promptAudioText || word.en);
-  });
-
-  var optionsEl = document.getElementById('options');
-  options.forEach(function (opt) {
-    var btn = el('<button class="opt" type="button">' + opt.en + '</button>');
-    btn.addEventListener('click', function () { handleAnswer(opt, word, optionsEl); });
-    optionsEl.appendChild(btn);
-  });
-}
-
-function handleAnswer(chosen, correctWord, optionsEl) {
-  if (state.answered) return;
-  state.answered = true;
-  var isCorrect = chosen.id === correctWord.id;
-  var responseTimeMs = Date.now() - state.cardShownAt;
-
-  Array.prototype.forEach.call(optionsEl.children, function (b) { b.disabled = true; });
-  Array.prototype.forEach.call(optionsEl.children, function (b, i) {
-    var opt = state.currentOptions[i];
-    if (opt.id === correctWord.id) b.setAttribute('data-state', 'correct');
-    else if (opt.id === chosen.id) b.setAttribute('data-state', 'wrong');
-  });
-
-  if (isCorrect) state.correct++;
-  var outcome = classifyAnswer(isCorrect, responseTimeMs);
-  applyAnswer(store.words, correctWord.id, outcome);
-  saveProgress(store);
-  state.round = requeueAfterAnswer(state.round, state.idx, correctWord, outcome, state.requeueCounts);
-  speak(correctWord.promptAudioText || correctWord.en);
-
-  var flashcard = document.getElementById('flashcard');
-  if (isCorrect) {
-    var pop = document.getElementById('stampPop');
-    pop.classList.add('show');
-  } else {
-    flashcard.classList.add('shake');
-  }
-
-  var bubble = document.getElementById('feedbackBubble');
-  var text = document.getElementById('feedbackText');
-  bubble.style.display = 'flex';
-  if (isCorrect) {
-    text.innerHTML = '<b>Đúng rồi!</b> ' + correctWord.en + ' = <span class="vi-reveal">' + correctWord.vi + '</span>';
-  } else {
-    text.innerHTML = 'Chưa đúng. Từ này là <b>' + correctWord.en + '</b> = <span class="vi-reveal">' + correctWord.vi + '</span>';
-  }
-
-  var isLast = state.idx >= state.round.length - 1;
-  var nextBtn = document.getElementById('nextBtn');
-  nextBtn.style.display = 'block';
-  nextBtn.textContent = isLast ? 'Xem kết quả' : 'Câu tiếp theo';
-  nextBtn.addEventListener('click', function () {
-    if (isLast) {
-      state.screen = 'summary';
-    } else {
-      state.idx++;
-      state.currentOptions = null;
-    }
-    state.answered = false;
-    render();
-  });
-}
-
-function renderSummary() {
-  var total = state.round.length;
-  var pct = total ? Math.round(state.correct / total * 100) : 0;
-  var mastered = masteredCount('all');
-  var msg;
-  if (pct >= 80) msg = 'Xuất sắc! Bé nhớ từ rất giỏi luôn!';
-  else if (pct >= 50) msg = 'Cố lên nào, ôn thêm chút nữa là thuộc hết!';
-  else msg = 'Không sao đâu, học lại vài lần nữa bé sẽ nhớ thôi!';
+  var body = touchedWords.length
+    ? '<div class="skillhead"><span>Từ</span><span>Nghe</span><span>Nói</span><span>Đọc</span><span>Viết</span><span>Nhìn</span></div>' + rows
+    : '<div class="emptystate">Bé chưa chơi trò nào cả.<br>Số liệu sẽ hiện ra ở đây sau khi bé chơi nhé!</div>';
 
   root.innerHTML =
-    '<div class="summary">' +
-    '<div class="big">' + OWL_SVG.replace('width="40" height="40"', 'width="56" height="56"') + '</div>' +
-    '<h2 style="text-align:center;">Xong một lượt học!</h2>' +
-    '<p style="text-align:center;color:var(--ink-soft);font-weight:600;margin:6px 0 0;">' + msg + '</p>' +
-    '<div class="statgrid">' +
-    '<div class="stat"><b>' + state.correct + '/' + total + '</b><span>Trả lời đúng</span></div>' +
-    '<div class="stat"><b>' + mastered + '/' + WORDS.length + '</b><span>Từ đã thuộc</span></div>' +
+    '<div class="parentpage">' +
+    '<div class="pheader">' +
+    '<button id="backBtn" aria-label="Về trang bé">' + BACK_SVG + '</button>' +
+    '<div><h1>Báo cáo học tập</h1><p class="psub">' + (profile ? profile.name : 'Bé') + ' — LV0 (chưa học) đến LV' + MAX_LEVEL + ' (đã nhớ rất lâu)</p></div>' +
     '</div>' +
-    '<div class="btnrow">' +
-    '<button class="stampbtn" id="againBtn">' + (state.mode === 'zoocatch' ? 'Bắt thú tiếp' : 'Học tiếp') + '</button>' +
-    '<button class="ghostbtn" id="homeBtn2">Về trang chủ</button>' +
-    '</div>' +
+    body +
     '</div>';
 
-  document.getElementById('againBtn').addEventListener('click', function () {
-    if (state.mode === 'zoocatch') startZooCatch();
-    else startSession();
-  });
-  document.getElementById('homeBtn2').addEventListener('click', function () {
-    state.mode = 'flashcard';
+  document.getElementById('backBtn').addEventListener('click', function () {
     state.screen = 'home'; render();
   });
 }
@@ -457,8 +462,7 @@ async function boot() {
     return;
   }
   WORDS = result.words;
-  CATEGORIES = [{ id: 'all', label: 'Tất cả' }].concat(result.categories);
-  state.screen = 'home';
+  state.screen = getProfile(store) ? 'home' : 'onboarding';
   render();
 }
 

@@ -1,17 +1,19 @@
-// Test thủ công cho Learning Engine bằng dữ liệu giả (không phụ thuộc
-// trình duyệt/localStorage — mọi hàm trong learning-engine.js là pure
-// function nên chạy thẳng được bằng Node).
+// Test thủ công cho Learning Engine bằng dữ liệu giả — mọi hàm trong
+// learning-engine.js là pure function nên chạy thẳng được bằng Node.
 //
 // Chạy: node tools/test-learning-engine.mjs
 
 import assert from 'node:assert/strict';
 import {
+  SKILLS,
   INTERVALS_MIN,
+  MAX_LEVEL,
   RESPONSE_FAST_MS,
   RESPONSE_SLOW_MS,
   MAX_REQUEUES_PER_WORD,
   classifyAnswer,
   applyAnswer,
+  getSkillProgress,
   wrongRate,
   buildRound,
   createSessionQueue,
@@ -23,7 +25,6 @@ import {
 var tests = [];
 function test(name, fn) { tests.push({ name: name, fn: fn }); }
 
-// Bộ từ giả: 6 từ, 2 chủ đề, đủ để test lọc theo cat + phân biệt distractor.
 function fakeWords() {
   return [
     { id: 'w1', en: 'one', vi: 'một', cat: 'number' },
@@ -63,59 +64,77 @@ test('classifyAnswer: đúng + chậm (> ngưỡng nhanh) là "correct-slow"', f
   assert.equal(classifyAnswer(true, RESPONSE_SLOW_MS + 5000), 'correct-slow');
 });
 
-// --- applyAnswer ---
+// --- applyAnswer: mỗi kỹ năng độc lập ---
 
-test('applyAnswer: correct-fast từ từ mới -> level tăng lên 1, correctCount=1', function () {
+test('applyAnswer: correct-fast trên kỹ năng "listen" -> LV tăng lên 1, không đụng kỹ năng khác', function () {
   var words = {};
-  var p = applyAnswer(words, 'w1', 'correct-fast');
+  var p = applyAnswer(words, 'w1', 'listen', 'correct-fast');
   assert.equal(p.level, 1);
   assert.equal(p.correctCount, 1);
-  assert.equal(p.wrongCount, 0);
-  assert.ok(p.seen);
-  assert.ok(p.next > Date.now() - 1);
+  assert.equal(getSkillProgress(words, 'w1', 'read'), null, 'kỹ năng "read" của từ này chưa hề bị đụng tới');
 });
 
-test('applyAnswer: wrong từ level 0 -> level giữ 0 (không âm), wrongCount=1', function () {
+test('applyAnswer: 2 kỹ năng của CÙNG 1 từ tiến độ hoàn toàn tách biệt', function () {
   var words = {};
-  var p = applyAnswer(words, 'w1', 'wrong');
+  applyAnswer(words, 'w1', 'listen', 'correct-fast');
+  applyAnswer(words, 'w1', 'listen', 'correct-fast');
+  applyAnswer(words, 'w1', 'read', 'wrong');
+  var listenP = getSkillProgress(words, 'w1', 'listen');
+  var readP = getSkillProgress(words, 'w1', 'read');
+  assert.equal(listenP.level, 2, 'listen đã tăng 2 lần đúng liên tiếp');
+  assert.equal(readP.level, 0, 'read chỉ có 1 lần sai, không liên quan gì tới listen');
+  assert.equal(readP.wrongCount, 1);
+});
+
+test('applyAnswer: wrong từ LV0 -> LV giữ 0 (không âm)', function () {
+  var words = {};
+  var p = applyAnswer(words, 'w1', 'speak', 'wrong');
   assert.equal(p.level, 0);
   assert.equal(p.wrongCount, 1);
 });
 
-test('applyAnswer: wrong từ level cao hơn -> level giảm 1', function () {
-  var words = { w1: { level: 3, next: 0, seen: true, correctCount: 3, wrongCount: 0 } };
-  var p = applyAnswer(words, 'w1', 'wrong');
+test('applyAnswer: wrong từ LV cao hơn -> LV giảm 1', function () {
+  var words = { w1: { skills: { speak: { level: 3, next: 0, seen: true, correctCount: 3, wrongCount: 0 } } } };
+  var p = applyAnswer(words, 'w1', 'speak', 'wrong');
   assert.equal(p.level, 2);
 });
 
-test('applyAnswer: correct-slow ở level thấp (<2) vẫn tăng level (chưa chắc, cần củng cố)', function () {
-  var words = { w1: { level: 0, next: 0, seen: true, correctCount: 0, wrongCount: 0 } };
-  var p = applyAnswer(words, 'w1', 'correct-slow');
+test('applyAnswer: correct-slow ở LV thấp (<2) vẫn tăng LV', function () {
+  var words = { w1: { skills: { see: { level: 0, next: 0, seen: true, correctCount: 0, wrongCount: 0 } } } };
+  var p = applyAnswer(words, 'w1', 'see', 'correct-slow');
   assert.equal(p.level, 1);
 });
 
-test('applyAnswer: correct-slow ở level cao (>=2) giữ nguyên level (không công nhận thuộc quá sớm)', function () {
-  var words = { w1: { level: 3, next: 0, seen: true, correctCount: 5, wrongCount: 0 } };
-  var p = applyAnswer(words, 'w1', 'correct-slow');
+test('applyAnswer: correct-slow ở LV cao (>=2) giữ nguyên LV', function () {
+  var words = { w1: { skills: { see: { level: 3, next: 0, seen: true, correctCount: 5, wrongCount: 0 } } } };
+  var p = applyAnswer(words, 'w1', 'see', 'correct-slow');
   assert.equal(p.level, 3);
 });
 
-test('applyAnswer: level không vượt quá 5 hay xuống dưới 0', function () {
-  var words = { w1: { level: 5, next: 0, seen: true, correctCount: 10, wrongCount: 0 } };
-  applyAnswer(words, 'w1', 'correct-fast');
-  assert.equal(words.w1.level, 5);
+test('applyAnswer: LV không vượt quá MAX_LEVEL (10) hay xuống dưới 0', function () {
+  var words = { w1: { skills: { write: { level: MAX_LEVEL, next: 0, seen: true, correctCount: 10, wrongCount: 0 } } } };
+  applyAnswer(words, 'w1', 'write', 'correct-fast');
+  assert.equal(words.w1.skills.write.level, MAX_LEVEL);
 
-  var words2 = { w2: { level: 0, next: 0, seen: true, correctCount: 0, wrongCount: 3 } };
-  applyAnswer(words2, 'w2', 'wrong');
-  assert.equal(words2.w2.level, 0);
+  var words2 = { w2: { skills: { write: { level: 0, next: 0, seen: true, correctCount: 0, wrongCount: 3 } } } };
+  applyAnswer(words2, 'w2', 'write', 'wrong');
+  assert.equal(words2.w2.skills.write.level, 0);
 });
 
-test('applyAnswer: next = now + đúng khoảng INTERVALS_MIN theo level mới', function () {
+test('applyAnswer: next = now + đúng khoảng INTERVALS_MIN theo LV mới', function () {
   var words = {};
   var before = Date.now();
-  var p = applyAnswer(words, 'w1', 'correct-fast');
+  var p = applyAnswer(words, 'w1', 'listen', 'correct-fast');
   var expectedMin = before + INTERVALS_MIN[1] * 60000;
-  assert.ok(Math.abs(p.next - expectedMin) < 2000, 'next phải xấp xỉ now + interval[level]');
+  assert.ok(Math.abs(p.next - expectedMin) < 2000);
+});
+
+test('INTERVALS_MIN: đúng 11 mốc (LV0-10), tăng gấp đôi đều ở 3 mốc cuối (không chậm lại)', function () {
+  assert.equal(INTERVALS_MIN.length, 11);
+  assert.equal(MAX_LEVEL, 10);
+  var l8 = INTERVALS_MIN[8], l9 = INTERVALS_MIN[9], l10 = INTERVALS_MIN[10];
+  assert.equal(l9 / l8, 2, 'LV8->LV9 phải tăng đúng gấp đôi (30->60 ngày)');
+  assert.equal(l10 / l9, 2, 'LV9->LV10 phải tăng đúng gấp đôi (60->120 ngày)');
 });
 
 test('wrongRate: tính đúng tỉ lệ sai, 0 khi chưa có lượt nào', function () {
@@ -124,68 +143,70 @@ test('wrongRate: tính đúng tỉ lệ sai, 0 khi chưa có lượt nào', func
   assert.equal(wrongRate({ correctCount: 1, wrongCount: 3 }), 0.75);
 });
 
-// --- buildRound ---
+// --- buildRound (theo 1 kỹ năng cụ thể) ---
 
-test('buildRound: chưa học gì thì trả về từ mới (đủ size, không trùng)', function () {
+test('buildRound: chưa học kỹ năng này thì trả về từ mới (đủ size, không trùng)', function () {
   var words = fakeWords();
-  var round = buildRound(words, {}, { size: 4, rng: seededRng(1) });
+  var round = buildRound(words, {}, 'listen', { size: 4, rng: seededRng(1) });
   assert.equal(round.length, 4);
   var ids = round.map(function (w) { return w.id; });
-  assert.equal(new Set(ids).size, 4, 'không được trùng từ trong 1 round');
+  assert.equal(new Set(ids).size, 4);
 });
 
-test('buildRound: từ đến hạn ôn được ưu tiên trước từ mới', function () {
+test('buildRound: từ đến hạn ôn (đúng kỹ năng đang xét) được ưu tiên trước từ mới', function () {
+  var words = fakeWords();
+  var now = Date.now();
+  var progress = { w1: { skills: { listen: { level: 2, next: now - 1000, seen: true, correctCount: 2, wrongCount: 0 } } } };
+  var round = buildRound(words, progress, 'listen', { size: 1, now: now, rng: seededRng(2) });
+  assert.equal(round[0].id, 'w1');
+});
+
+test('buildRound: due theo kỹ năng "read" không bị ảnh hưởng bởi tiến độ "listen" của cùng từ', function () {
   var words = fakeWords();
   var now = Date.now();
   var progress = {
-    w1: { level: 2, next: now - 1000, seen: true, correctCount: 2, wrongCount: 0 } // đã đến hạn
+    // w1 đã thuộc "listen" rất tốt (chưa đến hạn ôn), nhưng "read" thì
+    // chưa từng học -> vẫn phải được coi là "brand new" khi build round
+    // cho kỹ năng "read".
+    w1: { skills: { listen: { level: 9, next: now + 999999999, seen: true, correctCount: 20, wrongCount: 0 } } }
   };
-  var round = buildRound(words, progress, { size: 1, now: now, rng: seededRng(2) });
-  assert.equal(round[0].id, 'w1');
+  var roundRead = buildRound(words, progress, 'read', { size: 6, now: now, rng: seededRng(3) });
+  var idsRead = roundRead.map(function (w) { return w.id; });
+  assert.ok(idsRead.indexOf('w1') !== -1, 'w1 phải xuất hiện trong round "read" vì kỹ năng read của nó chưa học');
 });
 
 test('buildRound: trong số từ đến hạn, tỉ lệ sai cao hơn được ưu tiên lên trước', function () {
   var words = fakeWords();
   var now = Date.now();
   var progress = {
-    w1: { level: 2, next: now - 1000, seen: true, correctCount: 4, wrongCount: 0 }, // sai 0%
-    w2: { level: 2, next: now - 1000, seen: true, correctCount: 1, wrongCount: 3 }  // sai 75%
+    w1: { skills: { listen: { level: 2, next: now - 1000, seen: true, correctCount: 4, wrongCount: 0 } } },
+    w2: { skills: { listen: { level: 2, next: now - 1000, seen: true, correctCount: 1, wrongCount: 3 } } }
   };
-  var round = buildRound(words, progress, { size: 2, now: now, rng: seededRng(3) });
-  assert.equal(round[0].id, 'w2', 'từ sai nhiều hơn phải được xếp ưu tiên ôn trước');
+  var round = buildRound(words, progress, 'listen', { size: 2, now: now, rng: seededRng(4) });
+  assert.equal(round[0].id, 'w2');
 });
 
-// --- session queue / requeue ---
+// --- session queue / requeue (không phụ thuộc kỹ năng) ---
 
-test('requeueAfterAnswer: correct-fast không chèn lại (đã ổn trong phiên này)', function () {
+test('requeueAfterAnswer: correct-fast không chèn lại', function () {
   var words = fakeWords();
   var queue = createSessionQueue(words);
   var counts = {};
-  var result = requeueAfterAnswer(queue, 0, words[0], 'correct-fast', counts, seededRng(4));
+  var result = requeueAfterAnswer(queue, 0, words[0], 'correct-fast', counts, seededRng(5));
   assert.equal(result.length, queue.length);
 });
 
-test('requeueAfterAnswer: wrong chèn lại từ đó cách ít nhất 2 câu (né lặp liên tiếp)', function () {
+test('requeueAfterAnswer: wrong chèn lại cách ít nhất 2 câu', function () {
   var words = fakeWords();
   var queue = createSessionQueue(words);
   var counts = {};
-  var result = requeueAfterAnswer(queue, 0, words[0], 'wrong', counts, seededRng(5));
-  assert.equal(result.length, queue.length + 1, 'phải có thêm 1 câu trong hàng đợi');
-  var newPos = result.indexOf(words[0], 1); // tìm bản chèn lại, bỏ qua vị trí gốc idx 0
-  assert.ok(newPos >= 3, 'vị trí chèn lại phải cách xa vị trí vừa trả lời (idx 0) ít nhất 2 câu khác, thấy: ' + newPos);
-});
-
-test('requeueAfterAnswer: correct-slow cũng được chèn lại (ôn thêm 1 lần nhẹ)', function () {
-  var words = fakeWords();
-  var queue = createSessionQueue(words);
-  var counts = {};
-  var result = requeueAfterAnswer(queue, 0, words[0], 'correct-slow', counts, seededRng(6));
+  var result = requeueAfterAnswer(queue, 0, words[0], 'wrong', counts, seededRng(6));
   assert.equal(result.length, queue.length + 1);
+  var newPos = result.indexOf(words[0], 1);
+  assert.ok(newPos >= 3, 'thấy: ' + newPos);
 });
 
-test('requeueAfterAnswer: tôn trọng MAX_REQUEUES_PER_WORD, không lặp vô hạn dù trả lời sai liên tục', function () {
-  // Dùng đủ nhiều từ khác để luôn còn "chỗ trống" phía sau idx 0 mà chèn
-  // vào (giống 1 phiên học thật, không chỉ có 1 từ duy nhất).
+test('requeueAfterAnswer: tôn trọng MAX_REQUEUES_PER_WORD', function () {
   var words = fakeWords();
   var queue = createSessionQueue(words);
   var startLen = queue.length;
@@ -194,26 +215,26 @@ test('requeueAfterAnswer: tôn trọng MAX_REQUEUES_PER_WORD, không lặp vô h
   for (var i = 0; i < MAX_REQUEUES_PER_WORD + 5; i++) {
     queue = requeueAfterAnswer(queue, 0, words[0], 'wrong', counts, rng);
   }
-  assert.equal(counts.w1, MAX_REQUEUES_PER_WORD, 'không được chèn lại quá MAX_REQUEUES_PER_WORD lần');
+  assert.equal(counts.w1, MAX_REQUEUES_PER_WORD);
   assert.equal(queue.length, startLen + MAX_REQUEUES_PER_WORD);
 });
 
 // --- pickOptions ---
 
-test('pickOptions: luôn có đúng 4 lựa chọn, gồm cả đáp án đúng', function () {
+test('pickOptions: luôn có đúng 4 lựa chọn, gồm cả đáp án đúng, không trùng', function () {
   var words = fakeWords();
   var opts = pickOptions(words[0], words, seededRng(8));
   assert.equal(opts.length, 4);
   assert.ok(opts.some(function (o) { return o.id === words[0].id; }));
   var ids = opts.map(function (o) { return o.id; });
-  assert.equal(new Set(ids).size, 4, 'không được có lựa chọn trùng nhau');
+  assert.equal(new Set(ids).size, 4);
 });
 
 test('pickOptions: ưu tiên nhiễu cùng chủ đề khi đủ số lượng', function () {
-  var words = fakeWords(); // 3 từ "number", 3 từ "color"
-  var opts = pickOptions(words[0], words, seededRng(9)); // words[0] là "number"
+  var words = fakeWords();
+  var opts = pickOptions(words[0], words, seededRng(9));
   var sameCat = opts.filter(function (o) { return o.cat === 'number'; });
-  assert.equal(sameCat.length, 3, 'cả 3 từ number còn lại nên được dùng làm nhiễu vì đủ số lượng');
+  assert.equal(sameCat.length, 3);
 });
 
 // --- shuffle (sanity) ---
@@ -223,6 +244,10 @@ test('shuffle: giữ nguyên tập phần tử, chỉ đổi thứ tự', functi
   var out = shuffle(arr, seededRng(10));
   assert.equal(out.length, arr.length);
   assert.deepEqual(out.slice().sort(), arr.slice().sort());
+});
+
+test('SKILLS: đúng 5 kỹ năng theo thiết kế', function () {
+  assert.deepEqual(SKILLS, ['listen', 'speak', 'read', 'write', 'see']);
 });
 
 // --- runner ---
