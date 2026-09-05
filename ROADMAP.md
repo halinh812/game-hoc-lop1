@@ -299,15 +299,31 @@ xứng với việc chỉ đơn giản là "đổi ảnh 1 con vật". Chuyển 
 nội dung nữa.
 
 - `package.json` (mới — trước đó dự án không cần Node vì là web tĩnh
-  thuần) + `tools/admin-server.mjs`: server Express chạy local, phục vụ
-  2 trang trên cùng 1 cổng — `/index.html` (trò chơi, y hệt bản deploy)
-  và `/admin.html` (trang quản trị, MỚI). Chỉ chạy được trên máy có Node
-  cài `npm install` — không deploy `admin.html`/server này lên GitHub
-  Pages vì Pages là static hosting, không có chỗ chạy backend để ghi file.
-- `admin.html`: chọn 1 trong 5 bộ từ (Con vật/Màu sắc/Số đếm/Gia đình/
-  Trái cây) → chọn 1 từ có sẵn để thay ảnh/video, hoặc "➕ Thêm từ mới"
-  (tự gợi ý id từ chữ tiếng Anh, có thể sửa tay) → xem ảnh/video hiện có →
-  tải ảnh/video mới lên → bấm Lưu. Không cần biết code/JSON.
+  thuần) + `tools/admin-server.mjs`: server Express chạy local
+  (`npm install` rồi `npm start`), phục vụ `/index.html` (trò chơi, y hệt
+  bản deploy) kèm API `/api/*` để ghi file. Không deploy server này lên
+  GitHub Pages vì Pages là static hosting, không có chỗ chạy backend.
+- **Vị trí UI** (bản đầu tách hẳn 1 trang `/admin.html` riêng — đã bỏ):
+  người dùng phản hồi không rõ vào đâu để dùng và muốn thao tác ngay
+  trong Trang phụ huynh sẵn có thay vì nhớ thêm 1 địa chỉ riêng. Đã gộp
+  hẳn vào `renderParent()` trong `js/app.js`: mở "Dành cho phụ huynh" từ
+  màn hình chính, cuối trang tự thêm mục "🛠️ Thêm/sửa ảnh, video cho từ
+  vựng" — chọn 1 trong 5 bộ từ → chọn 1 từ có sẵn để thay ảnh/video, hoặc
+  "➕ Thêm từ mới" (tự gợi ý id từ chữ tiếng Anh, có thể sửa tay) → xem
+  ảnh/video hiện có → tải ảnh/video mới lên → bấm Lưu. Không cần biết
+  code/JSON, không cần nhớ URL riêng nào.
+  Mục này **tự phát hiện** bằng cách gọi thử `/api/packs` khi vào Trang
+  phụ huynh (`tryMountContentManager()`): gọi được (đang chạy qua
+  `npm start`) thì mới hiện ra; gọi lỗi/404 (mở file tĩnh, hoặc bản deploy
+  GitHub Pages công khai) thì im lặng bỏ qua, Trang phụ huynh hiện y hệt
+  như trước giờ, không lỗi gì hiển thị cho người xem công khai — đã kiểm
+  chứng bằng Playwright chạy qua server tĩnh thường (không có `/api/*`):
+  mục quản trị không xuất hiện, không có `pageerror` nào.
+  Sau khi lưu thành công, nạp lại content pack ngay (`loadContentPacks`)
+  để nếu quay lại chơi trong CÙNG phiên, từ/ảnh/video vừa thêm đã có thể
+  chơi được luôn — không cần tải lại trang (đã kiểm chứng: thêm video cho
+  "zebra" qua Trang phụ huynh, quay lại "Thế giới động vật" ngay, thấy
+  ô zebra hiện `<video>` mà không F5 lại trang).
 - Xử lý tự động khi lưu (API `POST /api/items`):
   - Ảnh: `sharp` co vừa tối đa 900px chiều dài nhất (giữ tỉ lệ, không
     phóng to ảnh nhỏ), xuất PNG, lưu vào `assets/<bộ từ>/<id>.png`.
@@ -328,8 +344,8 @@ nội dung nữa.
   `content/` và `assets/` (không bao giờ `git add -A`, tránh cuốn theo
   thay đổi code dở dang khác) rồi `commit` + `push` — đẩy thẳng nội dung
   mới lên GitHub Pages công khai, không cần mở terminal/nhờ ai.
-- Đã kiểm thử qua Playwright thao tác thật trên `admin.html` (không chỉ
-  gọi thẳng API): chọn từ có sẵn tự điền đúng dữ liệu, tải video qua ô
+- Đã kiểm thử qua Playwright thao tác thật trong Trang phụ huynh (không
+  chỉ gọi thẳng API): chọn từ có sẵn tự điền đúng dữ liệu, tải video qua ô
   chọn file thật rồi lưu thành công + xem trước video cập nhật ngay,
   thêm từ mới tự gợi ý id + lưu thành công + tự chọn lại đúng từ vừa
   thêm trong danh sách; cũng kiểm thử qua `curl` các trường hợp lỗi (id

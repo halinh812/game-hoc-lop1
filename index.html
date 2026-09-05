@@ -232,6 +232,36 @@
   }
   .emptystate{ text-align:center; color:#8B968E; font-size:.86rem; padding:40px 10px; line-height:1.6; }
 
+  /* Phần "Thêm/sửa ảnh, video" trong Trang phụ huynh — chỉ tự hiện ra khi
+     trang này đang được mở qua server quản trị local (npm start), vì lúc
+     đó mới có API /api/* để ghi file. Trên GitHub Pages (web tĩnh, không
+     server) phần này không hiện gì cả — xem tryMountContentManager() trong
+     js/app.js. */
+  .contentmgr{ margin-top:26px; padding-top:18px; border-top:1px solid #EAE5D5; }
+  .contentmgr h2{ font-family:'Baloo 2', sans-serif; font-size:1rem; font-weight:800; margin:0 0 4px; }
+  .contentmgr .hint{ font-size:.78rem; color:#6B7A70; margin:0 0 14px; line-height:1.5; }
+  .contentmgr label{ display:block; font-size:.75rem; font-weight:700; color:#6B7A70; margin:12px 0 4px; }
+  .contentmgr label:first-of-type{ margin-top:0; }
+  .contentmgr select, .contentmgr input[type=text]{
+    width:100%; padding:8px 10px; border:1px solid #EAE5D5; border-radius:8px; font-size:.88rem; background:#fff; color:#233A2A;
+  }
+  .contentmgr input[type=file]{ width:100%; font-size:.78rem; padding:5px 0; }
+  .contentmgr .row2{ display:flex; gap:10px; }
+  .contentmgr .row2 > div{ flex:1; }
+  .contentmgr .preview{ display:flex; gap:10px; margin-top:6px; flex-wrap:wrap; }
+  .contentmgr .preview img, .contentmgr .preview video{ width:64px; height:64px; object-fit:contain; background:#F4F1E6; border-radius:8px; border:1px solid #EAE5D5; }
+  .contentmgr .preview .empty{ font-size:.7rem; color:#8B968E; align-self:center; }
+  .contentmgr .badge{ display:inline-block; font-size:.68rem; background:#F4F1E6; color:#6B7A70; padding:2px 7px; border-radius:999px; margin-left:4px; }
+  .contentmgr button{ appearance:none; border:none; border-radius:9px; padding:10px 16px; font-size:.85rem; font-weight:700; cursor:pointer; margin-top:14px; display:block; }
+  .contentmgr button.savebtn{ color:#fff; background:#2f8f5b; }
+  .contentmgr button.savebtn:disabled{ background:#a9b8ac; }
+  .contentmgr button.pubbtn{ color:#233A2A; background:#EFEBDD; }
+  .contentmgr .msg{ margin-top:10px; padding:8px 10px; border-radius:8px; font-size:.78rem; white-space:pre-wrap; line-height:1.5; }
+  .contentmgr .msg.ok{ background:#E6F5EC; color:#1f6d43; }
+  .contentmgr .msg.err{ background:#FBECEB; color:#B24A43; }
+  .contentmgr .msg.info{ background:#EEF3FB; color:#33507a; }
+  .contentmgr pre.log{ background:#233A2A; color:#DCEFE0; font-size:.72rem; padding:10px; border-radius:8px; margin-top:10px; max-height:160px; overflow:auto; white-space:pre-wrap; }
+
   @media (prefers-reduced-motion: reduce){
     .sun-glow,.cloud,.blade,.owl-wing,.owl-blink,.soundbtn::after,.starburst svg,.fall,.starsrow svg{ animation:none !important; }
   }

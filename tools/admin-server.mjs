@@ -1,10 +1,11 @@
 // Server chạy LOCAL trên máy (không deploy lên GitHub Pages — Pages là
-// static hosting, không có chỗ để ghi file). Phục vụ 2 trang:
-//   http://localhost:5173/index.html  — trang trò chơi (y hệt bản deploy)
-//   http://localhost:5173/admin.html  — trang quản trị: upload ảnh/video
-//                                        cho từng từ, tự xử lý rồi ghi
-//                                        thẳng vào content/packs/*.json +
-//                                        assets/ — không cần sửa code.
+// static hosting, không có chỗ để ghi file). Phục vụ trang trò chơi
+// (index.html, y hệt bản deploy) + API /api/* để Trang phụ huynh trong
+// game tự phát hiện và hiện thêm phần "Thêm/sửa ảnh, video cho từ vựng"
+// (xem tryMountContentManager() trong js/app.js) — upload ảnh/video cho
+// từng từ, tự xử lý rồi ghi thẳng vào content/packs/*.json + assets/,
+// không cần sửa code. Mở trang tĩnh thường (không qua server này, ví dụ
+// bản deploy GitHub Pages) thì API không có, phần đó tự động không hiện.
 //
 // Chạy: npm install (1 lần đầu) rồi npm start.
 
@@ -270,6 +271,6 @@ app.post('/api/publish', async (req, res) => {
 app.listen(PORT, () => {
   console.log('');
   console.log('  Trò chơi:    http://localhost:' + PORT + '/index.html');
-  console.log('  Quản trị:    http://localhost:' + PORT + '/admin.html');
+  console.log('  (Vào "Dành cho phụ huynh" trong trang trên để thêm/sửa ảnh, video)');
   console.log('');
 });

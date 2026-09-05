@@ -477,7 +477,7 @@ function renderParent() {
     : '<div class="emptystate">Bé chưa chơi trò nào cả.<br>Số liệu sẽ hiện ra ở đây sau khi bé chơi nhé!</div>';
 
   root.innerHTML =
-    '<div class="parentpage">' +
+    '<div class="parentpage" id="parentPageRoot">' +
     '<div class="pheader">' +
     '<button id="backBtn" aria-label="Về trang bé">' + BACK_SVG + '</button>' +
     '<div><h1>Báo cáo học tập</h1><p class="psub">' + (profile ? profile.name : 'Bé') + ' — LV0 (chưa học) đến LV' + MAX_LEVEL + ' (đã nhớ rất lâu)</p></div>' +
@@ -488,6 +488,206 @@ function renderParent() {
   document.getElementById('backBtn').addEventListener('click', function () {
     state.screen = 'home'; render();
   });
+
+  tryMountContentManager();
+}
+
+// Phần "Thêm/sửa ảnh, video" chỉ tự xuất hiện trong Trang phụ huynh khi
+// trang đang chạy qua server quản trị local (npm start — xem
+// tools/admin-server.mjs), vì lúc đó mới có API /api/* để ghi file. Trên
+// bản deploy tĩnh (GitHub Pages) fetch này luôn lỗi/404 nên không hiện gì
+// thêm — không ảnh hưởng gì tới người xem trang công khai.
+var cmState = { category: null };
+
+async function tryMountContentManager() {
+  var packs;
+  try {
+    var res = await fetch('/api/packs');
+    if (!res.ok) return;
+    packs = await res.json();
+    if (!packs || !packs.length) return;
+  } catch (e) { return; }
+
+  var container = document.getElementById('parentPageRoot');
+  if (!container) return;
+  cmState.category = packs[0].category;
+
+  var catOptions = packs.map(function (p) {
+    return '<option value="' + p.category + '">' + (p.icon || '') + ' ' + p.label + '</option>';
+  }).join('');
+
+  container.insertAdjacentHTML('beforeend',
+    '<div class="contentmgr" id="cmSection">' +
+    '<h2>🛠️ Thêm / sửa ảnh, video cho từ vựng</h2>' +
+    '<p class="hint">Chọn 1 từ có sẵn để thay ảnh/video, hoặc "➕ Thêm từ mới". Ảnh sẽ tự co nhỏ, video sẽ tự nén — không cần chỉnh gì trước khi tải lên.</p>' +
+    '<label for="cmCategory">Bộ từ</label>' +
+    '<select id="cmCategory">' + catOptions + '</select>' +
+    '<label for="cmItem">Từ <span id="cmItemCount" class="badge"></span></label>' +
+    '<select id="cmItem"></select>' +
+    '<div id="cmIdRow" style="display:none;">' +
+    '<label for="cmId">Mã từ (id) — chữ thường, không dấu, không khoảng trắng</label>' +
+    '<input type="text" id="cmId" placeholder="vd: red_panda">' +
+    '</div>' +
+    '<div class="row2">' +
+    '<div><label for="cmEn">Tiếng Anh</label><input type="text" id="cmEn" placeholder="vd: red panda"></div>' +
+    '<div><label for="cmVi">Tiếng Việt</label><input type="text" id="cmVi" placeholder="vd: gấu trúc đỏ"></div>' +
+    '</div>' +
+    '<label for="cmDifficulty">Độ khó</label>' +
+    '<select id="cmDifficulty"><option value="1">1 — Dễ</option><option value="2">2 — Khó hơn</option></select>' +
+    '<label>Hiện có</label>' +
+    '<div class="preview" id="cmPreview"></div>' +
+    '<label for="cmImage">Ảnh mới (tuỳ chọn)</label>' +
+    '<input type="file" id="cmImage" accept="image/*">' +
+    '<label for="cmVideo">Video mới (tuỳ chọn)</label>' +
+    '<input type="file" id="cmVideo" accept="video/*">' +
+    '<button class="savebtn" id="cmSaveBtn">💾 Lưu</button>' +
+    '<div id="cmSaveMsg"></div>' +
+    '<button class="pubbtn" id="cmPublishBtn">🚀 Xuất bản lên GitHub</button>' +
+    '<pre class="log" id="cmPublishLog" style="display:none;"></pre>' +
+    '</div>'
+  );
+
+  document.getElementById('cmCategory').addEventListener('change', function () {
+    cmState.category = this.value;
+    cmLoadItems();
+  });
+  document.getElementById('cmItem').addEventListener('change', cmApplySelectedItem);
+  document.getElementById('cmEn').addEventListener('input', function () {
+    var idInput = document.getElementById('cmId');
+    var itemSelect = document.getElementById('cmItem');
+    if (itemSelect.value === CM_NEW_VALUE && !idInput.dataset.touched) {
+      idInput.value = cmSlugify(this.value);
+    }
+  });
+  document.getElementById('cmId').addEventListener('input', function () { this.dataset.touched = '1'; });
+  document.getElementById('cmSaveBtn').addEventListener('click', cmSave);
+  document.getElementById('cmPublishBtn').addEventListener('click', cmPublish);
+
+  await cmLoadItems();
+}
+
+var CM_NEW_VALUE = '__new__';
+var cmItems = [];
+
+function cmSlugify(s) {
+  return (s || '').toLowerCase().trim()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+async function cmLoadItems() {
+  cmItems = await fetch('/api/packs/' + cmState.category + '/items').then(function (r) { return r.json(); });
+  document.getElementById('cmItemCount').textContent = cmItems.length + ' từ';
+  var options = ['<option value="' + CM_NEW_VALUE + '">➕ Thêm từ mới</option>']
+    .concat(cmItems.map(function (it) { return '<option value="' + it.id + '">' + it.vi + ' (' + it.en + ')</option>'; }));
+  document.getElementById('cmItem').innerHTML = options.join('');
+  cmApplySelectedItem();
+}
+
+function cmApplySelectedItem() {
+  var itemSelect = document.getElementById('cmItem');
+  var idRow = document.getElementById('cmIdRow');
+  var idInput = document.getElementById('cmId');
+  var enInput = document.getElementById('cmEn');
+  var viInput = document.getElementById('cmVi');
+  var difficultySelect = document.getElementById('cmDifficulty');
+
+  if (itemSelect.value === CM_NEW_VALUE) {
+    idRow.style.display = '';
+    idInput.value = '';
+    idInput.dataset.touched = '';
+    enInput.value = '';
+    viInput.value = '';
+    difficultySelect.value = '1';
+    cmRenderPreview(null);
+    return;
+  }
+  idRow.style.display = 'none';
+  var item = cmItems.find(function (it) { return it.id === itemSelect.value; });
+  if (!item) return;
+  enInput.value = item.en;
+  viInput.value = item.vi;
+  difficultySelect.value = String(item.difficulty || 1);
+  cmRenderPreview(item);
+}
+
+function cmRenderPreview(item) {
+  var el = document.getElementById('cmPreview');
+  if (!item || (!item.image && !item.video)) {
+    el.innerHTML = '<span class="empty">Chưa có ảnh/video</span>';
+    return;
+  }
+  var html = '';
+  if (item.image) html += '<img src="/' + item.image + '?t=' + Date.now() + '" alt="">';
+  if (item.video) html += '<video src="/' + item.video + '?t=' + Date.now() + '" muted loop autoplay playsinline></video>';
+  el.innerHTML = html;
+}
+
+function cmShowMsg(text, type) {
+  var el = document.getElementById('cmSaveMsg');
+  el.textContent = text;
+  el.className = 'msg ' + type;
+}
+
+async function cmSave() {
+  var itemSelect = document.getElementById('cmItem');
+  var isNew = itemSelect.value === CM_NEW_VALUE;
+  var id = isNew ? document.getElementById('cmId').value.trim() : itemSelect.value;
+  if (!id) { cmShowMsg('Cần nhập mã từ (id).', 'err'); return; }
+
+  var form = new FormData();
+  form.set('category', cmState.category);
+  form.set('id', id);
+  form.set('text_en', document.getElementById('cmEn').value.trim());
+  form.set('text_vi', document.getElementById('cmVi').value.trim());
+  form.set('difficulty', document.getElementById('cmDifficulty').value);
+  var imageFile = document.getElementById('cmImage').files[0];
+  var videoFile = document.getElementById('cmVideo').files[0];
+  if (imageFile) form.set('image', imageFile);
+  if (videoFile) form.set('video', videoFile);
+
+  var saveBtn = document.getElementById('cmSaveBtn');
+  saveBtn.disabled = true;
+  cmShowMsg('Đang xử lý và lưu...', 'info');
+  try {
+    var res = await fetch('/api/items', { method: 'POST', body: form });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Lỗi không rõ');
+    var parts = [(isNew ? 'Đã thêm từ mới: ' : 'Đã cập nhật: ') + id];
+    if (data.warnings && data.warnings.length) parts = parts.concat(data.warnings);
+    cmShowMsg(parts.join('\n'), 'ok');
+    document.getElementById('cmImage').value = '';
+    document.getElementById('cmVideo').value = '';
+    await cmLoadItems();
+    document.getElementById('cmItem').value = id;
+    cmApplySelectedItem();
+
+    // Nạp lại toàn bộ content pack để bé chơi ngay được từ/ảnh vừa thêm
+    // trong cùng phiên, không cần tải lại trang.
+    var result = await loadContentPacks(CONTENT_PACKS);
+    if (result.words.length) WORDS = result.words;
+  } catch (e) {
+    cmShowMsg('Lỗi: ' + e.message, 'err');
+  } finally {
+    saveBtn.disabled = false;
+  }
+}
+
+async function cmPublish() {
+  var btn = document.getElementById('cmPublishBtn');
+  var log = document.getElementById('cmPublishLog');
+  btn.disabled = true;
+  log.style.display = 'block';
+  log.textContent = 'Đang xuất bản...';
+  try {
+    var res = await fetch('/api/publish', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    var data = await res.json();
+    log.textContent = data.log || (data.error || 'Xong.');
+  } catch (e) {
+    log.textContent = 'Lỗi: ' + e.message;
+  } finally {
+    btn.disabled = false;
+  }
 }
 
 async function boot() {

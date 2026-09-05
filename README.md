@@ -6,9 +6,11 @@ cách mở `index.html`, hoặc qua bản đã deploy trên GitHub Pages.
 
 ## Thêm/sửa ảnh & video cho từ vựng — chạy trên máy (không cần nhờ Claude)
 
-Có 1 trang quản trị riêng chạy LOCAL trên máy, cho phép tự upload ảnh/video
-cho từng từ (con vật, màu sắc, số đếm...) mà không cần sửa code hay nhờ ai
-— công cụ tự co nhỏ ảnh, tự nén video, tự ghi vào đúng file.
+Chạy trang trò chơi trên máy bằng server local đi kèm, phần **Trang dành
+cho phụ huynh** trong game sẽ tự hiện thêm mục "Thêm/sửa ảnh, video cho từ
+vựng" — upload ảnh/video mới cho bất kỳ từ nào (con vật, màu sắc, số
+đếm...), không cần sửa code hay nhờ ai. Công cụ tự co nhỏ ảnh, tự nén
+video, tự ghi vào đúng file.
 
 **Cài 1 lần đầu tiên** (cần máy đã cài [Node.js](https://nodejs.org), bản 18 trở lên):
 
@@ -22,14 +24,14 @@ npm install
 npm start
 ```
 
-Rồi mở 2 trang trên trình duyệt:
-- `http://localhost:5173/index.html` — trang trò chơi (test luôn thay đổi)
-- `http://localhost:5173/admin.html` — trang quản trị: chọn 1 từ, tải ảnh/
-  video mới lên, bấm Lưu — xong ngay, không cần code.
+Rồi mở `http://localhost:5173/index.html` trên trình duyệt — chơi/test
+bình thường, vào **"Dành cho phụ huynh"** ở trang chủ sẽ thấy thêm mục
+tải ảnh/video lên (mục này CHỈ hiện khi mở qua `npm start`, không hiện
+trên bản deploy GitHub Pages vì đó là web tĩnh, không có chỗ ghi file).
 
-Sau khi hài lòng, bấm nút **"🚀 Xuất bản"** ngay trong trang quản trị để đẩy
-thay đổi lên GitHub — trang web công khai (GitHub Pages) sẽ cập nhật theo
-(cần máy đã đăng nhập git từ trước; nếu đây là lần đầu dùng git trên máy
-này, nên thử `git push` bằng tay 1 lần trong terminal cho chắc).
+Sau khi hài lòng, bấm nút **"🚀 Xuất bản lên GitHub"** ngay trong Trang phụ
+huynh để đẩy thay đổi lên GitHub — trang web công khai (GitHub Pages) sẽ
+cập nhật theo (cần máy đã đăng nhập git từ trước; nếu đây là lần đầu dùng
+git trên máy này, nên thử `git push` bằng tay 1 lần trong terminal cho chắc).
 
 Chi tiết kỹ thuật/lịch sử phát triển: xem `ROADMAP.md`.
