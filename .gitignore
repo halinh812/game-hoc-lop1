@@ -14,3 +14,6 @@ desktop.ini
 # Python
 __pycache__/
 *.pyc
+
+# Node (công cụ quản trị nội dung chạy local — xem tools/admin-server.mjs)
+node_modules/

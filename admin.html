@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản trị nội dung — Vở học Tiếng Anh của Bòng</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{
+    --ink:#233a2a; --ink-soft:#5b6b60; --line:#dfe6df; --bg:#f3f6f2; --card:#ffffff;
+    --accent:#2f8f5b; --accent-dark:#1f6d43; --warn:#b24a43; --chip:#eef4ee;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; font-family:'Segoe UI',system-ui,-apple-system,Arial,sans-serif; background:var(--bg); color:var(--ink); }
+  header{ background:var(--accent-dark); color:#fff; padding:18px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+  header h1{ margin:0; font-size:1.15rem; }
+  header p{ margin:2px 0 0; font-size:.8rem; color:#d9ecdf; }
+  header a{ color:#fff; background:rgba(255,255,255,.18); padding:8px 14px; border-radius:10px; text-decoration:none; font-size:.85rem; font-weight:600; }
+  header a:hover{ background:rgba(255,255,255,.3); }
+  main{ max-width:640px; margin:24px auto; padding:0 16px 60px; display:flex; flex-direction:column; gap:20px; }
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; box-shadow:0 2px 6px rgba(30,50,35,.06); }
+  .card h2{ margin:0 0 4px; font-size:1.05rem; }
+  .card .hint{ margin:0 0 16px; font-size:.82rem; color:var(--ink-soft); line-height:1.5; }
+  label{ display:block; font-size:.82rem; font-weight:600; margin:14px 0 5px; color:var(--ink-soft); }
+  label:first-of-type{ margin-top:0; }
+  select, input[type=text], input[type=number]{
+    width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px; font-size:.95rem; background:#fff; color:var(--ink);
+  }
+  input[type=file]{ width:100%; font-size:.85rem; padding:6px 0; }
+  .row{ display:flex; gap:12px; }
+  .row > div{ flex:1; }
+  .preview{ display:flex; gap:12px; margin-top:8px; flex-wrap:wrap; }
+  .preview figure{ margin:0; text-align:center; }
+  .preview img, .preview video{ width:110px; height:110px; object-fit:contain; background:var(--chip); border-radius:10px; border:1px solid var(--line); }
+  .preview figcaption{ font-size:.72rem; color:var(--ink-soft); margin-top:4px; }
+  .preview .empty{ width:110px; height:110px; display:flex; align-items:center; justify-content:center; background:var(--chip); border-radius:10px; border:1px dashed var(--line); color:var(--ink-soft); font-size:.75rem; text-align:center; padding:6px; }
+  button{ appearance:none; border:none; border-radius:10px; padding:11px 18px; font-size:.92rem; font-weight:700; cursor:pointer; color:#fff; background:var(--accent); margin-top:18px; }
+  button:hover{ background:var(--accent-dark); }
+  button:disabled{ background:#a9b8ac; cursor:default; }
+  button.secondary{ background:#3a5a49; }
+  button.secondary:hover{ background:#2c4738; }
+  .msg{ margin-top:12px; padding:10px 12px; border-radius:8px; font-size:.85rem; white-space:pre-wrap; line-height:1.5; }
+  .msg.ok{ background:#e6f5ec; color:var(--accent-dark); border:1px solid #bfe3cc; }
+  .msg.err{ background:#fbeceb; color:var(--warn); border:1px solid #f0cac7; }
+  .msg.info{ background:#eef3fb; color:#33507a; border:1px solid #cddcf3; }
+  pre.log{ background:#1c2b21; color:#d7ead9; padding:12px; border-radius:8px; font-size:.78rem; overflow-x:auto; max-height:220px; white-space:pre-wrap; margin-top:12px; }
+  .field-id{ font-family:monospace; background:var(--chip); padding:9px 10px; border-radius:8px; font-size:.9rem; color:var(--ink-soft); }
+  .badge{ display:inline-block; font-size:.72rem; background:var(--chip); color:var(--ink-soft); padding:2px 8px; border-radius:999px; margin-left:6px; }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>🛠️ Quản trị nội dung</h1>
+    <p>Vở học Tiếng Anh của Bòng — chạy trên máy, không tốn gì để thêm ảnh/video</p>
+  </div>
+  <a href="/index.html" target="_blank" rel="noopener">🎮 Mở trang trò chơi</a>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Thêm / sửa ảnh &amp; video cho 1 từ</h2>
+    <p class="hint">Chọn bộ từ và 1 từ có sẵn để thay ảnh/video, hoặc chọn "➕ Thêm từ mới" để thêm hẳn 1 từ vựng mới. Ảnh sẽ tự co nhỏ vừa phải, video sẽ tự nén nhẹ hơn — không cần chỉnh gì trước khi tải lên.</p>
+
+    <label for="categorySelect">Bộ từ</label>
+    <select id="categorySelect"></select>
+
+    <label for="itemSelect">Từ <span id="itemCountBadge" class="badge"></span></label>
+    <select id="itemSelect"></select>
+
+    <div id="idRow" style="display:none;">
+      <label for="idInput">Mã từ (id) — chỉ chữ thường/số, không dấu, không khoảng trắng</label>
+      <input type="text" id="idInput" placeholder="vd: red_panda">
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="enInput">Tiếng Anh</label>
+        <input type="text" id="enInput" placeholder="vd: red panda">
+      </div>
+      <div>
+        <label for="viInput">Tiếng Việt</label>
+        <input type="text" id="viInput" placeholder="vd: gấu trúc đỏ">
+      </div>
+    </div>
+
+    <label for="difficultySelect">Độ khó</label>
+    <select id="difficultySelect">
+      <option value="1">1 — Dễ</option>
+      <option value="2">2 — Khó hơn</option>
+    </select>
+
+    <label>Hiện có</label>
+    <div class="preview" id="currentPreview"></div>
+
+    <label for="imageInput">Ảnh mới (tuỳ chọn — để trống nếu không đổi)</label>
+    <input type="file" id="imageInput" accept="image/*">
+
+    <label for="videoInput">Video mới (tuỳ chọn — để trống nếu không đổi)</label>
+    <input type="file" id="videoInput" accept="video/*">
+
+    <button id="saveBtn">💾 Lưu</button>
+    <div id="saveMsg"></div>
+  </section>
+
+  <section class="card">
+    <h2>Xuất bản lên GitHub Pages</h2>
+    <p class="hint">Đẩy các thay đổi trong <code>content/</code> và <code>assets/</code> lên GitHub để trang web công khai cập nhật theo. Cần máy đã đăng nhập git từ trước (nếu đây là lần đầu, mở terminal chạy <code>git push</code> thử 1 lần cho chắc).</p>
+    <button class="secondary" id="publishBtn">🚀 Xuất bản</button>
+    <pre class="log" id="publishLog" style="display:none;"></pre>
+  </section>
+</main>
+
+<script>
+const categorySelect = document.getElementById('categorySelect');
+const itemSelect = document.getElementById('itemSelect');
+const itemCountBadge = document.getElementById('itemCountBadge');
+const idRow = document.getElementById('idRow');
+const idInput = document.getElementById('idInput');
+const enInput = document.getElementById('enInput');
+const viInput = document.getElementById('viInput');
+const difficultySelect = document.getElementById('difficultySelect');
+const currentPreview = document.getElementById('currentPreview');
+const imageInput = document.getElementById('imageInput');
+const videoInput = document.getElementById('videoInput');
+const saveBtn = document.getElementById('saveBtn');
+const saveMsg = document.getElementById('saveMsg');
+const publishBtn = document.getElementById('publishBtn');
+const publishLog = document.getElementById('publishLog');
+
+const NEW_ITEM_VALUE = '__new__';
+let currentItems = [];
+
+function slugify(s) {
+  return (s || '').toLowerCase().trim()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+}
+
+function showMsg(el, text, type) {
+  el.textContent = text;
+  el.className = 'msg ' + type;
+}
+
+function renderPreview(item) {
+  currentPreview.innerHTML = '';
+  if (!item || (!item.image && !item.video)) {
+    currentPreview.innerHTML = '<div class="empty">Chưa có ảnh/video</div>';
+    return;
+  }
+  if (item.image) {
+    const fig = document.createElement('figure');
+    fig.innerHTML = `<img src="/${item.image}?t=${Date.now()}" alt=""><figcaption>Ảnh</figcaption>`;
+    currentPreview.appendChild(fig);
+  }
+  if (item.video) {
+    const fig = document.createElement('figure');
+    fig.innerHTML = `<video src="/${item.video}?t=${Date.now()}" muted loop autoplay playsinline></video><figcaption>Video</figcaption>`;
+    currentPreview.appendChild(fig);
+  }
+}
+
+function applySelectedItem() {
+  const val = itemSelect.value;
+  if (val === NEW_ITEM_VALUE) {
+    idRow.style.display = '';
+    idInput.value = '';
+    idInput.readOnly = false;
+    enInput.value = '';
+    viInput.value = '';
+    difficultySelect.value = '1';
+    renderPreview(null);
+    return;
+  }
+  const item = currentItems.find(it => it.id === val);
+  idRow.style.display = 'none';
+  if (!item) return;
+  enInput.value = item.en;
+  viInput.value = item.vi;
+  difficultySelect.value = String(item.difficulty || 1);
+  renderPreview(item);
+}
+
+async function loadCategories() {
+  const packs = await fetch('/api/packs').then(r => r.json());
+  categorySelect.innerHTML = packs.map(p => `<option value="${p.category}">${p.icon || ''} ${p.label}</option>`).join('');
+  await loadItems();
+}
+
+async function loadItems() {
+  const category = categorySelect.value;
+  currentItems = await fetch(`/api/packs/${category}/items`).then(r => r.json());
+  itemCountBadge.textContent = currentItems.length + ' từ';
+  const options = ['<option value="' + NEW_ITEM_VALUE + '">➕ Thêm từ mới</option>']
+    .concat(currentItems.map(it => `<option value="${it.id}">${it.vi} (${it.en})</option>`));
+  itemSelect.innerHTML = options.join('');
+  applySelectedItem();
+}
+
+categorySelect.addEventListener('change', loadItems);
+itemSelect.addEventListener('change', applySelectedItem);
+enInput.addEventListener('input', () => {
+  if (itemSelect.value === NEW_ITEM_VALUE && !idInput.dataset.touched) {
+    idInput.value = slugify(enInput.value);
+  }
+});
+idInput.addEventListener('input', () => { idInput.dataset.touched = '1'; });
+
+saveBtn.addEventListener('click', async () => {
+  const isNew = itemSelect.value === NEW_ITEM_VALUE;
+  const id = isNew ? idInput.value.trim() : itemSelect.value;
+  if (!id) { showMsg(saveMsg, 'Cần nhập mã từ (id).', 'err'); return; }
+
+  const form = new FormData();
+  form.set('category', categorySelect.value);
+  form.set('id', id);
+  form.set('text_en', enInput.value.trim());
+  form.set('text_vi', viInput.value.trim());
+  form.set('difficulty', difficultySelect.value);
+  if (imageInput.files[0]) form.set('image', imageInput.files[0]);
+  if (videoInput.files[0]) form.set('video', videoInput.files[0]);
+
+  saveBtn.disabled = true;
+  showMsg(saveMsg, 'Đang xử lý và lưu...', 'info');
+  try {
+    const res = await fetch('/api/items', { method: 'POST', body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Lỗi không rõ');
+    const parts = [(isNew ? 'Đã thêm từ mới: ' : 'Đã cập nhật: ') + id];
+    if (data.warnings && data.warnings.length) parts.push(...data.warnings);
+    showMsg(saveMsg, parts.join('\n'), 'ok');
+    imageInput.value = '';
+    videoInput.value = '';
+    await loadItems();
+    itemSelect.value = id;
+    applySelectedItem();
+  } catch (e) {
+    showMsg(saveMsg, 'Lỗi: ' + e.message, 'err');
+  } finally {
+    saveBtn.disabled = false;
+  }
+});
+
+publishBtn.addEventListener('click', async () => {
+  publishBtn.disabled = true;
+  publishLog.style.display = 'block';
+  publishLog.textContent = 'Đang xuất bản...';
+  try {
+    const res = await fetch('/api/publish', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const data = await res.json();
+    publishLog.textContent = data.log || (data.error || 'Xong.');
+  } catch (e) {
+    publishLog.textContent = 'Lỗi: ' + e.message;
+  } finally {
+    publishBtn.disabled = false;
+  }
+});
+
+loadCategories();
+</script>
+</body>
+</html>
