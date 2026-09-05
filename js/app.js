@@ -33,20 +33,6 @@ var CONTENT_PACKS = [
 
 var FOREST_WIN_TARGET = 10;
 
-// Kích thước hiển thị riêng từng con (px, theo chiều rộng ảnh) — ước lượng
-// theo tỉ lệ thật ngoài đời (voi to nhất, hươu cao cổ tuy ảnh hẹp nhưng rất
-// cao, cá sấu dài và dẹt sát đất, khỉ nhỏ nhất) chứ không dùng chung 1 cỡ.
-// Phóng to tổng thể ~1.7-1.8 lần so với bản gốc (60px) để bé dễ chạm hơn.
-// Hạ xuống so với 2 lần chỉnh trước (từng thử ~3 lần rồi ~2.2 lần) vì mỗi
-// con giờ có 1 dải ngang riêng cố định (không chạm nhau) — nếu để to như
-// trước, khung cảnh phải rất cao mới đủ chỗ chia dải, khiến màn hình thấp
-// (điện thoại nhỏ) phải cuộn mới thấy hết cả 4 con. Cỡ này vẫn to hơn hẳn
-// bản gốc và vừa đủ chỗ để không cần cuộn trên hầu hết điện thoại.
-var CRITTER_WIDTH_PX = {
-  elephant: 132, giraffe: 80, bear: 116, tiger: 112, lion: 108,
-  zebra: 104, crocodile: 136, kangaroo: 100, panda: 92, monkey: 80
-};
-
 var GAMES = [
   { id: 'forest', title: 'Thế giới động vật', emoji: '🦁', skill: 'listen', available: true },
   { id: 'g2', title: 'Sắp ra mắt', emoji: '🔒', available: false },
@@ -311,16 +297,12 @@ function renderForest() {
     starsRow += starMarkup.replace('<svg ', '<svg class="' + (lit ? 'lit' : '') + '" ');
   }
 
-  // 4 hàng cố định, mỗi hàng 1 con đi ngang qua lại suốt — chỉ đúng 1 hàng
-  // (hàng vừa được hỏi) bị đổi con sau mỗi câu, 3 hàng kia giữ nguyên.
-  var DURATIONS = [9, 11, 8.5, 10];
-  var lanes = state.slots.map(function (w, i) {
-    var dur = DURATIONS[i % DURATIONS.length];
-    var delay = (i * 1.4).toFixed(1);
-    var width = CRITTER_WIDTH_PX[w.id] || 100;
-    return '<div class="lane" data-idx="' + i + '">' +
-      '<div class="lane__mover" style="width:' + width + 'px; animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">' +
-      '<img src="' + w.image + '" alt="' + w.en + '"></div></div>';
+  // Kiểu cổ điển: lưới 2x2 ô ảnh tĩnh, bấm chọn — không đi lại/animation.
+  // Chỉ đúng 1 ô (ô vừa được hỏi) bị đổi con sau mỗi câu, 3 ô kia giữ
+  // nguyên. object-fit:contain (CSS) tự co ảnh vừa khít ô, giữ đúng tỉ lệ
+  // khung hình gốc của từng con (không cần tính px riêng như trước).
+  var tiles = state.slots.map(function (w, i) {
+    return '<div class="optiontile" data-idx="' + i + '"><img src="' + w.image + '" alt="' + w.en + '"></div>';
   }).join('');
 
   var targetWord = state.slots[state.targetIdx];
@@ -334,7 +316,7 @@ function renderForest() {
     '</div>' +
     '<div class="ribbon">🦁 Bắt con: <b>' + targetWord.en + '</b></div>' +
     '<button class="soundbtn" id="speakBtn" aria-label="Nghe lại">' + SPEAK_SVG + '</button>' +
-    '<div class="lane-list" id="laneList">' + lanes + '</div>' +
+    '<div class="optiongrid" id="optionGrid">' + tiles + '</div>' +
     '<div class="glasscard" id="feedbackBubble" style="display:none;"><p id="feedbackText" style="margin:0;font-weight:600;font-size:.9rem;"></p></div>' +
     '</div>';
 
@@ -345,10 +327,10 @@ function renderForest() {
   document.getElementById('speakBtn').addEventListener('click', sayIt);
   sayIt();
 
-  var laneList = document.getElementById('laneList');
-  Array.prototype.forEach.call(laneList.querySelectorAll('.lane'), function (laneEl) {
-    laneEl.addEventListener('click', function () {
-      handleForestAnswer(parseInt(laneEl.getAttribute('data-idx'), 10));
+  var optionGrid = document.getElementById('optionGrid');
+  Array.prototype.forEach.call(optionGrid.querySelectorAll('.optiontile'), function (tileEl) {
+    tileEl.addEventListener('click', function () {
+      handleForestAnswer(parseInt(tileEl.getAttribute('data-idx'), 10));
     });
   });
 }
@@ -357,7 +339,7 @@ function handleForestAnswer(idx) {
   if (state.answered) return;
   state.answered = true;
 
-  var laneEls = document.getElementById('laneList').querySelectorAll('.lane');
+  var tileEls = document.getElementById('optionGrid').querySelectorAll('.optiontile');
   var targetWord = state.slots[state.targetIdx];
   var isCorrect = idx === state.targetIdx;
   var responseTimeMs = Date.now() - state.cardShownAt;
@@ -372,7 +354,7 @@ function handleForestAnswer(idx) {
     saveProgress(store);
     state.correct++;
     speak(targetWord.en);
-    laneEls[idx].classList.add('correct');
+    tileEls[idx].classList.add('correct');
     text.innerHTML = '<b>Bắt được rồi!</b> 🎉 ' + targetWord.en;
 
     var isDone = state.correct >= FOREST_WIN_TARGET;
@@ -383,8 +365,8 @@ function handleForestAnswer(idx) {
   } else {
     applyAnswer(store.words, targetWord.id, 'listen', 'wrong');
     saveProgress(store);
-    laneEls[idx].classList.add('wrong');
-    laneEls[state.targetIdx].classList.add('correct');
+    tileEls[idx].classList.add('wrong');
+    tileEls[state.targetIdx].classList.add('correct');
     speak(targetWord.en);
     text.innerHTML = 'Chưa đúng. Đây là <b>' + targetWord.en + '</b>';
     setTimeout(function () { advanceForestRound(state.targetIdx); }, 3000);
