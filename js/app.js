@@ -287,22 +287,39 @@ function startForestGame() {
   render();
 }
 
-function renderForest() {
-  state.cardShownAt = Date.now();
+// Ảnh tĩnh hoặc video lặp (nếu từ có "video") cho 1 ô — object-fit:contain
+// (CSS) tự co vừa ô, giữ đúng tỉ lệ khung hình gốc.
+function forestTileMedia(w) {
+  return w.video
+    ? '<video src="' + w.video + '" autoplay loop muted playsinline poster="' + w.image + '"></video>'
+    : '<img src="' + w.image + '" alt="' + w.en + '">';
+}
 
-  var starsRow = '';
+function forestStarsRow() {
+  var row = '';
   for (var i = 0; i < FOREST_WIN_TARGET; i++) {
     var lit = i < state.correct;
     var starMarkup = starIcon(lit ? '#FFD25A' : 'rgba(255,255,255,.55)', 16, 'rgba(35,58,42,.35)');
-    starsRow += starMarkup.replace('<svg ', '<svg class="' + (lit ? 'lit' : '') + '" ');
+    row += starMarkup.replace('<svg ', '<svg class="' + (lit ? 'lit' : '') + '" ');
   }
+  return row;
+}
 
-  // Kiểu cổ điển: lưới 2x2 ô ảnh tĩnh, bấm chọn — không đi lại/animation.
+function speakForestTarget() {
+  var w = state.slots[state.targetIdx];
+  speak('Catch the ' + w.en + '!');
+}
+
+function renderForest() {
+  state.cardShownAt = Date.now();
+
+  // Kiểu cổ điển: lưới 2x2 ô ảnh/video, bấm chọn — không đi lại/animation.
   // Chỉ đúng 1 ô (ô vừa được hỏi) bị đổi con sau mỗi câu, 3 ô kia giữ
-  // nguyên. object-fit:contain (CSS) tự co ảnh vừa khít ô, giữ đúng tỉ lệ
-  // khung hình gốc của từng con (không cần tính px riêng như trước).
+  // nguyên DOM (xem advanceForestRound) — quan trọng với ô có <video>: nếu
+  // dựng lại toàn bộ innerHTML mỗi câu, video của các ô KHÔNG đổi cũng bị
+  // tạo lại từ đầu và chạy lại từ giây 0, giật hình mỗi lượt.
   var tiles = state.slots.map(function (w, i) {
-    return '<div class="optiontile" data-idx="' + i + '"><img src="' + w.image + '" alt="' + w.en + '"></div>';
+    return '<div class="optiontile" data-idx="' + i + '">' + forestTileMedia(w) + '</div>';
   }).join('');
 
   var targetWord = state.slots[state.targetIdx];
@@ -311,10 +328,10 @@ function renderForest() {
     '<div class="content">' +
     '<div class="topbar">' +
     '<button class="iconbtn" id="homeBtn" aria-label="Về trang chủ">' + CLOSE_SVG + '</button>' +
-    '<div class="starsrow" style="margin:0;">' + starsRow + '</div>' +
+    '<div class="starsrow" id="forestStars" style="margin:0;">' + forestStarsRow() + '</div>' +
     '<span style="width:38px;"></span>' +
     '</div>' +
-    '<div class="ribbon">🦁 Bắt con: <b>' + targetWord.en + '</b></div>' +
+    '<div class="ribbon">🦁 Bắt con: <b id="targetWordEl">' + targetWord.en + '</b></div>' +
     '<button class="soundbtn" id="speakBtn" aria-label="Nghe lại">' + SPEAK_SVG + '</button>' +
     '<div class="optiongrid" id="optionGrid">' + tiles + '</div>' +
     '<div class="glasscard" id="feedbackBubble" style="display:none;"><p id="feedbackText" style="margin:0;font-weight:600;font-size:.9rem;"></p></div>' +
@@ -323,9 +340,8 @@ function renderForest() {
   document.getElementById('homeBtn').addEventListener('click', function () {
     state.screen = 'home'; render();
   });
-  var sayIt = function () { speak('Catch the ' + targetWord.en + '!'); };
-  document.getElementById('speakBtn').addEventListener('click', sayIt);
-  sayIt();
+  document.getElementById('speakBtn').addEventListener('click', speakForestTarget);
+  speakForestTarget();
 
   var optionGrid = document.getElementById('optionGrid');
   Array.prototype.forEach.call(optionGrid.querySelectorAll('.optiontile'), function (tileEl) {
@@ -374,12 +390,24 @@ function handleForestAnswer(idx) {
 }
 
 // Chỉ thay từ ở slot vừa được hỏi (replaceIdx) — 3 slot kia giữ nguyên con
-// đang hiển thị, không đổi.
+// đang hiển thị, không đổi. Cập nhật DOM tại chỗ (không gọi render() dựng
+// lại toàn màn) để 3 ô còn lại — kể cả ô đang phát <video> — không bị tạo
+// lại và chạy lại từ đầu mỗi câu.
 function advanceForestRound(replaceIdx) {
   state.slots[replaceIdx] = pickReplacementWord(replaceIdx);
   state.targetIdx = pickTargetIndex(state.slots);
   state.answered = false;
-  render();
+  state.cardShownAt = Date.now();
+
+  var tileEls = document.getElementById('optionGrid').querySelectorAll('.optiontile');
+  Array.prototype.forEach.call(tileEls, function (el) { el.classList.remove('wrong', 'correct'); });
+  tileEls[replaceIdx].innerHTML = forestTileMedia(state.slots[replaceIdx]);
+
+  document.getElementById('feedbackBubble').style.display = 'none';
+  document.getElementById('forestStars').innerHTML = forestStarsRow();
+  document.getElementById('targetWordEl').textContent = state.slots[state.targetIdx].en;
+
+  speakForestTarget();
 }
 
 function renderForestSummary() {

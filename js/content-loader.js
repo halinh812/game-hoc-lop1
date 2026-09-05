@@ -62,6 +62,9 @@ function flattenPack(pack) {
         vi: item.answer.text_vi,
         emoji: item.answer.emoji || null,
         image: item.answer.image || null,
+        // Video lặp (mp4) tuỳ chọn — khi có, UI ưu tiên hiển thị video động
+        // thay cho ảnh tĩnh "image" (dùng làm ảnh dự phòng nếu video lỗi).
+        video: item.answer.video || null,
         promptAudioText: item.prompt_audio_text || item.answer.text_en,
         difficulty: typeof item.difficulty === 'number' ? item.difficulty : 1,
         cat: pack.category,

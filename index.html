@@ -190,10 +190,10 @@
     transition:transform .1s ease, box-shadow .1s ease, background-color .2s ease, border-color .2s ease;
   }
   .optiontile:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(20,40,25,.14); }
-  .optiontile img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 6px 4px rgba(20,40,25,.3)); }
+  .optiontile img, .optiontile video{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 6px 4px rgba(20,40,25,.3)); border-radius:12px; }
   .optiontile.wrong{ background:rgba(178,74,67,.32); border-color:#B24A43; }
   .optiontile.correct{ background:rgba(47,143,91,.32); border-color:var(--success); }
-  .optiontile.correct img{ transform:scale(1.08); }
+  .optiontile.correct img, .optiontile.correct video{ transform:scale(1.08); }
 
   /* ---------- forest summary ---------- */
   .summary-mid{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; }
