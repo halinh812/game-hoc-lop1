@@ -5,7 +5,7 @@
   "category_label_vi": "Con vật",
   "category_icon": "🐾",
   "items": [
-    { "id": "tiger", "type": "vocab", "prompt_audio_text": "tiger", "answer": { "text_en": "tiger", "text_vi": "hổ", "image": "assets/animals/tiger.png" }, "difficulty": 1 },
+    { "id": "tiger", "type": "vocab", "prompt_audio_text": "tiger", "answer": { "text_en": "tiger", "text_vi": "hổ", "image": "assets/animals/tiger.png", "video": "assets/animals/tiger.mp4" }, "difficulty": 1 },
     { "id": "lion", "type": "vocab", "prompt_audio_text": "lion", "answer": { "text_en": "lion", "text_vi": "sư tử", "image": "assets/animals/lion.png" }, "difficulty": 1 },
     { "id": "elephant", "type": "vocab", "prompt_audio_text": "elephant", "answer": { "text_en": "elephant", "text_vi": "con voi", "image": "assets/animals/elephant.png" }, "difficulty": 1 },
     { "id": "giraffe", "type": "vocab", "prompt_audio_text": "giraffe", "answer": { "text_en": "giraffe", "text_vi": "hươu cao cổ", "image": "assets/animals/giraffe.png" }, "difficulty": 2 },

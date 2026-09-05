@@ -187,12 +187,41 @@ mini-game giờ phải khai báo rõ nó luyện kỹ năng nào.
       Playwright: so sánh toàn bộ 4 ô trước/sau mỗi câu ở cả nhánh đúng
       và nhánh sai, xác nhận đúng 3/4 không đổi trong mọi trường hợp.
 
-      Định hướng mở rộng sau này (chưa làm): khi có ảnh động cho từng con
-      (quay/tạo video ngắn lặp từ chính ảnh AI đã duyệt, hoặc GIF), chỉ
-      cần đổi `<img>` trong `.optiontile` thành `<video autoplay loop muted
-      playsinline>` hoặc trỏ `src` sang file `.gif`/`.webp` động — không
-      cần đổi lại HTML/CSS layout hay logic chọn đáp án, vì đó là cơ chế
-      hoàn toàn tách biệt (hiển thị) khỏi cách chấm điểm.
+      **Ảnh động (video lặp) — bắt đầu với con hổ:** thêm trường tuỳ chọn
+      `answer.video` trong content pack (giữ `answer.image` làm ảnh
+      "poster" hiển thị khi video chưa tải xong/không phát được); content
+      loader gắn thêm `video` vào từ vựng; `.optiontile` hiển thị
+      `<video autoplay loop muted playsinline poster="...">` thay cho
+      `<img>` khi từ đó có `video`; con nào chưa có video vẫn dùng `<img>`
+      như cũ (2 kiểu trộn lẫn tự nhiên trong cùng 1 lưới, không cần đổi gì
+      thêm). Đã kiểm thử: `canPlayType('video/mp4; codecs="avc1..."')` rỗng
+      trên Chromium headless của môi trường test (bản Chromium mã nguồn mở
+      không có codec H.264 — hạn chế MÔI TRƯỜNG TEST, không phải lỗi trang
+      web, vì mọi trình duyệt thật — Chrome/Safari/Edge/Firefox — đều hỗ
+      trợ H.264 sẵn) nên không tự phát được trong Playwright ở đây; đã xác
+      nhận thay vào đó: HTML render đúng thuộc tính, không có lỗi JS khi
+      video không phát được, và ảnh "poster" (tiger.png) hiện đẹp thay thế
+      — coi như suy giảm nhẹ nhàng (graceful degradation) nếu gặp trình
+      duyệt hiếm không hỗ trợ.
+
+      **Sửa kèm 1 lỗi phát sinh khi thêm video:** trước đó mỗi câu hỏi gọi
+      lại `render()` dựng lại toàn bộ `innerHTML` của màn chơi — với `<img>`
+      việc này vô hại (trình duyệt dùng cache tức thì), nhưng với `<video
+      autoplay loop>` thì bị HUỶ và TẠO LẠI từ đầu mỗi câu, khiến video
+      chạy lại từ giây 0 dù con đó không phải con vừa được hỏi. Đã sửa:
+      `advanceForestRound()` giờ chỉ cập nhật DOM tại chỗ (đổi `innerHTML`
+      của đúng 1 ô vừa trả lời, đổi chữ trong ribbon, đổi hàng sao, ẩn
+      bong bóng phản hồi) thay vì gọi `render()` toàn màn — 3 ô còn lại
+      (kể cả ô đang có `<video>`) giữ nguyên DOM, không bị chạy lại. Kiểm
+      chứng bằng Playwright: đánh dấu node video bằng `data-testMarker`,
+      chơi qua nhiều câu không liên quan đến ô đó, xác nhận node DOM và số
+      lần tải file `.mp4` không đổi (đều = 1) trong suốt quá trình.
+
+      Định hướng mở rộng tiếp (chưa làm): làm video cho 9 con còn lại theo
+      đúng cách trên, ưu tiên "ảnh → video" (AI video từ chính ảnh tĩnh đã
+      duyệt để giữ phong cách vẽ) hơn là tự vẽ sprite sheet nhiều khung hình
+      (ANIMAL_ART_PIPELINE.md đã ghi nhận AI khó giữ nhất quán nhân vật qua
+      nhiều khung liên tiếp).
 - [x] **Trang 3 — Trang phụ huynh:** giao diện cố tình KHÁC hẳn 2 trang kia
       (sạch, kiểu báo cáo, không phải thế giới game) — bảng LV theo từng
       kỹ năng (Nghe/Nói/Đọc/Viết/Nhìn) cho mỗi từ bé đã chơi
