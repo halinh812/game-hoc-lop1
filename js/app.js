@@ -36,6 +36,15 @@ var CONTENT_PACKS = [
 
 var FOREST_WIN_TARGET = 10;
 
+// Kích thước hiển thị riêng từng con (px, theo chiều rộng ảnh) — ước lượng
+// theo tỉ lệ thật ngoài đời (voi to nhất, hươu cao cổ tuy ảnh hẹp nhưng rất
+// cao, cá sấu dài và dẹt sát đất, khỉ nhỏ nhất) chứ không dùng chung 1 cỡ.
+// Phóng to tổng thể ~3-4 lần so với bản trước (60px) để bé dễ chạm hơn.
+var CRITTER_WIDTH_PX = {
+  elephant: 220, giraffe: 130, bear: 195, tiger: 190, lion: 180,
+  zebra: 175, crocodile: 230, kangaroo: 165, panda: 155, monkey: 135
+};
+
 var GAMES = [
   { id: 'forest', title: 'Thế giới động vật', emoji: '🦁', skill: 'listen', available: true },
   { id: 'g2', title: 'Sắp ra mắt', emoji: '🔒', available: false },
@@ -72,7 +81,7 @@ function owlMascot(size) {
 }
 
 function bushHtml(left, top, size) {
-  size = size || 66;
+  size = size || 180;
   return '<div class="bush" style="left:' + left + '; top:' + top + ';">' +
     '<svg width="' + size + '" height="' + size + '" viewBox="0 0 64 64" aria-hidden="true">' +
     '<ellipse cx="32" cy="55" rx="23" ry="6" fill="rgba(20,40,25,.2)"/>' +
@@ -297,10 +306,14 @@ function renderForest() {
     var pathName = PATH_NAMES[i % PATH_NAMES.length];
     var dur = DURATIONS[i % DURATIONS.length];
     var delay = (i * 1.3).toFixed(1);
-    return '<div class="critter" data-id="' + opt.id + '" style="animation-name:' + pathName + '; animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">' +
+    var w = CRITTER_WIDTH_PX[opt.id] || 200;
+    return '<div class="critter" data-id="' + opt.id + '" style="width:' + w + 'px; animation-name:' + pathName + '; animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">' +
       '<span class="critter-shake"><img src="' + opt.image + '" alt="' + opt.en + '"></span></div>';
   }).join('');
-  var bushes = bushHtml('14%', '48%', 66) + bushHtml('58%', '26%', 70);
+  // Vị trí 2 bụi cây khớp với đoạn "lõm vào" của path-a (~8%,40%) và
+  // path-b (~46%,26%) trong index.html, để con vật đi ngang qua đúng chỗ
+  // bị che khuất một đoạn rồi thò ra tiếp.
+  var bushes = bushHtml('1%', '34%', 180) + bushHtml('22%', '18%', 160);
 
   root.innerHTML = worldBg() +
     '<div class="content">' +

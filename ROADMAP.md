@@ -163,7 +163,13 @@ mini-game giờ phải khai báo rõ nó luyện kỹ năng nào.
       đúng khoảnh khắc che khuất, không chỉ tin vào toán học CSS. Quản trò
       đọc câu tiếng Anh động "Catch the {tên con vật}!" qua AudioProvider,
       bắt đúng tổng cộng 10 lần (đếm dồn, có thể lặp con) thì thắng — mỗi
-      lần bắt đúng chỉ cập nhật LV kỹ năng **Nghe** của từ đó
+      lần bắt đúng chỉ cập nhật LV kỹ năng **Nghe** của từ đó. Kích thước
+      từng con theo đúng tỉ lệ thật ngoài đời (voi to nhất, hươu cao cổ
+      ảnh dọc rất cao, cá sấu ảnh ngang rất dẹt, khỉ nhỏ nhất) thay vì
+      dùng chung 1 cỡ — phóng to ~3 lần so với bản đầu để bé dễ chạm; vùng
+      di chuyển được siết lại và kiểm chứng bằng ảnh chụp để 2 con to nhất
+      (voi, cá sấu) không tràn ra ngoài màn hình ở bất kỳ điểm nào trên
+      đường đi
 - [x] **Trang 3 — Trang phụ huynh:** giao diện cố tình KHÁC hẳn 2 trang kia
       (sạch, kiểu báo cáo, không phải thế giới game) — bảng LV theo từng
       kỹ năng (Nghe/Nói/Đọc/Viết/Nhìn) cho mỗi từ bé đã chơi
