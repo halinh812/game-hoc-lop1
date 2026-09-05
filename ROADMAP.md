@@ -163,27 +163,36 @@ mini-game giờ phải khai báo rõ nó luyện kỹ năng nào.
       đời (voi to nhất, hươu cao cổ ảnh dọc rất cao, cá sấu ảnh ngang rất
       dẹt, khỉ nhỏ nhất) thay vì dùng chung 1 cỡ.
 
-      Cách chơi + chuyển động đã qua 3 vòng chỉnh theo phản hồi thật, chốt
-      lại ở dạng đơn giản nhất:
+      Cách chơi + hiển thị đã qua 4 vòng chỉnh theo phản hồi thật, chốt
+      lại ở dạng đơn giản/cổ điển nhất:
       1. Thử "chạy tự do 2D" (đường mòn vòng kín bất kỳ) + bụi cây che
          khuất tạo hiệu ứng núp/thò ra.
       2. Đổi sang mỗi con 1 "dải ngang" riêng (không chạm nhau, đo bằng
          bounding box thật, xác nhận 0% chồng lấn ở nhiều kích thước màn
          hình) — nhưng nhìn vẫn rối, không đẹp hơn.
-      3. **Chốt cuối cùng:** quay về **4 hàng cố định xếp dọc** (giống bản
-         gốc), mỗi hàng 1 con đi ngang qua lại hết chiều rộng màn hình
-         (dùng `left:%` thay vì `translateX` theo px cố định, nên luôn
-         khớp đúng mọi kích thước điện thoại, không hụt/tràn). Cơ chế câu
-         hỏi đổi hẳn: **4 ô là cố định xuyên suốt ván chơi** (`state.slots`),
-         không phải rút ngẫu nhiên 4 con mới mỗi câu — mỗi câu chỉ hỏi về
-         1 trong 4 con đang hiện, **bấm đúng thì tự động chuyển sang câu
-         khác ngay (không cần nút "Tiếp theo")**, **bấm sai thì hàng vừa
-         bấm chuyển đỏ, hàng đáp án đúng chuyển xanh, giữ nguyên 3 giây**
-         cho bé nhìn thấy đáp án rồi mới tự chuyển. Dù đúng hay sai, **chỉ
-         đúng 1 hàng (con vừa được hỏi) bị đổi sang con khác — 3 hàng còn
-         lại giữ nguyên** — kiểm chứng bằng Playwright: so sánh toàn bộ 4
-         hàng trước/sau mỗi câu ở cả nhánh đúng và nhánh sai, xác nhận
-         đúng 3/4 không đổi trong mọi trường hợp.
+      3. Đổi sang 4 hàng cố định xếp dọc, mỗi hàng 1 con đi ngang qua lại.
+      4. **Chốt cuối cùng — kiểu cổ điển:** bỏ hẳn chuyển động đi lại, thay
+         bằng **lưới 2x2 ô ảnh tĩnh** (`.optiontile`, CSS `object-fit:contain`
+         để ảnh to vừa khít ô mà vẫn giữ đúng tỉ lệ khung hình gốc của từng
+         con — không cần tính px riêng theo loài như các bản trước).
+
+      Cơ chế câu hỏi (giữ nguyên từ vòng 3, chỉ đổi phần hiển thị): **4 ô
+      cố định xuyên suốt ván chơi** (`state.slots`), không phải rút ngẫu
+      nhiên 4 con mới mỗi câu — mỗi câu chỉ hỏi về 1 trong 4 con đang
+      hiện, **bấm đúng thì tự động chuyển sang câu khác ngay (không cần
+      nút "Tiếp theo")**, **bấm sai thì ô vừa bấm chuyển đỏ, ô đáp án
+      đúng chuyển xanh, giữ nguyên 3 giây** cho bé nhìn thấy đáp án rồi
+      mới tự chuyển. Dù đúng hay sai, **chỉ đúng 1 ô (con vừa được hỏi)
+      bị đổi sang con khác — 3 ô còn lại giữ nguyên** — kiểm chứng bằng
+      Playwright: so sánh toàn bộ 4 ô trước/sau mỗi câu ở cả nhánh đúng
+      và nhánh sai, xác nhận đúng 3/4 không đổi trong mọi trường hợp.
+
+      Định hướng mở rộng sau này (chưa làm): khi có ảnh động cho từng con
+      (quay/tạo video ngắn lặp từ chính ảnh AI đã duyệt, hoặc GIF), chỉ
+      cần đổi `<img>` trong `.optiontile` thành `<video autoplay loop muted
+      playsinline>` hoặc trỏ `src` sang file `.gif`/`.webp` động — không
+      cần đổi lại HTML/CSS layout hay logic chọn đáp án, vì đó là cơ chế
+      hoàn toàn tách biệt (hiển thị) khỏi cách chấm điểm.
 - [x] **Trang 3 — Trang phụ huynh:** giao diện cố tình KHÁC hẳn 2 trang kia
       (sạch, kiểu báo cáo, không phải thế giới game) — bảng LV theo từng
       kỹ năng (Nghe/Nói/Đọc/Viết/Nhìn) cho mỗi từ bé đã chơi

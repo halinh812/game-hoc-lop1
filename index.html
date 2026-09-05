@@ -179,28 +179,21 @@
      left:% (không phải translateX theo px cố định) để luôn khớp đúng
      chiều rộng màn hình thật — điện thoại to hay nhỏ đều đi hết chiều
      rộng, không bị hụt hay tràn. */
-  .lane-list{ display:flex; flex-direction:column; gap:12px; flex:1; margin-bottom:6px; }
-  .lane{
-    position:relative; height:112px; border-radius:16px; overflow:visible;
-    transition: background-color .2s ease;
+  /* Kiểu cổ điển: lưới 2x2 ô ảnh tĩnh, bấm chọn — không có chuyển động/đi
+     lại. object-fit:contain giúp ảnh to vừa khít ô mà vẫn giữ đúng tỉ lệ
+     khung hình gốc (hươu cao cổ vẫn cao, cá sấu vẫn dẹt, không bị méo). */
+  .optiongrid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; flex:1; align-content:start; }
+  .optiontile{
+    position:relative; background:var(--glass); border:2px solid var(--glass-border); border-radius:18px;
+    aspect-ratio:1; padding:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    box-shadow:0 4px 0 rgba(20,40,25,.14), 0 10px 18px rgba(20,40,25,.16);
+    transition:transform .1s ease, box-shadow .1s ease, background-color .2s ease, border-color .2s ease;
   }
-  .lane.wrong{ background: rgba(178,74,67,.32); }
-  .lane.correct{ background: rgba(47,143,91,.32); }
-  .lane__mover{
-    /* Kích thước riêng từng con đặt qua inline style (width) trong app.js,
-       theo đúng tỉ lệ thật — voi to nhất, hươu cao cổ ảnh dọc rất cao, cá
-       sấu ảnh ngang rất dẹt, khỉ nhỏ nhất. transform căn giữa theo chiều
-       dọc đặt tĩnh ở đây (không animate) — animation "left" ở dưới không
-       đụng tới transform nên không xung đột. */
-    position:absolute; top:50%; transform:translateY(-50%); cursor:pointer;
-    animation-name:walklane; animation-timing-function:linear; animation-iteration-count:infinite;
-    padding:10px; margin:-10px; /* mở rộng vùng bấm cho tay bé, không đổi vị trí hiển thị */
-  }
-  .lane__mover img{ display:block; width:100%; filter:drop-shadow(0 6px 4px rgba(20,40,25,.35)); animation:bob 1.1s ease-in-out infinite alternate; }
-  @keyframes bob{ from{ transform:translateY(0);} to{ transform:translateY(-6px);} }
-  @keyframes walklane{ from{ left:-16%; } to{ left:102%; } }
-  .lane.correct .lane__mover, .lane.wrong .lane__mover{ animation-play-state:paused; }
-  .lane.correct .lane__mover img{ animation-play-state:paused; transform:scale(1.15); }
+  .optiontile:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(20,40,25,.14); }
+  .optiontile img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 6px 4px rgba(20,40,25,.3)); }
+  .optiontile.wrong{ background:rgba(178,74,67,.32); border-color:#B24A43; }
+  .optiontile.correct{ background:rgba(47,143,91,.32); border-color:var(--success); }
+  .optiontile.correct img{ transform:scale(1.08); }
 
   /* ---------- forest summary ---------- */
   .summary-mid{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; }
@@ -240,7 +233,7 @@
   .emptystate{ text-align:center; color:#8B968E; font-size:.86rem; padding:40px 10px; line-height:1.6; }
 
   @media (prefers-reduced-motion: reduce){
-    .sun-glow,.cloud,.blade,.owl-wing,.owl-blink,.lane__mover,.lane__mover img,.soundbtn::after,.starburst svg,.fall,.starsrow svg{ animation:none !important; }
+    .sun-glow,.cloud,.blade,.owl-wing,.owl-blink,.soundbtn::after,.starburst svg,.fall,.starsrow svg{ animation:none !important; }
   }
   button:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
 </style>
