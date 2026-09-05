@@ -158,24 +158,32 @@ mini-game giờ phải khai báo rõ nó luyện kỹ năng nào.
 - [x] **Trang 2 — Thế giới động vật** (đổi tên từ "Bắt thú Sở thú", bối
       cảnh đổi từ sở thú sang khu rừng): quản trò đọc câu tiếng Anh động
       "Catch the {tên con vật}!" qua AudioProvider, bắt đúng tổng cộng 10
-      lần (đếm dồn, có thể lặp con) thì thắng — mỗi lần bắt đúng chỉ cập
-      nhật LV kỹ năng **Nghe** của từ đó. Kích thước từng con theo đúng
-      tỉ lệ thật ngoài đời (voi to nhất, hươu cao cổ ảnh dọc rất cao, cá
-      sấu ảnh ngang rất dẹt, khỉ nhỏ nhất) thay vì dùng chung 1 cỡ.
-      Chuyển động qua 2 vòng chỉnh theo phản hồi thật:
+      lần (đếm dồn) thì thắng — mỗi lần trả lời chỉ cập nhật LV kỹ năng
+      **Nghe** của từ đó. Kích thước từng con theo đúng tỉ lệ thật ngoài
+      đời (voi to nhất, hươu cao cổ ảnh dọc rất cao, cá sấu ảnh ngang rất
+      dẹt, khỉ nhỏ nhất) thay vì dùng chung 1 cỡ.
+
+      Cách chơi + chuyển động đã qua 3 vòng chỉnh theo phản hồi thật, chốt
+      lại ở dạng đơn giản nhất:
       1. Thử "chạy tự do 2D" (đường mòn vòng kín bất kỳ) + bụi cây che
-         khuất tạo hiệu ứng núp/thò ra — kiểm chứng bằng ảnh chụp đúng
-         khoảnh khắc che khuất, không chỉ tin toán học CSS.
-      2. Theo phản hồi tiếp theo: **bỏ bụi cây**, và đổi sang **mỗi con 1
-         dải ngang cố định riêng** (chia đều chiều cao khung cảnh) để
-         đảm bảo 2 con KHÔNG BAO GIỜ chạm/chồng lên nhau — đã đo trực
-         tiếp diện tích chồng lấn giữa các con qua nhiều mốc thời gian
-         trên 3 kích thước màn hình khác nhau (kể cả điện thoại nhỏ nhất
-         360×640) và xác nhận 0% chồng lấn ở mọi trường hợp. Đánh đổi:
-         phải giảm bớt độ phóng to (còn ~1.7-1.8 lần thay vì ~3 lần đã
-         thử trước đó) và khung cảnh cao hơn một chút, để chia đủ 4 dải
-         mà con cao nhất (hươu cao cổ) không lấn dải kề bên, đồng thời
-         vẫn xem được cả 4 con mà không cần cuộn trên hầu hết điện thoại
+         khuất tạo hiệu ứng núp/thò ra.
+      2. Đổi sang mỗi con 1 "dải ngang" riêng (không chạm nhau, đo bằng
+         bounding box thật, xác nhận 0% chồng lấn ở nhiều kích thước màn
+         hình) — nhưng nhìn vẫn rối, không đẹp hơn.
+      3. **Chốt cuối cùng:** quay về **4 hàng cố định xếp dọc** (giống bản
+         gốc), mỗi hàng 1 con đi ngang qua lại hết chiều rộng màn hình
+         (dùng `left:%` thay vì `translateX` theo px cố định, nên luôn
+         khớp đúng mọi kích thước điện thoại, không hụt/tràn). Cơ chế câu
+         hỏi đổi hẳn: **4 ô là cố định xuyên suốt ván chơi** (`state.slots`),
+         không phải rút ngẫu nhiên 4 con mới mỗi câu — mỗi câu chỉ hỏi về
+         1 trong 4 con đang hiện, **bấm đúng thì tự động chuyển sang câu
+         khác ngay (không cần nút "Tiếp theo")**, **bấm sai thì hàng vừa
+         bấm chuyển đỏ, hàng đáp án đúng chuyển xanh, giữ nguyên 3 giây**
+         cho bé nhìn thấy đáp án rồi mới tự chuyển. Dù đúng hay sai, **chỉ
+         đúng 1 hàng (con vừa được hỏi) bị đổi sang con khác — 3 hàng còn
+         lại giữ nguyên** — kiểm chứng bằng Playwright: so sánh toàn bộ 4
+         hàng trước/sau mỗi câu ở cả nhánh đúng và nhánh sai, xác nhận
+         đúng 3/4 không đổi trong mọi trường hợp.
 - [x] **Trang 3 — Trang phụ huynh:** giao diện cố tình KHÁC hẳn 2 trang kia
       (sạch, kiểu báo cáo, không phải thế giới game) — bảng LV theo từng
       kỹ năng (Nghe/Nói/Đọc/Viết/Nhìn) cho mỗi từ bé đã chơi
