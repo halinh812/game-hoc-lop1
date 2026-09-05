@@ -156,20 +156,26 @@ mini-game giờ phải khai báo rõ nó luyện kỹ năng nào.
       chỉ có lời chào + lưới 8 ô trò chơi (2 cột x 4 dòng, 1 ô chạy được
       "Thế giới động vật", 7 ô còn lại "Sắp ra mắt")
 - [x] **Trang 2 — Thế giới động vật** (đổi tên từ "Bắt thú Sở thú", bối
-      cảnh đổi từ sở thú sang khu rừng): 4 con vật **chạy tự do trong
-      khung cảnh rừng** (4 đường mòn vòng kín riêng theo % vị trí, không
-      phải làn ngang cố định), 2 bụi cây SVG cố định che khuất con vật một
-      đoạn trên đường đi rồi để lộ ra tiếp — đã kiểm chứng bằng ảnh chụp
-      đúng khoảnh khắc che khuất, không chỉ tin vào toán học CSS. Quản trò
-      đọc câu tiếng Anh động "Catch the {tên con vật}!" qua AudioProvider,
-      bắt đúng tổng cộng 10 lần (đếm dồn, có thể lặp con) thì thắng — mỗi
-      lần bắt đúng chỉ cập nhật LV kỹ năng **Nghe** của từ đó. Kích thước
-      từng con theo đúng tỉ lệ thật ngoài đời (voi to nhất, hươu cao cổ
-      ảnh dọc rất cao, cá sấu ảnh ngang rất dẹt, khỉ nhỏ nhất) thay vì
-      dùng chung 1 cỡ — phóng to ~3 lần so với bản đầu để bé dễ chạm; vùng
-      di chuyển được siết lại và kiểm chứng bằng ảnh chụp để 2 con to nhất
-      (voi, cá sấu) không tràn ra ngoài màn hình ở bất kỳ điểm nào trên
-      đường đi
+      cảnh đổi từ sở thú sang khu rừng): quản trò đọc câu tiếng Anh động
+      "Catch the {tên con vật}!" qua AudioProvider, bắt đúng tổng cộng 10
+      lần (đếm dồn, có thể lặp con) thì thắng — mỗi lần bắt đúng chỉ cập
+      nhật LV kỹ năng **Nghe** của từ đó. Kích thước từng con theo đúng
+      tỉ lệ thật ngoài đời (voi to nhất, hươu cao cổ ảnh dọc rất cao, cá
+      sấu ảnh ngang rất dẹt, khỉ nhỏ nhất) thay vì dùng chung 1 cỡ.
+      Chuyển động qua 2 vòng chỉnh theo phản hồi thật:
+      1. Thử "chạy tự do 2D" (đường mòn vòng kín bất kỳ) + bụi cây che
+         khuất tạo hiệu ứng núp/thò ra — kiểm chứng bằng ảnh chụp đúng
+         khoảnh khắc che khuất, không chỉ tin toán học CSS.
+      2. Theo phản hồi tiếp theo: **bỏ bụi cây**, và đổi sang **mỗi con 1
+         dải ngang cố định riêng** (chia đều chiều cao khung cảnh) để
+         đảm bảo 2 con KHÔNG BAO GIỜ chạm/chồng lên nhau — đã đo trực
+         tiếp diện tích chồng lấn giữa các con qua nhiều mốc thời gian
+         trên 3 kích thước màn hình khác nhau (kể cả điện thoại nhỏ nhất
+         360×640) và xác nhận 0% chồng lấn ở mọi trường hợp. Đánh đổi:
+         phải giảm bớt độ phóng to (còn ~1.7-1.8 lần thay vì ~3 lần đã
+         thử trước đó) và khung cảnh cao hơn một chút, để chia đủ 4 dải
+         mà con cao nhất (hươu cao cổ) không lấn dải kề bên, đồng thời
+         vẫn xem được cả 4 con mà không cần cuộn trên hầu hết điện thoại
 - [x] **Trang 3 — Trang phụ huynh:** giao diện cố tình KHÁC hẳn 2 trang kia
       (sạch, kiểu báo cáo, không phải thế giới game) — bảng LV theo từng
       kỹ năng (Nghe/Nói/Đọc/Viết/Nhìn) cho mỗi từ bé đã chơi
@@ -240,7 +246,13 @@ phụ huynh vẫn dùng nền sáng trung tính, đọc tốt trong mọi điề
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
-  / thu âm giọng thật (thương mại, chưa làm ngay)
+  / thu âm giọng thật (thương mại, chưa làm ngay). Đã cải thiện trong giới
+  hạn Web Speech API miễn phí (`js/audio-provider.js`): tự chọn giọng
+  tiếng Anh tốt nhất trong số giọng có sẵn trên máy thay vì để trình duyệt
+  tự chọn, chỉnh tốc độ/cao độ tự nhiên hơn. Giới hạn thật: chất lượng
+  giọng phụ thuộc thiết bị/trình duyệt của người dùng (ngoài tầm code) —
+  nếu vẫn chưa đủ tự nhiên và cần nhất quán trên mọi máy, bước tiếp theo
+  là giọng trả phí (ước tính chi phí + chọn nhà cung cấp khi cần)
 - Ảnh: AI-ảnh-ngoài (raster PNG) cho nhân vật con vật cần giống thật; SVG
   tự code chỉ cho icon/UI đơn giản (nút bấm, huy hiệu). Quy trình chi tiết
   ở `ANIMAL_ART_PIPELINE.md`

@@ -39,10 +39,15 @@ var FOREST_WIN_TARGET = 10;
 // Kích thước hiển thị riêng từng con (px, theo chiều rộng ảnh) — ước lượng
 // theo tỉ lệ thật ngoài đời (voi to nhất, hươu cao cổ tuy ảnh hẹp nhưng rất
 // cao, cá sấu dài và dẹt sát đất, khỉ nhỏ nhất) chứ không dùng chung 1 cỡ.
-// Phóng to tổng thể ~3-4 lần so với bản trước (60px) để bé dễ chạm hơn.
+// Phóng to tổng thể ~1.7-1.8 lần so với bản gốc (60px) để bé dễ chạm hơn.
+// Hạ xuống so với 2 lần chỉnh trước (từng thử ~3 lần rồi ~2.2 lần) vì mỗi
+// con giờ có 1 dải ngang riêng cố định (không chạm nhau) — nếu để to như
+// trước, khung cảnh phải rất cao mới đủ chỗ chia dải, khiến màn hình thấp
+// (điện thoại nhỏ) phải cuộn mới thấy hết cả 4 con. Cỡ này vẫn to hơn hẳn
+// bản gốc và vừa đủ chỗ để không cần cuộn trên hầu hết điện thoại.
 var CRITTER_WIDTH_PX = {
-  elephant: 220, giraffe: 130, bear: 195, tiger: 190, lion: 180,
-  zebra: 175, crocodile: 230, kangaroo: 165, panda: 155, monkey: 135
+  elephant: 132, giraffe: 80, bear: 116, tiger: 112, lion: 108,
+  zebra: 104, crocodile: 136, kangaroo: 100, panda: 92, monkey: 80
 };
 
 var GAMES = [
@@ -78,17 +83,6 @@ function owlMascot(size) {
     '<path d="M46 60 L50 68 L54 60 Z" fill="#E4633F"/>' +
     '<path d="M28 32 L20 12 L36 24 Z" fill="#F4A93B"/><path d="M72 32 L80 12 L64 24 Z" fill="#F4A93B"/>' +
     '</svg>';
-}
-
-function bushHtml(left, top, size) {
-  size = size || 180;
-  return '<div class="bush" style="left:' + left + '; top:' + top + ';">' +
-    '<svg width="' + size + '" height="' + size + '" viewBox="0 0 64 64" aria-hidden="true">' +
-    '<ellipse cx="32" cy="55" rx="23" ry="6" fill="rgba(20,40,25,.2)"/>' +
-    '<circle cx="20" cy="38" r="16" fill="#8FC48A"/>' +
-    '<circle cx="40" cy="34" r="18" fill="#4E8F58"/>' +
-    '<circle cx="30" cy="45" r="15" fill="#356B44"/>' +
-    '</svg></div>';
 }
 
 function worldBg() {
@@ -297,23 +291,19 @@ function renderForest() {
     starsRow += starMarkup.replace('<svg ', '<svg class="' + (lit ? 'lit' : '') + '" ');
   }
 
-  // 4 con vật chạy tự do theo 4 "đường mòn" vòng kín khác nhau (không phải
-  // làn ngang cố định) — path-a/path-b cố tình đi ngang qua sau 2 bụi cây
-  // (z-index bụi cao hơn con vật) để tạo cảm giác núp rồi thò đầu ra.
-  var PATH_NAMES = ['path-a', 'path-b', 'path-c', 'path-d'];
+  // Mỗi con vật có 1 "dải ngang" riêng (band-a..d), chia đều chiều cao
+  // khung cảnh — chỉ đi ngang trong dải của mình nên không bao giờ chạm
+  // con vật ở dải khác, dù to cỡ nào.
+  var BAND_NAMES = ['band-a', 'band-b', 'band-c', 'band-d'];
   var DURATIONS = [11, 13, 10.5, 12];
   var critters = options.map(function (opt, i) {
-    var pathName = PATH_NAMES[i % PATH_NAMES.length];
+    var bandName = BAND_NAMES[i % BAND_NAMES.length];
     var dur = DURATIONS[i % DURATIONS.length];
     var delay = (i * 1.3).toFixed(1);
-    var w = CRITTER_WIDTH_PX[opt.id] || 200;
-    return '<div class="critter" data-id="' + opt.id + '" style="width:' + w + 'px; animation-name:' + pathName + '; animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">' +
+    var w = CRITTER_WIDTH_PX[opt.id] || 130;
+    return '<div class="critter" data-id="' + opt.id + '" style="width:' + w + 'px; animation-name:' + bandName + '; animation-duration:' + dur + 's; animation-delay:-' + delay + 's;">' +
       '<span class="critter-shake"><img src="' + opt.image + '" alt="' + opt.en + '"></span></div>';
   }).join('');
-  // Vị trí 2 bụi cây khớp với đoạn "lõm vào" của path-a (~8%,40%) và
-  // path-b (~46%,26%) trong index.html, để con vật đi ngang qua đúng chỗ
-  // bị che khuất một đoạn rồi thò ra tiếp.
-  var bushes = bushHtml('1%', '34%', 180) + bushHtml('22%', '18%', 160);
 
   root.innerHTML = worldBg() +
     '<div class="content">' +
@@ -324,7 +314,7 @@ function renderForest() {
     '</div>' +
     '<div class="ribbon">🦁 Bắt con: <b>' + word.en + '</b></div>' +
     '<button class="soundbtn" id="speakBtn" aria-label="Nghe lại">' + SPEAK_SVG + '</button>' +
-    '<div class="forest-scene" id="forestStage">' + bushes + critters + '</div>' +
+    '<div class="forest-scene" id="forestStage">' + critters + '</div>' +
     '<div class="glasscard" id="feedbackBubble" style="display:none;margin-top:12px;"><p id="feedbackText" style="margin:0;font-weight:600;font-size:.9rem;"></p></div>' +
     '<button class="chunkybtn green" id="nextBtn" style="display:none;margin-top:12px;"></button>' +
     '</div>';
