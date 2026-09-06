@@ -35,13 +35,13 @@ var FOREST_WIN_TARGET = 10;
 
 var GAMES = [
   { id: 'forest', title: 'Thế giới động vật', emoji: '🦁', skill: 'listen', available: true },
-  { id: 'g2', title: 'Sắp ra mắt', emoji: '🔒', available: false },
-  { id: 'g3', title: 'Sắp ra mắt', emoji: '🔒', available: false },
-  { id: 'g4', title: 'Sắp ra mắt', emoji: '🔒', available: false },
-  { id: 'g5', title: 'Sắp ra mắt', emoji: '🔒', available: false },
-  { id: 'g6', title: 'Sắp ra mắt', emoji: '🔒', available: false },
-  { id: 'g7', title: 'Sắp ra mắt', emoji: '🔒', available: false },
-  { id: 'g8', title: 'Sắp ra mắt', emoji: '🔒', available: false }
+  { id: 'g2', title: 'Sắp ra mắt', available: false },
+  { id: 'g3', title: 'Sắp ra mắt', available: false },
+  { id: 'g4', title: 'Sắp ra mắt', available: false },
+  { id: 'g5', title: 'Sắp ra mắt', available: false },
+  { id: 'g6', title: 'Sắp ra mắt', available: false },
+  { id: 'g7', title: 'Sắp ra mắt', available: false },
+  { id: 'g8', title: 'Sắp ra mắt', available: false }
 ];
 
 function starIcon(fill, size, stroke) {
@@ -68,6 +68,23 @@ function owlMascot(size) {
     '</svg>';
 }
 
+// Linh vật "đang ngủ" cho các ô trò chơi "Sắp ra mắt" — trước đây là ổ
+// khoá xám xịt chiếm 7/8 ô ở Trang chủ, nhìn như sản phẩm dở dang. Đổi
+// sang 1 khuôn mặt tròn pastel đang nhắm mắt + chữ "z" bay lên, có nhịp
+// thở nhẹ (CSS .sleepy) để đỡ "chết" mà vẫn rõ ràng là chưa mở khoá.
+function sleepyMascot(size) {
+  size = size || 40;
+  return '<svg class="sleepy" width="' + size + '" height="' + size + '" viewBox="0 0 100 100" aria-hidden="true">' +
+    '<circle cx="50" cy="54" r="34" fill="#C9C2E8"/>' +
+    '<path d="M32 52 Q38 46 44 52" stroke="#5B5480" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+    '<path d="M56 52 Q62 46 68 52" stroke="#5B5480" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+    '<path d="M42 66 Q50 71 58 66" stroke="#5B5480" stroke-width="4" fill="none" stroke-linecap="round"/>' +
+    '<ellipse cx="30" cy="64" rx="4.5" ry="3" fill="#A79BD1" opacity=".8"/><ellipse cx="70" cy="64" rx="4.5" ry="3" fill="#A79BD1" opacity=".8"/>' +
+    '<text x="64" y="28" font-size="15" fill="#C9C2E8" font-family="Baloo 2,sans-serif" font-weight="700">z</text>' +
+    '<text x="75" y="17" font-size="11" fill="#C9C2E8" font-family="Baloo 2,sans-serif" font-weight="700">z</text>' +
+    '</svg>';
+}
+
 function worldBg() {
   return '<div class="world-bg" aria-hidden="true">' +
     '<div class="sun-glow"></div>' +
@@ -75,13 +92,25 @@ function worldBg() {
     '<div class="canopy-band"><svg viewBox="0 0 400 88" preserveAspectRatio="none">' +
     '<path d="M-10 50 Q40 14 100 46 T220 40 T340 50 T410 28 V-10 H-10 Z" fill="#8FC48A"/>' +
     '<path d="M-10 66 Q50 32 130 62 T280 54 T410 50 V-10 H-10 Z" fill="#4E8F58"/>' +
-    '<rect x="55" y="52" width="14" height="18" rx="6" fill="#7A5636"/>' +
-    '<rect x="326" y="48" width="16" height="22" rx="6" fill="#7A5636"/>' +
+    // Cụm cây tán tròn rậm (nhiều hình tròn chồng nhau) thay cho 1 hình
+    // chữ nhật thân cây trơ trọi trước đây — giống dáng cây bụi tròn trong
+    // ảnh mẫu khu rừng minh hoạ.
+    '<rect x="40" y="46" width="12" height="30" rx="5" fill="#7A5636"/>' +
+    '<circle cx="30" cy="38" r="20" fill="#5FA766"/><circle cx="48" cy="30" r="24" fill="#6FBB74"/><circle cx="64" cy="40" r="18" fill="#5FA766"/>' +
+    '<rect x="330" y="42" width="14" height="34" rx="5" fill="#6B4B2E"/>' +
+    '<circle cx="318" cy="32" r="22" fill="#5FA766"/><circle cx="340" cy="24" r="26" fill="#6FBB74"/><circle cx="358" cy="36" r="20" fill="#5FA766"/>' +
+    '<rect x="196" y="52" width="9" height="20" rx="4" fill="#7A5636"/><circle cx="200" cy="46" r="16" fill="#6FBB74" opacity=".9"/>' +
     '</svg></div>' +
     '<div class="ground-band"><svg viewBox="0 0 400 112" preserveAspectRatio="none">' +
     '<path d="M0 30 Q100 5 200 25 T400 15 V112 H0 Z" fill="#8FC48A" opacity=".4"/>' +
     '<path d="M0 55 Q100 35 200 50 T400 42 V112 H0 Z" fill="#4B8A57"/>' +
     '<path d="M0 78 H400 V112 H0 Z" fill="#356B44"/>' +
+    // Đá cuội + hoa nhỏ ven đường — chi tiết trang trí để mặt đất đỡ trống.
+    '<ellipse cx="90" cy="86" rx="16" ry="10" fill="#9A9488"/><ellipse cx="90" cy="83" rx="12" ry="6" fill="#B4AEA0"/>' +
+    '<ellipse cx="300" cy="90" rx="20" ry="12" fill="#9A9488"/><ellipse cx="300" cy="86" rx="14" ry="7" fill="#B4AEA0"/>' +
+    '<g><line x1="140" y1="90" x2="140" y2="78" stroke="#356B44" stroke-width="2"/><circle cx="140" cy="76" r="4" fill="#FFD25A"/></g>' +
+    '<g><line x1="250" y1="94" x2="250" y2="80" stroke="#356B44" stroke-width="2"/><circle cx="250" cy="78" r="4" fill="#F4958A"/></g>' +
+    '<g><line x1="60" y1="96" x2="60" y2="84" stroke="#356B44" stroke-width="2"/><circle cx="60" cy="82" r="3.5" fill="#FFD25A"/></g>' +
     '<g stroke="#356B44" stroke-width="3.4" stroke-linecap="round">' +
     '<path class="blade" d="M20 80 Q15 64 22 52"/><path class="blade" d="M40 80 Q45 62 38 50"/>' +
     '<path class="blade" d="M360 80 Q355 64 362 52"/><path class="blade" d="M380 80 Q385 62 378 50"/>' +
@@ -217,7 +246,7 @@ function renderHome() {
       return '<button type="button" class="gametile" data-id="' + g.id + '">' +
         '<span class="emoji">' + g.emoji + '</span><span class="name">' + g.title + '</span></button>';
     }
-    return '<div class="gametile locked"><span class="emoji">' + g.emoji + '</span><span class="name">' + g.title + '</span></div>';
+    return '<div class="gametile locked">' + sleepyMascot(40) + '<span class="name">' + g.title + '</span></div>';
   }).join('');
 
   root.innerHTML = worldBg() +
@@ -227,6 +256,7 @@ function renderHome() {
     '<div class="greet">Chào ' + profile.name + '! <span>Chọn trò chơi để bắt đầu nhé</span></div>' +
     '</div>' +
     '<div class="gamegrid" id="gameGrid">' + tiles + '</div>' +
+    '<div class="homemascot">' + owlMascot(72) + '</div>' +
     '<button type="button" class="parentbtn" id="parentLink">👪 Dành cho phụ huynh</button>' +
     '</div>';
 
@@ -288,11 +318,16 @@ function startForestGame() {
 }
 
 // Ảnh tĩnh hoặc video lặp (nếu từ có "video") cho 1 ô — object-fit:contain
-// (CSS) tự co vừa ô, giữ đúng tỉ lệ khung hình gốc.
+// (CSS) tự co vừa ô, giữ đúng tỉ lệ khung hình gốc. Bọc trong span
+// .tileswing để có hiệu ứng "lắc lư nhẹ nhàng" tại chỗ (CSS, xem
+// index.html) — không cho con vật chạy/di chuyển vị trí, chỉ đứng yên và
+// đung đưa như đang thở, theo đúng yêu cầu (đã thử "chạy" ở các vòng
+// trước và bị chê rối).
 function forestTileMedia(w) {
-  return w.video
+  var media = w.video
     ? '<video src="' + w.video + '" autoplay loop muted playsinline poster="' + w.image + '"></video>'
     : '<img src="' + w.image + '" alt="' + w.en + '">';
+  return '<span class="tileswing">' + media + '</span>';
 }
 
 function forestStarsRow() {
@@ -308,6 +343,52 @@ function forestStarsRow() {
 function speakForestTarget() {
   var w = state.slots[state.targetIdx];
   speak('Catch the ' + w.en + '!');
+}
+
+// Chuông "ting" 2 nốt lên cao khi bấm đúng — tự tổng hợp bằng Web Audio,
+// không cần file âm thanh riêng. Trước đây bấm đúng chỉ đổi màu viền +
+// 1 dòng chữ nhỏ, gần như không có gì "ăn mừng" thật sự.
+var sharedAudioCtx = null;
+function playDing() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  try {
+    if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    var ctx = sharedAudioCtx;
+    var now = ctx.currentTime;
+    [880, 1318.5].forEach(function (freq, i) {
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      var start = now + i * 0.09;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.18, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.28);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.3);
+    });
+  } catch (e) { /* Web Audio không khả dụng — bỏ qua, không phá UI */ }
+}
+
+// Bắn vài hạt "ăn mừng" nhỏ từ chính ô vừa bấm đúng rồi tự dọn — khác với
+// confetti rơi từ trên xuống ở màn thắng cả ván (.fall), đây là phản hồi
+// tức thời ngay tại chỗ cho MỖI câu trả lời đúng.
+function celebrateTile(tileEl) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var colors = ['#F4A93B', '#E4633F', '#2F8F5B', '#FFD25A'];
+  for (var i = 0; i < 8; i++) {
+    var p = document.createElement('span');
+    p.className = 'tileburst';
+    var angle = (Math.PI * 2 * i) / 8 + Math.random() * 0.4;
+    var dist = 26 + Math.random() * 20;
+    p.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
+    p.style.setProperty('--dy', (Math.sin(angle) * dist - 10) + 'px');
+    p.style.setProperty('--rot', (Math.random() * 360) + 'deg');
+    p.style.background = colors[i % colors.length];
+    tileEl.appendChild(p);
+    (function (el) { setTimeout(function () { el.remove(); }, 750); })(p);
+  }
 }
 
 function renderForest() {
@@ -371,6 +452,8 @@ function handleForestAnswer(idx) {
     state.correct++;
     speak(targetWord.en);
     tileEls[idx].classList.add('correct');
+    playDing();
+    celebrateTile(tileEls[idx]);
     text.innerHTML = '<b>Bắt được rồi!</b> 🎉 ' + targetWord.en;
 
     var isDone = state.correct >= FOREST_WIN_TARGET;
