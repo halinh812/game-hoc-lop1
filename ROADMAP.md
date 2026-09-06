@@ -354,6 +354,64 @@ nội dung nữa.
   (`index.html`) chạy qua server mới này vẫn hoạt động y hệt trước (đã
   chạy lại bộ kiểm thử luồng chơi 2x2 grid, kết quả không đổi).
 
+## Đợt sửa "hình ảnh/giao diện chưa đẹp, chưa sinh động"
+
+Phản hồi sau khi test bản đầy đủ: người dùng thấy game "rất dở". Tự vào
+chơi và chụp lại từng màn hình mới xác định được đúng 4 chỗ cụ thể (không
+chỉ "chưa đẹp" chung chung): (1) 7/8 ô ở Trang chủ là ổ khoá xám xịt
+"Sắp ra mắt", nhìn như sản phẩm dở dang; (2) bấm đúng gần như không có gì
+ăn mừng — chỉ viền xanh + 1 dòng chữ nhỏ; (3) phong cách hình ảnh không
+đồng nhất — avatar hoạt hình dễ thương nhưng ảnh con vật trong game lại
+là ảnh chụp thật, 2 phong cách chọi nhau; (4) nhiều khoảng trống chết
+không trang trí gì ở cả Trang chủ lẫn "Thế giới động vật". Người dùng gửi
+1 ảnh mẫu phong cách rừng cây/hồ nước hoạt hình dễ thương (con vật chibi
+mắt to) muốn game theo đúng phong cách đó.
+
+- **Đổi hẳn phong cách ảnh AI sang chibi** (`ANIMAL_ART_PIPELINE.md`):
+  khung phong cách cũ "semi-realistic, dáng đi" đổi sang "chibi/hoạt hình
+  dễ thương, mắt to long lanh, tô màu vector mềm" — khớp avatar SVG sẵn
+  có. Viết lại prompt riêng cho cả 10 con Sở thú theo dáng đứng/ngồi đơn
+  giản (không cần dáng đi nữa, vì xem mục tiếp theo). Đây là phần người
+  dùng tự chạy qua công cụ AI ảnh bên ngoài rồi tải lên qua Trang phụ
+  huynh — tôi không tự tạo được ảnh AI trong môi trường này.
+- **Con vật không di chuyển, chỉ "lắc lư nhẹ nhàng" tại chỗ**: sau đúng 4
+  vòng thử chuyển động (chạy tự do + núp bụi cây → dải ngang không chồng
+  lấn → 4 hàng đi ngang → tĩnh hoàn toàn), người dùng xác nhận hướng cuối:
+  đứng yên nhưng có 1 hiệu ứng nhẹ cho đỡ "chết" — implement bằng CSS xoay
+  ±2.5° liên tục (`@keyframes tileSway`) trên `span.tileswing` bọc quanh
+  ảnh/video (KHÔNG đặt animation thẳng lên ảnh/video, vì trạng thái
+  `.correct` cần tự phóng to ảnh — 2 animation transform trên cùng 1 phần
+  tử sẽ đè lên nhau; tách ra cha/con để cả 2 chạy độc lập, không xung
+  đột), lệch delay 0/.4/.8/1.2s giữa 4 ô để không đồng bộ tăm tắp.
+- **Ô "Sắp ra mắt" đổi từ ổ khoá xám sang linh vật đang ngủ** (hàm
+  `sleepyMascot()`) — mặt tròn pastel nhắm mắt + chữ "z" bay lên, có nhịp
+  thở nhẹ (`sleepyBreathe`), đỡ "chết"/dở dang hơn hẳn 7 ổ khoá xám xịt.
+- **Hiệu ứng ăn mừng thật cho MỖI câu trả lời đúng** (trước chỉ có ở màn
+  thắng cả ván): nảy bật ô (`tileCorrectBounce`), bắn 8 hạt màu từ chính
+  ô vừa bấm rồi tự dọn sau 750ms (`celebrateTile()`, khác với confetti rơi
+  từ trên ở màn thắng), kèm 1 tiếng chuông "ting" 2 nốt tự tổng hợp bằng
+  Web Audio (`playDing()`, không cần file âm thanh). Chỉ áp dụng cho nhánh
+  bấm ĐÚNG, không áp dụng khi bấm sai rồi hiện đáp án đúng (tránh gây hiểu
+  lầm là được thưởng dù trả lời sai).
+- **Làm giàu bối cảnh nền** (`worldBg()`): tán cây đổi từ 1 hình chữ nhật
+  thân cây trơ trọi sang cụm tròn rậm rạp (nhiều hình tròn chồng nhau,
+  giống ảnh mẫu khu rừng); thêm đá cuội + hoa nhỏ ven đường ở dải mặt đất.
+  Vẫn giữ nguyên cấu trúc 2 dải cố định trên/dưới (`canopy-band`/
+  `ground-band`, `overflow:hidden`) — bài học từ lỗi cũ (nền SVG tràn vào
+  đè lên nội dung) vẫn áp dụng, không thêm chi tiết trang trí vào vùng
+  giữa màn hình nơi chữ/nút hiển thị.
+- **Cú mèo linh vật lấp khoảng trống** ở Trang chủ, phía dưới lưới trò
+  chơi — trước là 1 mảng nền trống hoàn toàn, giờ có cú mèo bay nhẹ lên
+  xuống (`mascotFloat`).
+- Tất cả animation mới đều tôn trọng `prefers-reduced-motion: reduce`
+  (tắt hết, khớp quy ước đã có từ trước).
+- Đã kiểm thử bằng Playwright: xác nhận từng animation THỰC SỰ đang chạy
+  (không chỉ khai báo CSS) bằng cách đọc `getComputedStyle(...).transform`
+  2 lần cách nhau 700ms và so sánh khác nhau; xác nhận 8 hạt ăn mừng sinh
+  ra rồi tự dọn sạch; chạy lại toàn bộ bộ kiểm thử luồng chơi 2x2 grid cũ
+  (auto-advance, hiện đáp án 3 giây, chỉ đúng 1 ô đổi mỗi câu, thắng ở câu
+  thứ 10) — không có gì bị hỏng bởi các thay đổi giao diện.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs

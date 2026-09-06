@@ -139,7 +139,12 @@
   .profilebar .greet{ font-family:'Baloo 2', sans-serif; font-weight:800; font-size:1.15rem; color:var(--ink); text-shadow:0 1px 0 rgba(255,255,255,.5); }
   .profilebar .greet span{ display:block; font-family:'Be Vietnam Pro',sans-serif; font-weight:600; font-size:.76rem; color:var(--ink-soft); text-shadow:none; }
 
-  .gamegrid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; flex:1; align-content:start; }
+  .gamegrid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  /* Cú mèo linh vật lấp khoảng trống phía dưới lưới trò chơi — trước đây
+     là 1 mảng nền trống trải không có gì, nhìn "chết". */
+  .homemascot{ flex:1; display:flex; align-items:center; justify-content:center; min-height:56px; }
+  .homemascot svg{ animation:mascotFloat 3.4s ease-in-out infinite; }
+  @keyframes mascotFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-8px); } }
   .gametile{
     border:none; border-radius:18px; padding:16px 10px; cursor:pointer; text-align:center;
     display:flex; flex-direction:column; align-items:center; gap:8px;
@@ -150,10 +155,14 @@
   .gametile:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(20,40,25,.14); }
   .gametile .emoji{ font-size:2.1rem; }
   .gametile .name{ font-family:'Baloo 2', sans-serif; font-weight:700; font-size:.86rem; color:var(--ink); line-height:1.25; }
-  .gametile.locked{ background:var(--locked-bg); box-shadow:none; cursor:default; opacity:.75; }
-  .gametile.locked .emoji{ filter:grayscale(.4); opacity:.6; }
+  /* Ô "Sắp ra mắt": trước là ổ khoá xám xịt chiếm hết sự chú ý (7/8 ô) —
+     đổi sang linh vật ngủ gật be bé, màu pastel dịu, có nhịp thở nhẹ để
+     đỡ trông "chết"/dở dang mà vẫn rõ ràng là chưa mở khoá. */
+  .gametile.locked{ background:rgba(255,255,255,.4); box-shadow:none; cursor:default; }
+  .gametile.locked .sleepy{ animation:sleepyBreathe 3.2s ease-in-out infinite; }
   .gametile.locked .name{ color:var(--ink-soft); font-size:.72rem; }
   .gametile.locked:active{ transform:none; }
+  @keyframes sleepyBreathe{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.06); } }
 
   /* ---------- forest game ---------- */
   .ribbon{
@@ -190,10 +199,34 @@
     transition:transform .1s ease, box-shadow .1s ease, background-color .2s ease, border-color .2s ease;
   }
   .optiontile:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(20,40,25,.14); }
+  /* "Hiện ra và lắc lư nhẹ nhàng" — không đi lại/chạy (đã thử và bị chê
+     rối ở các vòng trước), chỉ xoay qua lại vài độ tại chỗ như đang thở/
+     đung đưa. Đặt animation trên .tileswing (span bọc ảnh/video), KHÔNG
+     đặt thẳng lên img/video, để không đụng transform:scale(...) riêng của
+     trạng thái .correct bên dưới (2 phần tử cha/con transform độc lập,
+     không đè lên nhau). */
+  .tileswing{ display:block; width:100%; height:100%; animation:tileSway 2.6s ease-in-out infinite; }
+  .optiontile[data-idx="0"] .tileswing{ animation-delay:0s; }
+  .optiontile[data-idx="1"] .tileswing{ animation-delay:.4s; }
+  .optiontile[data-idx="2"] .tileswing{ animation-delay:.8s; }
+  .optiontile[data-idx="3"] .tileswing{ animation-delay:1.2s; }
+  @keyframes tileSway{ 0%,100%{ transform:rotate(-2.5deg); } 50%{ transform:rotate(2.5deg); } }
   .optiontile img, .optiontile video{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 6px 4px rgba(20,40,25,.3)); border-radius:12px; }
   .optiontile.wrong{ background:rgba(178,74,67,.32); border-color:#B24A43; }
-  .optiontile.correct{ background:rgba(47,143,91,.32); border-color:var(--success); }
+  .optiontile.correct{ background:rgba(47,143,91,.32); border-color:var(--success); animation:tileCorrectBounce .5s cubic-bezier(.34,1.56,.64,1) both; }
   .optiontile.correct img, .optiontile.correct video{ transform:scale(1.08); }
+  @keyframes tileCorrectBounce{ 0%{ transform:scale(1); } 40%{ transform:scale(1.1); } 65%{ transform:scale(.96); } 100%{ transform:scale(1.03); } }
+  /* Hạt "ăn mừng" nhỏ bắn ra từ chính ô vừa bấm đúng — khác với .fall (rơi
+     từ trên xuống, dùng cho màn thắng cả ván), đây bắn ra rồi tan biến
+     nhanh trong lúc vẫn đang chơi tiếp câu khác. */
+  .tileburst{
+    position:absolute; top:50%; left:50%; width:7px; height:11px; border-radius:2px;
+    pointer-events:none; opacity:1; animation:tileBurst .7s ease-out forwards;
+  }
+  @keyframes tileBurst{
+    0%{ transform:translate(-50%,-50%) rotate(0deg) scale(1); opacity:1; }
+    100%{ transform:translate(calc(-50% + var(--dx,20px)),calc(-50% + var(--dy,-40px))) rotate(var(--rot,180deg)) scale(.5); opacity:0; }
+  }
 
   /* ---------- forest summary ---------- */
   .summary-mid{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; }
@@ -263,7 +296,8 @@
   .contentmgr pre.log{ background:#233A2A; color:#DCEFE0; font-size:.72rem; padding:10px; border-radius:8px; margin-top:10px; max-height:160px; overflow:auto; white-space:pre-wrap; }
 
   @media (prefers-reduced-motion: reduce){
-    .sun-glow,.cloud,.blade,.owl-wing,.owl-blink,.soundbtn::after,.starburst svg,.fall,.starsrow svg{ animation:none !important; }
+    .sun-glow,.cloud,.blade,.owl-wing,.owl-blink,.soundbtn::after,.starburst svg,.fall,.starsrow svg,
+    .sleepy,.tileswing,.optiontile.correct,.tileburst,.homemascot svg{ animation:none !important; }
   }
   button:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
 </style>
