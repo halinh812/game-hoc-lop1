@@ -412,6 +412,40 @@ mắt to) muốn game theo đúng phong cách đó.
   (auto-advance, hiện đáp án 3 giây, chỉ đúng 1 ô đổi mỗi câu, thắng ở câu
   thứ 10) — không có gì bị hỏng bởi các thay đổi giao diện.
 
+## Tự động xoá nền trắng khi upload ảnh qua Trang phụ huynh
+
+Người dùng tự tạo lại bộ 10 con vật theo phong cách chibi mới (đúng bộ
+prompt ở `ANIMAL_ART_PIPELINE.md`) và tải lên qua Trang phụ huynh — nhưng
+phát hiện ảnh tuy đã là `.png` nhưng nền trắng chưa được xoá (trang quản
+trị trước đó chỉ đổi định dạng + co nhỏ kích thước, chưa tách nền).
+
+- `tools/admin-server.mjs`: `processImageBuffer()` giờ luôn chạy thêm
+  bước tách nền sau khi resize — port thuật toán y hệt
+  `tools/remove_white_bg.py` (vẫn giữ file Python đó làm công cụ chạy tay
+  riêng) sang JavaScript/`sharp`: tô loang (flood fill BFS 4 hướng) từ
+  đúng 4 góc ảnh, so màu với NGƯỠNG 26 so với màu gốc của chính góc đó
+  (không phải ngưỡng cố định so với trắng tuyệt đối) — nên vẫn xoá đúng
+  nền dù không phải trắng 100% (có nhiễu nén ảnh/AI), mà KHÔNG đục lỗ vào
+  vùng trắng/nhạt NẰM BÊN TRONG con vật (bụng gấu trúc, mắt...) vì vùng đó
+  không nối liền với góc ảnh. Làm mềm viền bằng cách blur riêng kênh
+  alpha (không đụng màu RGB, tránh viền nhoè trắng quanh con vật).
+- **Lỗi gặp phải khi viết (đáng lưu ý cho lần sau):** bước blur alpha ban
+  đầu làm ảnh ra bị sọc ngang loang lổ — nguyên nhân là `sharp` âm thầm
+  nâng ảnh xám 1 kênh lên sRGB 3 kênh ngay khi gọi `.blur()`, khiến buffer
+  trả về dài gấp 3 dự kiến, làm lệch toàn bộ phép ghép ngược lại theo
+  hàng. Nhìn code không thấy sai — chỉ phát hiện được bằng cách so sánh
+  độ dài buffer trước/sau thực tế. Khắc phục: gọi thêm
+  `.toColourspace('b-w')` trước `.raw()` để ép sharp giữ đúng 1 kênh.
+- Đã kiểm thử: (1) ảnh dựng tay có 1 lỗ trắng nhỏ NẰM TRONG hình (mô
+  phỏng đốm lông trắng) — xác nhận lỗ đó KHÔNG bị xoá còn nền 4 góc + mép
+  giữa cạnh (không chỉ đúng góc) đều bị xoá sạch; (2) chạy lại đúng thuật
+  toán này trên 3 ảnh chibi thật người dùng đã tải lên (gấu trúc, hươu
+  cao cổ, cá sấu) — ghép thử lên nền xanh dương để mắt thường thấy rõ
+  vùng trong suốt, xác nhận nền trắng mất hẳn, mắt/đốm sáng/bụng trắng
+  bên trong con vật vẫn nguyên vẹn; (3) gọi thẳng API `/api/items` với 1
+  ảnh test upload thật, đọc lại file `.png` ghi ra đĩa bằng PIL xác nhận
+  kênh alpha ở góc = 0, ở giữa = 255.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
