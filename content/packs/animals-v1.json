@@ -5,15 +5,15 @@
   "category_label_vi": "Con vật",
   "category_icon": "🐾",
   "items": [
-    { "id": "tiger", "type": "vocab", "prompt_audio_text": "tiger", "answer": { "text_en": "tiger", "text_vi": "hổ", "image": "assets/animals/tiger.png", "video": "assets/animals/tiger.mp4" }, "difficulty": 1 },
-    { "id": "lion", "type": "vocab", "prompt_audio_text": "lion", "answer": { "text_en": "lion", "text_vi": "sư tử", "image": "assets/animals/lion.png" }, "difficulty": 1 },
-    { "id": "elephant", "type": "vocab", "prompt_audio_text": "elephant", "answer": { "text_en": "elephant", "text_vi": "con voi", "image": "assets/animals/elephant.png" }, "difficulty": 1 },
-    { "id": "giraffe", "type": "vocab", "prompt_audio_text": "giraffe", "answer": { "text_en": "giraffe", "text_vi": "hươu cao cổ", "image": "assets/animals/giraffe.png" }, "difficulty": 2 },
-    { "id": "zebra", "type": "vocab", "prompt_audio_text": "zebra", "answer": { "text_en": "zebra", "text_vi": "ngựa vằn", "image": "assets/animals/zebra.png" }, "difficulty": 2 },
-    { "id": "monkey", "type": "vocab", "prompt_audio_text": "monkey", "answer": { "text_en": "monkey", "text_vi": "con khỉ", "image": "assets/animals/monkey.png" }, "difficulty": 1 },
-    { "id": "bear", "type": "vocab", "prompt_audio_text": "bear", "answer": { "text_en": "bear", "text_vi": "con gấu", "image": "assets/animals/bear.png" }, "difficulty": 1 },
-    { "id": "kangaroo", "type": "vocab", "prompt_audio_text": "kangaroo", "answer": { "text_en": "kangaroo", "text_vi": "chuột túi", "image": "assets/animals/kangaroo.png" }, "difficulty": 2 },
-    { "id": "panda", "type": "vocab", "prompt_audio_text": "panda", "answer": { "text_en": "panda", "text_vi": "gấu trúc", "image": "assets/animals/panda.png" }, "difficulty": 2 },
-    { "id": "crocodile", "type": "vocab", "prompt_audio_text": "crocodile", "answer": { "text_en": "crocodile", "text_vi": "cá sấu", "image": "assets/animals/crocodile.png" }, "difficulty": 2 }
+    {"id":"tiger","type":"vocab","prompt_audio_text":"tiger","answer":{"text_en":"tiger","text_vi":"hổ","image":"assets/animals/tiger.png","video":"assets/animals/tiger.mp4"},"difficulty":1},
+    {"id":"lion","type":"vocab","prompt_audio_text":"lion","answer":{"text_en":"lion","text_vi":"sư tử","image":"assets/animals/lion.png"},"difficulty":1},
+    {"id":"elephant","type":"vocab","prompt_audio_text":"elephant","answer":{"text_en":"elephant","text_vi":"con voi","image":"assets/animals/elephant.png"},"difficulty":1},
+    {"id":"giraffe","type":"vocab","prompt_audio_text":"giraffe","answer":{"text_en":"giraffe","text_vi":"hươu cao cổ","image":"assets/animals/giraffe.png"},"difficulty":2},
+    {"id":"zebra","type":"vocab","prompt_audio_text":"zebra","answer":{"text_en":"zebra","text_vi":"ngựa vằn","image":"assets/animals/zebra.png"},"difficulty":2},
+    {"id":"monkey","type":"vocab","prompt_audio_text":"monkey","answer":{"text_en":"monkey","text_vi":"con khỉ","image":"assets/animals/monkey.png"},"difficulty":1},
+    {"id":"bear","type":"vocab","prompt_audio_text":"bear","answer":{"text_en":"bear","text_vi":"con gấu","image":"assets/animals/bear.png"},"difficulty":1},
+    {"id":"kangaroo","type":"vocab","prompt_audio_text":"kangaroo","answer":{"text_en":"kangaroo","text_vi":"chuột túi","image":"assets/animals/kangaroo.png"},"difficulty":2},
+    {"id":"panda","type":"vocab","prompt_audio_text":"panda","answer":{"text_en":"panda","text_vi":"gấu trúc","image":"assets/animals/panda.png"},"difficulty":2},
+    {"id":"crocodile","type":"vocab","prompt_audio_text":"crocodile","answer":{"text_en":"crocodile","text_vi":"cá sấu","image":"assets/animals/crocodile.png"},"difficulty":2}
   ]
 }
