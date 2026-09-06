@@ -14,7 +14,9 @@
         "text_vi": "Hổ",
         "image": "assets/animals/tiger.svg"
       },
-      "difficulty": 1
+      "difficulty": 1,
+      "subcategory": "wild",
+      "subcategory_label_vi": "Động vật hoang dã"
     },
     {
       "id": "animal_elephant",
@@ -39,6 +41,8 @@
     "items[].prompt_audio_text": "Văn bản tiếng Anh đưa vào AudioProvider để đọc (Web Speech API hiện tại, hoặc audio thu sẵn sau này)",
     "items[].answer.image": "Đường dẫn ảnh minh hoạ (vd: assets/animals/tiger.png) — dùng khi đã có ảnh AI cho từ đó",
     "items[].answer.emoji": "Emoji minh hoạ — dùng khi chưa có ảnh riêng. Content Loader yêu cầu có ít nhất 1 trong 2 (image hoặc emoji)",
-    "items[].difficulty": "1-5, dùng để Learning Engine cân nhắc thứ tự giới thiệu từ mới"
+    "items[].difficulty": "1-5, dùng để Learning Engine cân nhắc thứ tự giới thiệu từ mới",
+    "items[].subcategory": "Tuỳ chọn — mã 'nhóm con' bên trong 1 category (vd category=animal thì subcategory có thể là wild/pet). Dùng để 1 trò chơi chỉ lấy từ đúng 1 nhóm con (vd trò rừng chỉ lấy subcategory=wild) thay vì cả category. Không bắt buộc — từ không gắn nhóm con vẫn hợp lệ, chỉ là không trò nào lọc theo nhóm con nào sẽ lấy được nó",
+    "items[].subcategory_label_vi": "Tên nhóm con hiển thị tiếng Việt (vd 'Động vật hoang dã') — đi kèm subcategory, dùng cho UI Trang phụ huynh"
   }
 }

@@ -238,7 +238,9 @@ app.get('/api/packs/:category/items', (req, res) => {
       vi: it.answer.text_vi,
       image: it.answer.image || null,
       video: it.answer.video || null,
-      difficulty: it.difficulty || 1
+      difficulty: it.difficulty || 1,
+      subcategory: it.subcategory || null,
+      subcategoryLabel: it.subcategory_label_vi || null
     }));
     res.json(items);
   } catch (e) {
@@ -249,7 +251,7 @@ app.get('/api/packs/:category/items', (req, res) => {
 app.post('/api/items', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'video', maxCount: 1 }]), async (req, res) => {
   const warnings = [];
   try {
-    const { category, id, text_en, text_vi, difficulty } = req.body;
+    const { category, id, text_en, text_vi, difficulty, subcategory, subcategory_label_vi } = req.body;
     if (!category || !FOLDER_BY_CATEGORY[category]) {
       return res.status(400).json({ error: 'Bộ từ không hợp lệ.' });
     }
@@ -279,6 +281,22 @@ app.post('/api/items', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'v
       if (text_en) { item.answer.text_en = text_en; item.prompt_audio_text = text_en; }
       if (text_vi) item.answer.text_vi = text_vi;
       if (difficulty) item.difficulty = Number(difficulty) || item.difficulty;
+    }
+
+    // "Nhóm con" (subcategory) — tuỳ chọn, để 1 trò chơi sau này chỉ lấy
+    // đúng 1 nhóm trong category (vd category=animal, subcategory=wild
+    // cho "Thế giới động vật", subcategory=pet cho trò vật nuôi sau này).
+    // Không gửi subcategory nghĩa là "giữ nguyên, không đổi" (giống cách
+    // text_en/text_vi/difficulty đang xử lý ở trên) — không có cách xoá
+    // hẳn 1 nhóm con đã gắn qua UI, chỉ có thể gán sang nhóm khác.
+    if (subcategory) {
+      if (!SAFE_ID.test(subcategory)) {
+        return res.status(400).json({ error: 'Mã nhóm con chỉ được gồm chữ thường a-z, số, dấu gạch ngang/gạch dưới.' });
+      }
+      item.subcategory = subcategory;
+      item.subcategory_label_vi = subcategory_label_vi
+        || (pack.items.find(it => it.subcategory === subcategory && it.subcategory_label_vi) || {}).subcategory_label_vi
+        || subcategory;
     }
 
     const folder = FOLDER_BY_CATEGORY[category];

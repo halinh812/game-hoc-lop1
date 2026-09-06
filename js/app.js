@@ -147,8 +147,15 @@ function speak(text) {
   audio.speak(text, { lang: 'en-US' });
 }
 
-function wordsInCat(catId) {
-  return WORDS.filter(function (w) { return w.cat === catId; });
+// subcategory tuỳ chọn — truyền vào để chỉ lấy đúng 1 "nhóm con" bên
+// trong category đó (vd category="animal", subcategory="wild" chỉ lấy
+// động vật hoang dã, bỏ qua động vật nuôi dù cùng category).
+function wordsInCat(catId, subcategory) {
+  return WORDS.filter(function (w) {
+    if (w.cat !== catId) return false;
+    if (subcategory && w.subcategory !== subcategory) return false;
+    return true;
+  });
 }
 
 function render() {
@@ -308,7 +315,9 @@ function pickReplacementWord(replaceIdx) {
 }
 
 function startForestGame() {
-  state.forestPool = wordsInCat('animal');
+  // Chỉ lấy động vật hoang dã — trò "vật nuôi" (chưa làm) sẽ lấy
+  // subcategory="pet" cùng category="animal" riêng, không lẫn vào đây.
+  state.forestPool = wordsInCat('animal', 'wild');
   state.slots = buildRound(state.forestPool, store.words, 'listen', { size: 4 });
   state.targetIdx = pickTargetIndex(state.slots);
   state.correct = 0;
@@ -602,9 +611,16 @@ async function tryMountContentManager() {
   container.insertAdjacentHTML('beforeend',
     '<div class="contentmgr" id="cmSection">' +
     '<h2>🛠️ Thêm / sửa ảnh, video cho từ vựng</h2>' +
-    '<p class="hint">Chọn 1 từ có sẵn để thay ảnh/video, hoặc "➕ Thêm từ mới". Ảnh sẽ tự co nhỏ, video sẽ tự nén — không cần chỉnh gì trước khi tải lên.</p>' +
+    '<p class="hint">Chọn 1 từ có sẵn để thay ảnh/video, hoặc "➕ Thêm từ mới". Ảnh sẽ tự co nhỏ + tự xoá nền trắng, video sẽ tự nén — không cần chỉnh gì trước khi tải lên.</p>' +
     '<label for="cmCategory">Bộ từ</label>' +
     '<select id="cmCategory">' + catOptions + '</select>' +
+    '<label for="cmSubcategory">Nhóm con</label>' +
+    '<select id="cmSubcategory"></select>' +
+    '<div id="cmNewSubcatRow" style="display:none;">' +
+    '<label for="cmNewSubcatLabel">Tên nhóm mới (tiếng Việt)</label>' +
+    '<input type="text" id="cmNewSubcatLabel" placeholder="vd: Động vật nuôi">' +
+    '<p class="hint" id="cmNewSubcatIdHint" style="margin:4px 0 0;"></p>' +
+    '</div>' +
     '<label for="cmItem">Từ <span id="cmItemCount" class="badge"></span></label>' +
     '<select id="cmItem"></select>' +
     '<div id="cmIdRow" style="display:none;">' +
@@ -634,6 +650,11 @@ async function tryMountContentManager() {
     cmState.category = this.value;
     cmLoadItems();
   });
+  document.getElementById('cmSubcategory').addEventListener('change', cmOnSubcategoryChange);
+  document.getElementById('cmNewSubcatLabel').addEventListener('input', function () {
+    var hint = document.getElementById('cmNewSubcatIdHint');
+    hint.textContent = this.value.trim() ? ('Mã nhóm: ' + cmSlugify(this.value)) : '';
+  });
   document.getElementById('cmItem').addEventListener('change', cmApplySelectedItem);
   document.getElementById('cmEn').addEventListener('input', function () {
     var idInput = document.getElementById('cmId');
@@ -650,19 +671,72 @@ async function tryMountContentManager() {
 }
 
 var CM_NEW_VALUE = '__new__';
+var CM_NO_SUBCAT = '__none__';
+var CM_NEW_SUBCAT = '__newsub__';
 var cmItems = [];
+var cmSubcatMap = {}; // id -> { id, label, count } — cho từ có sẵn trong bộ từ đang chọn
 
 function cmSlugify(s) {
+  // "đ/Đ" không bị NFD tách dấu như các chữ có dấu khác (nó là 1 chữ cái
+  // riêng trong Unicode, không phải chữ La-tinh + dấu) — phải tự thay
+  // trước, nếu không nó biến mất hẳn khỏi kết quả thay vì thành "d"
+  // (vd "Động vật nuôi" ra "ong_vat_nuoi" thay vì "dong_vat_nuoi").
   return (s || '').toLowerCase().trim()
+    .replace(/đ/g, 'd')
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
 }
 
 async function cmLoadItems() {
   cmItems = await fetch('/api/packs/' + cmState.category + '/items').then(function (r) { return r.json(); });
-  document.getElementById('cmItemCount').textContent = cmItems.length + ' từ';
+  cmRebuildSubcategorySelect();
+  cmOnSubcategoryChange();
+}
+
+// "Nhóm con" là bước lọc/duyệt trước khi chọn Từ — giống hệt cách chọn
+// Bộ từ rồi mới chọn Từ, chỉ thêm 1 tầng nữa. Từ chưa gắn nhóm con nào
+// (các bộ từ khác ngoài Con vật) gộp vào "— Chưa phân nhóm —" để vẫn
+// duyệt/sửa được bình thường.
+function cmRebuildSubcategorySelect() {
+  var groups = {};
+  var noneCount = 0;
+  cmItems.forEach(function (it) {
+    if (it.subcategory) {
+      if (!groups[it.subcategory]) groups[it.subcategory] = { id: it.subcategory, label: it.subcategoryLabel || it.subcategory, count: 0 };
+      groups[it.subcategory].count++;
+    } else {
+      noneCount++;
+    }
+  });
+  cmSubcatMap = groups;
+  var list = Object.keys(groups).map(function (k) { return groups[k]; });
+  list.sort(function (a, b) { return a.label.localeCompare(b.label, 'vi'); });
+
+  var options = list.map(function (g) {
+    return '<option value="' + g.id + '">' + g.label + ' (' + g.count + ')</option>';
+  });
+  options.push('<option value="' + CM_NO_SUBCAT + '">— Chưa phân nhóm — (' + noneCount + ')</option>');
+  options.push('<option value="' + CM_NEW_SUBCAT + '">➕ Thêm nhóm mới</option>');
+
+  var sel = document.getElementById('cmSubcategory');
+  sel.innerHTML = options.join('');
+  sel.value = list.length ? list[0].id : CM_NO_SUBCAT;
+}
+
+function cmOnSubcategoryChange() {
+  var sel = document.getElementById('cmSubcategory');
+  var newRow = document.getElementById('cmNewSubcatRow');
+  var isNewSubcat = sel.value === CM_NEW_SUBCAT;
+  newRow.style.display = isNewSubcat ? '' : 'none';
+  if (isNewSubcat) document.getElementById('cmNewSubcatLabel').value = '';
+
+  var filtered = isNewSubcat ? []
+    : sel.value === CM_NO_SUBCAT ? cmItems.filter(function (it) { return !it.subcategory; })
+    : cmItems.filter(function (it) { return it.subcategory === sel.value; });
+
+  document.getElementById('cmItemCount').textContent = filtered.length + ' từ';
   var options = ['<option value="' + CM_NEW_VALUE + '">➕ Thêm từ mới</option>']
-    .concat(cmItems.map(function (it) { return '<option value="' + it.id + '">' + it.vi + ' (' + it.en + ')</option>'; }));
+    .concat(filtered.map(function (it) { return '<option value="' + it.id + '">' + it.vi + ' (' + it.en + ')</option>'; }));
   document.getElementById('cmItem').innerHTML = options.join('');
   cmApplySelectedItem();
 }
@@ -718,12 +792,29 @@ async function cmSave() {
   var id = isNew ? document.getElementById('cmId').value.trim() : itemSelect.value;
   if (!id) { cmShowMsg('Cần nhập mã từ (id).', 'err'); return; }
 
+  var subcatSel = document.getElementById('cmSubcategory').value;
+  var subcategoryId = '';
+  var subcategoryLabel = '';
+  if (subcatSel === CM_NEW_SUBCAT) {
+    var newLabel = document.getElementById('cmNewSubcatLabel').value.trim();
+    if (!newLabel) { cmShowMsg('Cần nhập tên cho nhóm con mới.', 'err'); return; }
+    subcategoryId = cmSlugify(newLabel);
+    subcategoryLabel = newLabel;
+  } else if (subcatSel !== CM_NO_SUBCAT) {
+    subcategoryId = subcatSel;
+    subcategoryLabel = (cmSubcatMap[subcatSel] && cmSubcatMap[subcatSel].label) || subcatSel;
+  } // CM_NO_SUBCAT -> để trống, không gắn nhóm con
+
   var form = new FormData();
   form.set('category', cmState.category);
   form.set('id', id);
   form.set('text_en', document.getElementById('cmEn').value.trim());
   form.set('text_vi', document.getElementById('cmVi').value.trim());
   form.set('difficulty', document.getElementById('cmDifficulty').value);
+  if (subcategoryId) {
+    form.set('subcategory', subcategoryId);
+    form.set('subcategory_label_vi', subcategoryLabel);
+  }
   var imageFile = document.getElementById('cmImage').files[0];
   var videoFile = document.getElementById('cmVideo').files[0];
   if (imageFile) form.set('image', imageFile);
@@ -741,7 +832,17 @@ async function cmSave() {
     cmShowMsg(parts.join('\n'), 'ok');
     document.getElementById('cmImage').value = '';
     document.getElementById('cmVideo').value = '';
+
     await cmLoadItems();
+    // cmLoadItems() dựng lại danh sách nhóm con từ đầu (mặc định chọn
+    // nhóm đầu tiên) — chọn lại đúng nhóm vừa lưu vào rồi mới chọn từ,
+    // để không bị "nhảy" sang nhóm khác sau khi lưu.
+    if (subcategoryId) {
+      document.getElementById('cmSubcategory').value = subcategoryId;
+    } else {
+      document.getElementById('cmSubcategory').value = CM_NO_SUBCAT;
+    }
+    cmOnSubcategoryChange();
     document.getElementById('cmItem').value = id;
     cmApplySelectedItem();
 
