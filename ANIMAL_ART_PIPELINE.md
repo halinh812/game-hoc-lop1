@@ -160,15 +160,24 @@ Sau 10 con này, thêm con mới chỉ cần lặp lại đúng công thức: Kh
 cách (không đổi) + 1 đoạn mô tả riêng theo mẫu trên (loài + màu/hoạ tiết
 đặc trưng + dáng đứng/ngồi đơn giản, không cần mô tả dáng đi).
 
-## Bước 6 — Danh sách 10 "Thú nuôi gần gũi" (chủ đề thứ 2, ngoài Sở thú)
+## Bước 6 — Danh sách 10 "Động vật nuôi" (nhóm con thứ 2 trong "Con vật")
 
-Nhóm vật nuôi/nông trại quen thuộc với trẻ Việt Nam — dùng cho 1 chủ đề
-riêng (Nông trại), không trộn chung với Sở thú. **Chưa có content pack
-thật cho nhóm này (chỉ mới lên kế hoạch)** — prompt bên dưới vẫn viết
-theo phong cách "semi-realistic + dáng đi" cũ, khi nào thật sự làm chủ đề
-này thì viết lại theo đúng khung phong cách chibi mới ở Bước 1 (bỏ hết mô
-tả dáng đi, chuyển sang dáng đứng/ngồi đơn giản) — như đã làm cho 10 con
-Sở thú ở Bước 5.
+Nhóm vật nuôi/nông trại quen thuộc với trẻ Việt Nam — **đã đưa vào
+`content/packs/animals-v1.json`** làm nhóm con `subcategory: "pet"`
+("Động vật nuôi") song song nhóm `"wild"` ("Động vật hoang dã"), cùng 1
+category "Con vật" (không tách category riêng — xem phần "Nhóm con
+(subcategory)" trong `ROADMAP.md` để hiểu vì sao). "Thế giới động vật"
+(khu rừng) chỉ lấy nhóm `wild`, không đụng đến nhóm này.
+
+**Ảnh hiện tại vẫn là ảnh raster cũ từ Phase 0** (phong cách
+"semi-realistic + dáng đi", theo đúng prompt cũ bên dưới) — CHƯA khớp
+phong cách chibi mới đã đổi cho 10 con Sở thú ở Bước 5. Cần tạo lại ảnh
+chibi cho cả 10 con này theo đúng khung phong cách ở Bước 1 (bỏ hết mô tả
+dáng đi, chuyển sang dáng đứng/ngồi đơn giản — xem cách viết lại prompt ở
+Bước 5 làm mẫu) rồi tải lên qua Trang phụ huynh (chọn Bộ từ "Con vật" →
+Nhóm con "Động vật nuôi" → chọn đúng con cần thay → tải ảnh mới), **không
+cần đổi tên/mã (id)** vì id đã đặt đúng theo `text_en` sẵn (dog/cat/hen/
+duck/pig/cow/buffalo/horse/goat/rabbit).
 
 - [x] Chó (Dog)
 - [x] Mèo (Cat)

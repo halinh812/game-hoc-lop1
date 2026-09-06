@@ -511,6 +511,37 @@ dù cùng nằm trong 1 category "animal", để không bị lẫn.
   Dữ liệu test được dọn sạch trước khi merge — bản chính thức chỉ có lại
   đúng 10 con hoang dã như trước.
 
+## Thêm 10 "Động vật nuôi" — ngộ nhận về ảnh có sẵn trong thư mục
+
+Sau khi có tính năng nhóm con, người dùng thấy trong thư mục
+`assets/animals/` trên GitHub có 20 file ảnh và tưởng rằng đã có sẵn 10
+từ "Động vật nuôi" (dog/cat/hen/duck/pig/cow/buffalo/horse/goat/rabbit)
+song song 10 con hoang dã. Thực tế: 10 file ảnh đó là **ảnh raster còn sót
+lại từ Phase 0** (`ANIMAL_ART_PIPELINE.md` Bước 6 — nhóm "Thú nuôi gần
+gũi" từng lên kế hoạch nhưng chưa từng làm) — có file ảnh trong thư mục
+KHÔNG đồng nghĩa với có từ vựng; `content/packs/animals-v1.json` lúc đó
+vẫn chỉ có đúng 10 mục (toàn bộ "wild"). Xác nhận trực tiếp bằng cách đọc
+file JSON thật, không đoán.
+
+Người dùng chọn phương án: nối tạm 10 ảnh cũ đó thành nhóm "Động vật
+nuôi" ngay (ảnh phong cách tả thực cũ, không khớp phong cách chibi mới —
+sẽ tự thay ảnh sau qua Trang phụ huynh khi có bản chibi, không cần đổi
+id/tên).
+
+- Thêm 10 mục vào `animals-v1.json`: dog/cat/hen/duck/pig/cow/buffalo/
+  horse/goat/rabbit, mỗi mục trỏ đúng ảnh đã có sẵn
+  (`assets/animals/<id>.png` — xác nhận cả 10 ảnh này đã có alpha trong
+  suốt sẵn từ trước, không cần chạy lại bước xoá nền), gắn
+  `subcategory: "pet"`, `subcategory_label_vi: "Động vật nuôi"`.
+- Không đổi code — tính năng nhóm con ở đợt trước đã xử lý đúng ngay khi
+  có đủ 2 nhóm thật trong dữ liệu.
+- Đã kiểm thử: gọi API xác nhận đúng 20 mục (10 wild + 10 pet); Playwright
+  thao tác thật trong Trang phụ huynh xác nhận dropdown "Nhóm con" hiện
+  đúng "Động vật hoang dã (10)" mặc định + "Động vật nuôi (10)", đúng tên
+  tiếng Việt cho cả 10 con nuôi; chơi thử "Thế giới động vật" toàn bộ 1
+  ván (tới lúc thắng) xác nhận không con vật nuôi nào từng xuất hiện —
+  trò rừng vẫn chỉ lấy đúng "wild" như thiết kế.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
