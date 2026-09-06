@@ -67,6 +67,11 @@ function flattenPack(pack) {
         video: item.answer.video || null,
         promptAudioText: item.prompt_audio_text || item.answer.text_en,
         difficulty: typeof item.difficulty === 'number' ? item.difficulty : 1,
+        // "Nhóm con" tuỳ chọn bên trong 1 category (vd category=animal thì
+        // subcategory=wild/pet) — để 1 trò chơi chỉ lấy đúng 1 nhóm con
+        // thay vì cả category (xem wordsInCat() trong app.js).
+        subcategory: item.subcategory || null,
+        subcategoryLabel: item.subcategory_label_vi || null,
         cat: pack.category,
         catLabel: pack.category_label_vi || pack.category,
         catIcon: pack.category_icon || null,

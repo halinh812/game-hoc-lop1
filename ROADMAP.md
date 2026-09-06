@@ -446,6 +446,71 @@ trị trước đó chỉ đổi định dạng + co nhỏ kích thước, chưa
   ảnh test upload thật, đọc lại file `.png` ghi ra đĩa bằng PIL xác nhận
   kênh alpha ở góc = 0, ở giữa = 255.
 
+## "Nhóm con" (subcategory) — để 1 trò chơi chỉ lấy đúng 1 phần của 1 bộ từ
+
+Lý do: bộ từ "Con vật" giờ chỉ có 10 con hoang dã, nhưng người dùng sẽ
+làm tiếp 10 con vật nuôi (dog/cat/hen/duck/pig/cow/buffalo/horse/goat/
+rabbit — đã có ảnh cũ phong cách semi-realistic từ Phase 0, chưa đưa vào
+content pack). "Thế giới động vật" (khu rừng) chỉ nên có động vật hoang
+dã; trò sau (chưa làm) mới đến vật nuôi — cần cách tách 2 nhóm này ra
+dù cùng nằm trong 1 category "animal", để không bị lẫn.
+
+- **Schema** (`content-schema.json`, `content/packs/animals-v1.json`):
+  thêm 2 field tuỳ chọn ở cấp item (ngang hàng `difficulty`, không phải
+  bên trong `answer`): `subcategory` (mã, vd `wild`) và
+  `subcategory_label_vi` (tên hiển thị, vd "Động vật hoang dã"). Tuỳ
+  chọn — từ không gắn nhóm con vẫn hợp lệ như trước giờ (colors/numbers/
+  family/fruits chưa dùng field này). Đã gắn `subcategory: "wild"` cho cả
+  10 con hoang dã hiện có.
+- **`js/content-loader.js`**: gắn thêm `subcategory`/`subcategoryLabel`
+  vào từ đã "làm phẳng" (flatten).
+- **`js/app.js`**: `wordsInCat(catId, subcategory)` nhận thêm tham số
+  tuỳ chọn để lọc theo nhóm con; `startForestGame()` giờ gọi
+  `wordsInCat('animal', 'wild')` thay vì `wordsInCat('animal')` — khi nào
+  có trò vật nuôi, trò đó gọi `wordsInCat('animal', 'pet')` (hoặc mã nhóm
+  con thật sự được tạo qua Trang phụ huynh) là xong, không đụng gì đến
+  trò rừng.
+- **Trang phụ huynh — UI 2 tầng chọn (Bộ từ → Nhóm con → Từ)**: thêm hẳn
+  1 dropdown "Nhóm con" giữa "Bộ từ" và "Từ", hoạt động y hệt cách chọn
+  Bộ từ/Từ đã quen thuộc — chọn 1 nhóm con có sẵn (kèm số lượng từ trong
+  ngoặc, vd "Động vật hoang dã (10)"), chọn "— Chưa phân nhóm —" (cho từ
+  chưa gắn nhóm con nào), hoặc "➕ Thêm nhóm mới" (gõ tên tiếng Việt, tự
+  sinh mã nhóm hiển thị làm gợi ý, dùng đúng hàm `cmSlugify` sẵn có). Danh
+  sách "Từ" bên dưới LUÔN chỉ hiện từ thuộc đúng nhóm con đang chọn — chủ
+  đích thiết kế để tránh việc vừa lọc theo nhóm vừa cho sửa item tự do
+  gây rối logic (đổi nhóm 1 từ có sẵn = vào đúng nhóm cũ của nó trước,
+  sửa xong muốn chuyển nhóm khác thì chọn nhóm mới rồi lưu lại).
+  Sau khi lưu, tự quay lại đúng nhóm con vừa lưu vào (không bị "nhảy" về
+  nhóm mặc định).
+- **`tools/admin-server.mjs`**: `GET /api/packs/:category/items` trả
+  thêm `subcategory`/`subcategoryLabel`; `POST /api/items` nhận thêm
+  `subcategory`/`subcategory_label_vi` — bỏ trống nghĩa là "giữ nguyên"
+  (giống cách `text_en`/`text_vi`/`difficulty` đang xử lý, nhất quán với
+  quy ước sẵn có) chứ không phải "xoá nhóm con đã gắn". Nếu chỉ gửi
+  `subcategory` (id) mà không gửi label, tự dò trong các từ khác cùng
+  bộ đang dùng đúng mã đó để lấy lại label, phòng khi client thiếu.
+- **Sửa kèm 1 lỗi phát hiện trong lúc làm:** `cmSlugify()` (dùng để tự
+  sinh mã từ tên tiếng Việt) làm mất hẳn chữ "đ/Đ" thay vì đổi thành "d"
+  — do "đ" là 1 chữ cái riêng trong Unicode chứ không phải chữ La-tinh +
+  dấu nên `.normalize('NFD')` không tách được (vd "Động vật nuôi" từng ra
+  "ong_vat_nuoi" thay vì "dong_vat_nuoi"). Thêm bước thay "đ"→"d" thủ công
+  trước khi chuẩn hoá dấu.
+- **Sửa kèm 1 lỗi dữ liệu phát hiện trong lúc làm:** `tiger` trong
+  `animals-v1.json` vẫn còn field `answer.video` trỏ tới
+  `assets/animals/tiger.mp4` dù file đó đã bị xoá thủ công (không qua
+  Trang phụ huynh) ở một thời điểm trước — tham chiếu chết, tự sửa bằng
+  cách bỏ field `video` (game vẫn hoạt động bình thường lúc đó nhờ ảnh
+  `poster` dự phòng của thẻ `<video>`, nhưng dữ liệu vẫn sai nên sửa lại
+  cho đúng thực tế).
+- Đã kiểm thử qua Playwright thao tác thật trong Trang phụ huynh: chọn
+  "Con vật" tự hiện đúng "Động vật hoang dã (10)"; tạo nhóm con mới
+  "Động vật nuôi", thêm 1 từ test vào đó, xác nhận nhóm mới xuất hiện
+  đúng số lượng (1), quay lại nhóm "Động vật hoang dã" xác nhận từ mới
+  KHÔNG lẫn vào (vẫn đúng 10); chơi thử "Thế giới động vật" tới lúc thắng
+  (10 câu đúng) xác nhận từ test không bao giờ xuất hiện trong trò chơi.
+  Dữ liệu test được dọn sạch trước khi merge — bản chính thức chỉ có lại
+  đúng 10 con hoang dã như trước.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
