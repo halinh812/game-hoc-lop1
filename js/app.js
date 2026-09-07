@@ -586,14 +586,36 @@ function levelColor(level) {
   return 'rgb(' + r + ',' + g + ',' + b + ')';
 }
 
-function renderParent() {
-  var profile = getProfile(store);
-  var touchedWords = WORDS.filter(function (w) {
+// Bộ lọc "Bộ từ"/"Nhóm từ" trên bảng báo cáo — chọn kiểu tick vào ô vuông,
+// chọn nhiều cùng lúc trong 1 nhóm (multi-select). id -> true/false theo
+// từng bộ từ (cats) / nhóm từ (subcats). Sống suốt phiên (không reset khi
+// rời rồi quay lại Trang phụ huynh) — object rỗng ở 1 nhóm nghĩa là KHÔNG
+// lọc theo nhóm đó (hiện hết).
+var parentFilter = { cats: {}, subcats: {} };
+
+function parentTouchedWords() {
+  return WORDS.filter(function (w) {
     return store.words[w.id] && store.words[w.id].skills &&
       SKILLS.some(function (s) { return store.words[w.id].skills[s]; });
   });
+}
 
-  var rows = touchedWords.map(function (w) {
+function parentApplyFilter(touchedWords) {
+  var catKeys = Object.keys(parentFilter.cats).filter(function (k) { return parentFilter.cats[k]; });
+  var subKeys = Object.keys(parentFilter.subcats).filter(function (k) { return parentFilter.subcats[k]; });
+  if (!catKeys.length && !subKeys.length) return touchedWords;
+  return touchedWords.filter(function (w) {
+    if (catKeys.length && catKeys.indexOf(w.cat) === -1) return false;
+    if (subKeys.length && subKeys.indexOf(w.subcategory) === -1) return false;
+    return true;
+  });
+}
+
+function parentRenderTable() {
+  var touchedWords = parentTouchedWords();
+  var filtered = parentApplyFilter(touchedWords);
+
+  var rows = filtered.map(function (w) {
     var cells = SKILLS.map(function (s) {
       var p = getSkillProgress(store.words, w.id, s);
       var lv = p ? p.level : 0;
@@ -603,23 +625,74 @@ function renderParent() {
     return '<div class="wordrow"><div class="wname">' + thumb + '<span>' + w.en + '</span></div>' + cells + '</div>';
   }).join('');
 
-  var body = touchedWords.length
-    ? '<div class="skillhead"><span>Từ</span><span>Nghe</span><span>Nói</span><span>Đọc</span><span>Viết</span><span>Nhìn</span></div>' + rows
-    : '<div class="emptystate">Bé chưa chơi trò nào cả.<br>Số liệu sẽ hiện ra ở đây sau khi bé chơi nhé!</div>';
+  var body;
+  if (filtered.length) {
+    body = '<div class="skillhead"><span>Từ</span><span>Nghe</span><span>Nói</span><span>Đọc</span><span>Viết</span><span>Nhìn</span></div>' + rows;
+  } else if (touchedWords.length) {
+    body = '<div class="emptystate">Không có từ nào khớp bộ lọc đang chọn.</div>';
+  } else {
+    body = '<div class="emptystate">Bé chưa chơi trò nào cả.<br>Số liệu sẽ hiện ra ở đây sau khi bé chơi nhé!</div>';
+  }
+  document.getElementById('reportBody').innerHTML = body;
+}
+
+function parentFilterChip(group, item) {
+  var isChecked = !!parentFilter[group][item.id];
+  return '<label class="filterchip' + (isChecked ? ' checked' : '') + '">' +
+    '<input type="checkbox" data-group="' + group + '" value="' + item.id + '"' + (isChecked ? ' checked' : '') + '>' +
+    '<span class="fbox"></span><span class="ftext">' + (item.icon ? item.icon + ' ' : '') + item.label + ' (' + item.count + ')</span>' +
+    '</label>';
+}
+
+function renderParent() {
+  var touchedWords = parentTouchedWords();
+
+  var catGroups = {}, subGroups = {};
+  touchedWords.forEach(function (w) {
+    if (!catGroups[w.cat]) catGroups[w.cat] = { id: w.cat, label: w.catLabel || w.cat, icon: w.catIcon, count: 0 };
+    catGroups[w.cat].count++;
+    if (w.subcategory) {
+      if (!subGroups[w.subcategory]) subGroups[w.subcategory] = { id: w.subcategory, label: w.subcategoryLabel || w.subcategory, count: 0 };
+      subGroups[w.subcategory].count++;
+    }
+  });
+  var byLabel = function (a, b) { return a.label.localeCompare(b.label, 'vi'); };
+  var catList = Object.keys(catGroups).map(function (k) { return catGroups[k]; }).sort(byLabel);
+  var subList = Object.keys(subGroups).map(function (k) { return subGroups[k]; }).sort(byLabel);
+
+  var filtersHtml = '';
+  if (catList.length) {
+    filtersHtml += '<div class="filtergroup"><span class="fglabel">Bộ từ</span><div class="fgchips">' +
+      catList.map(function (c) { return parentFilterChip('cats', c); }).join('') + '</div></div>';
+  }
+  if (subList.length) {
+    filtersHtml += '<div class="filtergroup"><span class="fglabel">Nhóm từ</span><div class="fgchips">' +
+      subList.map(function (s) { return parentFilterChip('subcats', s); }).join('') + '</div></div>';
+  }
 
   root.innerHTML =
     '<div class="parentpage" id="parentPageRoot">' +
     '<div class="pheader" id="pHeader">' +
     '<button id="backBtn" aria-label="Về trang bé">' + BACK_SVG + '</button>' +
-    '<div><h1>Báo cáo học tập</h1><p class="psub">' + (profile ? profile.name : 'Bé') + ' — LV0 (chưa học) đến LV' + MAX_LEVEL + ' (đã nhớ rất lâu)</p></div>' +
+    '<h1>Báo cáo học tập</h1>' +
     '</div>' +
-    body +
+    (filtersHtml ? '<div class="reportfilters">' + filtersHtml + '</div>' : '') +
+    '<div id="reportBody"></div>' +
     '</div>';
 
   document.getElementById('backBtn').addEventListener('click', function () {
     state.screen = 'home'; render();
   });
 
+  Array.prototype.forEach.call(document.querySelectorAll('.filterchip input[type=checkbox]'), function (cb) {
+    cb.addEventListener('change', function () {
+      parentFilter[this.dataset.group][this.value] = this.checked;
+      this.closest('label').classList.toggle('checked', this.checked);
+      parentRenderTable();
+    });
+  });
+
+  parentRenderTable();
   tryMountContentManager();
 }
 

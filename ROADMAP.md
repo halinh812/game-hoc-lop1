@@ -744,6 +744,33 @@ ra khi cần.
   trước; chạy lại 24 unit test + test chơi hết 1 ván — đều pass, không có
   gì bị ảnh hưởng.
 
+## Vòng 11 — Rút gọn tiêu đề + thêm bộ lọc "Bộ từ"/"Nhóm từ" cho bảng báo cáo
+
+Trang báo cáo dài dần khi bé chơi nhiều từ. Bỏ dòng phụ đề không cần
+thiết và thêm bộ lọc multi-select kiểu tick ô vuông để phụ huynh thu hẹp
+bảng theo đúng bộ từ/nhóm từ muốn xem.
+
+- Xoá dòng `"Bòng — LV0 (chưa học) đến LV10 (đã nhớ rất lâu)"` (`.psub`)
+  khỏi header Trang phụ huynh — chỉ còn tiêu đề "Báo cáo học tập".
+- **Bộ lọc mới** ngay dưới header: 2 nhóm chip dạng ô vuông tick —
+  "Bộ từ" (theo `w.cat`/`w.catLabel`) và "Nhóm từ" (theo
+  `w.subcategory`/`w.subcategoryLabel`, chỉ hiện nếu có ít nhất 1 từ đã
+  gắn nhóm) — đếm số từ ngay trên chip. Bấm tick chọn/bỏ chọn nhiều ô
+  cùng lúc trong 1 nhóm (`parentFilter.cats`/`parentFilter.subcats`, sống
+  suốt phiên). Logic lọc (`parentApplyFilter()`): trong 1 nhóm là OR
+  (chọn nhiều bộ/nhóm thì hiện từ thuộc BẤT KỲ bộ/nhóm nào đã tick), giữa
+  2 nhóm là AND; không tick gì ở 1 nhóm = không lọc theo nhóm đó (mặc
+  định hiện hết, không phải hiện rỗng).
+- Tách bảng kết quả ra 1 hàm riêng `parentRenderTable()` chỉ cập nhật
+  `#reportBody` — bấm tick chỉ vẽ lại đúng phần bảng, không dựng lại toàn
+  bộ trang (không ảnh hưởng tới bảng "Thêm/sửa từ vựng" nếu đang mở).
+- Đã kiểm thử bằng Playwright (gán sẵn tiến độ giả cho cả nhóm "Động vật
+  hoang dã" và "Động vật nuôi" qua localStorage rồi tải lại trang để mô
+  phỏng bé đã chơi nhiều từ): chip hiện đúng số đếm, tick "Động vật nuôi"
+  lọc đúng còn 3 từ (dog/cat/hen), bỏ tick quay lại đủ 6 từ, không còn
+  dòng phụ đề cũ; chạy lại 24 unit test + test chơi hết 1 ván + test sửa
+  từ có sẵn trong bảng "+" — đều pass, không ảnh hưởng gì.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
