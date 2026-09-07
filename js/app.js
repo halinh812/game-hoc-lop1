@@ -400,19 +400,46 @@ function celebrateTile(tileEl) {
   }
 }
 
+// Mỗi ô (0-3) có 1 góc phần tư cố định trong khu chơi suốt cả ván — chỉ
+// vị trí CHÍNH XÁC bên trong góc đó là ngẫu nhiên, tính lại mỗi khi con
+// vật ở ô đó đổi (xem forestPositionTile()). 2 góc phần tư khác nhau
+// không bao giờ chồng lấn nên đảm bảo 2 con không bao giờ đè lên nhau,
+// mà không cần thử-sai (rejection sampling) vốn có thể bị "kẹt".
+function forestPositionTile(tileEl, idx) {
+  var container = document.getElementById('freeplayArea');
+  if (!container) return;
+  var cw = container.clientWidth;
+  var ch = container.clientHeight;
+  var tw = tileEl.offsetWidth;
+  var th = tileEl.offsetHeight;
+  var halfW = cw / 2;
+  var halfH = ch / 2;
+  var qx = idx % 2;
+  var qy = idx < 2 ? 0 : 1;
+  var maxJitterX = Math.max(halfW - tw, 0);
+  var maxJitterY = Math.max(halfH - th, 0);
+  tileEl.style.left = (qx * halfW + Math.random() * maxJitterX) + 'px';
+  tileEl.style.top = (qy * halfH + Math.random() * maxJitterY) + 'px';
+}
+
+function forestPositionAllTiles() {
+  var tileEls = document.getElementById('freeplayArea').querySelectorAll('.freetile');
+  Array.prototype.forEach.call(tileEls, function (tileEl, i) { forestPositionTile(tileEl, i); });
+}
+
 function renderForest() {
   state.cardShownAt = Date.now();
 
-  // Kiểu cổ điển: lưới 2x2 ô ảnh/video, bấm chọn — không đi lại/animation.
-  // Chỉ đúng 1 ô (ô vừa được hỏi) bị đổi con sau mỗi câu, 3 ô kia giữ
-  // nguyên DOM (xem advanceForestRound) — quan trọng với ô có <video>: nếu
-  // dựng lại toàn bộ innerHTML mỗi câu, video của các ô KHÔNG đổi cũng bị
-  // tạo lại từ đầu và chạy lại từ giây 0, giật hình mỗi lượt.
+  // Vị trí ngẫu nhiên trong khu chơi thay vì lưới ô vuông — không đi
+  // lại/chạy (đã thử và bị chê rối ở các vòng trước), chỉ đứng yên tại
+  // vị trí ngẫu nhiên đó và lắc lư nhẹ. Chỉ đúng 1 ô (ô vừa được hỏi) bị
+  // đổi con + đổi vị trí mới sau mỗi câu, 3 ô kia giữ nguyên DOM (xem
+  // advanceForestRound) — quan trọng với ô có <video>: nếu dựng lại toàn
+  // bộ innerHTML mỗi câu, video của các ô KHÔNG đổi cũng bị tạo lại từ
+  // đầu và chạy lại từ giây 0, giật hình mỗi lượt.
   var tiles = state.slots.map(function (w, i) {
-    return '<div class="optiontile" data-idx="' + i + '">' + forestTileMedia(w) + '</div>';
+    return '<div class="freetile" data-idx="' + i + '">' + forestTileMedia(w) + '</div>';
   }).join('');
-
-  var targetWord = state.slots[state.targetIdx];
 
   root.innerHTML = worldBg() +
     '<div class="content">' +
@@ -421,10 +448,9 @@ function renderForest() {
     '<div class="starsrow" id="forestStars" style="margin:0;">' + forestStarsRow() + '</div>' +
     '<span style="width:38px;"></span>' +
     '</div>' +
-    '<div class="ribbon">🦁 Bắt con: <b id="targetWordEl">' + targetWord.en + '</b></div>' +
-    '<button class="soundbtn" id="speakBtn" aria-label="Nghe lại">' + SPEAK_SVG + '</button>' +
-    '<div class="optiongrid" id="optionGrid">' + tiles + '</div>' +
+    '<div class="freeplay" id="freeplayArea">' + tiles + '</div>' +
     '<div class="glasscard" id="feedbackBubble" style="display:none;"><p id="feedbackText" style="margin:0;font-weight:600;font-size:.9rem;"></p></div>' +
+    '<button class="soundbtn" id="speakBtn" aria-label="Nghe lại">' + SPEAK_SVG + '</button>' +
     '</div>';
 
   document.getElementById('homeBtn').addEventListener('click', function () {
@@ -433,19 +459,20 @@ function renderForest() {
   document.getElementById('speakBtn').addEventListener('click', speakForestTarget);
   speakForestTarget();
 
-  var optionGrid = document.getElementById('optionGrid');
-  Array.prototype.forEach.call(optionGrid.querySelectorAll('.optiontile'), function (tileEl) {
+  var freeplayArea = document.getElementById('freeplayArea');
+  Array.prototype.forEach.call(freeplayArea.querySelectorAll('.freetile'), function (tileEl) {
     tileEl.addEventListener('click', function () {
       handleForestAnswer(parseInt(tileEl.getAttribute('data-idx'), 10));
     });
   });
+  forestPositionAllTiles();
 }
 
 function handleForestAnswer(idx) {
   if (state.answered) return;
   state.answered = true;
 
-  var tileEls = document.getElementById('optionGrid').querySelectorAll('.optiontile');
+  var tileEls = document.getElementById('freeplayArea').querySelectorAll('.freetile');
   var targetWord = state.slots[state.targetIdx];
   var isCorrect = idx === state.targetIdx;
   var responseTimeMs = Date.now() - state.cardShownAt;
@@ -491,13 +518,13 @@ function advanceForestRound(replaceIdx) {
   state.answered = false;
   state.cardShownAt = Date.now();
 
-  var tileEls = document.getElementById('optionGrid').querySelectorAll('.optiontile');
+  var tileEls = document.getElementById('freeplayArea').querySelectorAll('.freetile');
   Array.prototype.forEach.call(tileEls, function (el) { el.classList.remove('wrong', 'correct'); });
   tileEls[replaceIdx].innerHTML = forestTileMedia(state.slots[replaceIdx]);
+  forestPositionTile(tileEls[replaceIdx], replaceIdx);
 
   document.getElementById('feedbackBubble').style.display = 'none';
   document.getElementById('forestStars').innerHTML = forestStarsRow();
-  document.getElementById('targetWordEl').textContent = state.slots[state.targetIdx].en;
 
   speakForestTarget();
 }
