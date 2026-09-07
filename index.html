@@ -32,30 +32,10 @@
   .stage{ width:min(430px,100%); min-height:100vh; position:relative; }
   .world{ position:relative; min-height:100vh; overflow:hidden; }
 
-  /* Nền "rừng" ghép từ 3 lớp CỐ ĐỊNH theo mép màn hình (không dùng 1 SVG to
-     kéo giãn theo tỉ lệ — với nội dung cao thấp khác nhau giữa các màn,
-     cách đó khiến cây/mặt đất trôi vào giữa nội dung rất lộn xộn). */
+  /* Nền "rừng" — ảnh minh hoạ tĩnh do người dùng tự tạo bằng AI (thay cho
+     bản vẽ CSS/SVG lớp chồng lớp trước đây), phủ kín toàn màn hình. */
   .world-bg{ position:absolute; inset:0; z-index:0; overflow:hidden;
-    background:linear-gradient(180deg,#FFEFC9 0%, #DCEFC6 42%, #EFF7E7 100%); }
-  .sun-glow{
-    position:absolute; top:16px; right:20px; width:76px; height:76px; border-radius:50%;
-    background:radial-gradient(circle, rgba(255,210,90,.95), rgba(255,210,90,0) 70%);
-    animation: sunpulse 5s ease-in-out infinite;
-  }
-  .cloud{ position:absolute; background:#fff; border-radius:999px; }
-  .cloud.c1{ width:64px; height:24px; top:64px; left:6%; opacity:.75; animation:driftx1 15s ease-in-out infinite; }
-  .cloud.c2{ width:46px; height:18px; top:104px; right:16%; opacity:.6; animation:driftx2 19s ease-in-out infinite; }
-  .canopy-band{ position:absolute; top:0; left:0; width:100%; height:88px; overflow:hidden; }
-  .canopy-band svg{ position:absolute; top:0; left:0; width:100%; height:88px; display:block; }
-  .ground-band{ position:absolute; bottom:0; left:0; width:100%; height:100px; overflow:hidden; }
-  .ground-band svg{ position:absolute; bottom:0; left:0; width:100%; height:100px; display:block; }
-
-  @keyframes sunpulse{ 0%,100%{ transform:scale(1); opacity:.9;} 50%{ transform:scale(1.07); opacity:1;} }
-  @keyframes driftx1{ 0%,100%{ transform:translateX(0);} 50%{ transform:translateX(10px);} }
-  @keyframes driftx2{ 0%,100%{ transform:translateX(0);} 50%{ transform:translateX(-8px);} }
-  .blade{ transform-origin:bottom center; animation: sway 3s ease-in-out infinite alternate; }
-  .blade:nth-child(3n){ animation-delay:-.6s; } .blade:nth-child(3n+1){ animation-delay:-1.3s; }
-  @keyframes sway{ from{ transform:rotate(-4deg);} to{ transform:rotate(4deg);} }
+    background:#EFF3E3 url('assets/backgrounds/forest-bg.jpg') center/cover no-repeat; }
 
   .content{ position:relative; z-index:2; min-height:100vh; display:flex; flex-direction:column; padding:100px 16px 24px; }
 
@@ -301,7 +281,7 @@
   .contentmgr pre.log{ background:#233A2A; color:#DCEFE0; font-size:.72rem; padding:10px; border-radius:8px; margin-top:10px; max-height:160px; overflow:auto; white-space:pre-wrap; }
 
   @media (prefers-reduced-motion: reduce){
-    .sun-glow,.cloud,.blade,.owl-wing,.owl-blink,.soundbtn::after,.starburst svg,.fall,.starsrow svg,
+    .owl-wing,.owl-blink,.soundbtn::after,.starburst svg,.fall,.starsrow svg,
     .sleepy,.tileswing,.freetile.correct,.tileburst,.homemascot svg{ animation:none !important; }
   }
   button:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
