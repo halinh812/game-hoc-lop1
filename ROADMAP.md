@@ -798,6 +798,30 @@ xổ ra danh sách ô vuông tick bên trong.
   unit test + test chơi hết 1 ván + test sửa từ có sẵn trong bảng "+" —
   đều pass, không ảnh hưởng gì.
 
+## Vòng 13 — "Sao" học tập trên màn chọn trò chơi
+
+Thêm chỉ số động viên bé nhìn thấy ngay: tổng số "sao" đã đạt được, hiện
+đối diện tên bé (góc phải) trên màn chọn trò chơi.
+
+- **Công thức**: tổng LV của TẤT CẢ kỹ năng (Nghe/Nói/Đọc/Viết/Nhìn) của
+  TẤT CẢ từ đã học — vd từ "tiger" có LV Nghe=1 + LV Đọc=1 → góp 2 sao.
+  Cài đặt thành `totalStars(wordsMap)` trong `js/learning-engine.js`
+  (cùng nhóm với `wrongRate()` — hàm thuần tuý tính trên dữ liệu
+  progress, có unit test riêng trong `tools/test-learning-engine.mjs`).
+  Khác với `buildRound()`/`wrongRate()` vốn luôn xét đúng 1 kỹ năng của 1
+  trò chơi, `totalStars()` cộng dồn cả 5 kỹ năng của mọi từ — đúng ý
+  "tổng LV" người dùng mô tả, không giới hạn theo trò chơi nào.
+- **Giao diện**: `renderHome()` (`js/app.js`) thêm `.starsbadge` (icon
+  ngôi sao 5 cánh vàng — dùng lại `starIcon('#FFD25A', ...)` đã có sẵn từ
+  màn "Khu rừng kỳ bí"/màn kết quả, không tạo icon mới + số) vào
+  `.profilebar`, đẩy sang phải bằng `margin-left:auto` trong hàng flex
+  (đối diện tên bé, không cần thêm cấu trúc mới).
+- Đã kiểm thử: unit test `totalStars` (tiger LV Nghe=1+Đọc=1, lion LV
+  Nghe=2 → đúng 4 sao; rỗng/null → 0) trong bộ 25 unit test (đều pass);
+  chụp ảnh Playwright xác nhận huy hiệu hiện đúng số 0 lúc chưa học gì và
+  đúng số 4 sau khi gán tiến độ giả qua localStorage rồi tải lại trang;
+  chạy lại test chơi hết 1 ván ở "Khu rừng kỳ bí" — vẫn pass.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs

@@ -87,6 +87,23 @@ export function wrongRate(p) {
   return total ? (p.wrongCount || 0) / total : 0;
 }
 
+// "Sao" học tập của bé = tổng LV của TẤT CẢ kỹ năng của TẤT CẢ từ đã học
+// (vd từ "tiger" có LV Nghe=1 + LV Đọc=1 → góp 2 sao). Cộng dồn tất cả 5
+// kỹ năng của mọi từ, không chỉ 1 kỹ năng — khác với buildRound()/
+// wrongRate() vốn luôn xét theo đúng 1 kỹ năng của 1 trò chơi.
+export function totalStars(wordsMap) {
+  var total = 0;
+  if (!wordsMap) return total;
+  Object.keys(wordsMap).forEach(function (wordId) {
+    var skills = wordsMap[wordId] && wordsMap[wordId].skills;
+    if (!skills) return;
+    SKILLS.forEach(function (s) {
+      if (skills[s] && typeof skills[s].level === 'number') total += skills[s].level;
+    });
+  });
+  return total;
+}
+
 export function shuffle(arr, rng) {
   var random = rng || Math.random;
   var a = arr.slice();
