@@ -638,6 +638,51 @@ CSS/SVG nhiều lớp chồng nhau (`.sun-glow` + `.cloud` + `.canopy-band` +
   test Playwright của vòng trước (đúng/sai + chơi hết 1 ván) — vẫn pass,
   không có gì bị ảnh hưởng bởi việc đổi nền.
 
+## Vòng 8 — Giới hạn lại ảnh nền chỉ trong màn chơi + đổi icon "Khu rừng kỳ bí"
+
+Sau khi thử, người dùng phản hồi: chỉ muốn ảnh nền AI (Vòng 7) áp dụng
+cho MÀN CHƠI thôi, còn màn chọn trò chơi (và các màn khác) giữ nguyên nền
+vẽ bằng CSS/SVG cũ. Đồng thời đổi luôn icon của ô trò chơi này.
+
+- **Thu hẹp phạm vi ảnh nền**: `worldBg()` (`js/app.js`) khôi phục lại
+  toàn bộ phần vẽ SVG mây/mặt trời/tán cây/mặt đất như trước Vòng 7, giờ
+  nhận thêm tham số `photo` — gọi `worldBg(true)` chỉ tại `renderForest()`
+  (màn chơi) để dùng class `.world-bg.forestphoto` (nền ảnh), mọi màn khác
+  (`loading`, `error`, onboarding, chọn trò chơi, màn kết quả) vẫn gọi
+  `worldBg()` như cũ, dùng lại đúng nền gradient + SVG gốc. Khôi phục lại
+  các CSS rule/keyframe đã xoá ở Vòng 7 (`.sun-glow`, `.cloud`,
+  `.canopy-band`, `.ground-band`, `.blade`...) và danh sách
+  `prefers-reduced-motion`.
+- **Đổi tên trò chơi**: "Thế giới động vật" → **"Khu rừng kỳ bí"**
+  (`GAMES` trong `js/app.js`).
+- **Nền ô icon**: thay vì màu `--glass` phẳng, ô `.gametile.forest-tile`
+  giờ dùng chính `assets/backgrounds/forest-bg.jpg` làm nền, nhưng
+  **crop/zoom nhỏ lại** (`background-position:50% 56%; background-size:
+  240%`) để chỉ thấy đúng đoạn sông uốn lượn + đồng cỏ + núi mờ phía xa ở
+  giữa ảnh — không lấy nguyên khung ảnh gốc (sẽ làm chữ + icon rối/khó
+  đọc trên diện tích nhỏ). Thêm 1 lớp phủ gradient tối dần ở đáy
+  (`::before`) để chữ "Khu rừng kỳ bí" màu trắng luôn đọc rõ dù nền ảnh
+  sáng/tối chỗ nào.
+- **Icon mặt hổ thay cho emoji 🦁**: dùng lại đúng ảnh có sẵn
+  `assets/animals/tiger.png` (KHÔNG tạo ảnh mới, KHÔNG sửa/ghi đè file
+  ảnh này) — chỉ crop bằng CSS thuần (không chạy script xử lý ảnh nào,
+  không đụng tới rule "hỏi trước khi sửa ảnh" trong `CLAUDE.md` vì ảnh
+  gốc trên đĩa không hề bị động tới): 1 khung tròn 68px `overflow:hidden`
+  (`.foresttile-face`), bên trong `<img>` được phóng to + dịch chuyển
+  bằng % (`width/height:145.16%; left:-22.58%; top:-11.29%`) sao cho chỉ
+  vùng đầu/mặt (đo được bằng bounding-box pixel thật của kênh alpha, quy
+  đổi % để không phụ thuộc kích thước hiển thị) lấp đầy khung tròn, ẩn hết
+  phần thân/đuôi. Áp dụng lại đúng animation `tileSway` (xoay ±2.5°, 2.6s)
+  đã dùng cho con vật trong màn chơi để icon "lắc lư nhẹ" y hệt cảm giác
+  quen thuộc.
+- Đã kiểm thử: 24 unit test pass; chụp ảnh xác nhận màn onboarding + màn
+  chọn trò chơi đã quay lại đúng nền cũ (không còn ảnh nền); icon ô "Khu
+  rừng kỳ bí" hiện đúng nền sông/núi crop nhỏ + mặt hổ tròn rõ nét, đúng
+  tâm (kiểm tra riêng bằng screenshot phần tử `.foresttile-face` khi tắt
+  animation để soi crop tĩnh); màn chơi vẫn giữ nguyên ảnh nền full màn
+  hình; chạy lại 2 test Playwright cũ (đúng/sai, chơi hết 1 ván) — vẫn
+  pass, không ảnh hưởng gì.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs

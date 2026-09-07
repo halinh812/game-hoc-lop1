@@ -32,10 +32,35 @@
   .stage{ width:min(430px,100%); min-height:100vh; position:relative; }
   .world{ position:relative; min-height:100vh; overflow:hidden; }
 
-  /* Nền "rừng" — ảnh minh hoạ tĩnh do người dùng tự tạo bằng AI (thay cho
-     bản vẽ CSS/SVG lớp chồng lớp trước đây), phủ kín toàn màn hình. */
+  /* Nền "rừng" ghép từ 3 lớp CỐ ĐỊNH theo mép màn hình (không dùng 1 SVG to
+     kéo giãn theo tỉ lệ — với nội dung cao thấp khác nhau giữa các màn,
+     cách đó khiến cây/mặt đất trôi vào giữa nội dung rất lộn xộn). Dùng cho
+     mọi màn TRỪ màn chơi "Khu rừng kỳ bí" (xem .world-bg.forestphoto). */
   .world-bg{ position:absolute; inset:0; z-index:0; overflow:hidden;
-    background:#EFF3E3 url('assets/backgrounds/forest-bg.jpg') center/cover no-repeat; }
+    background:linear-gradient(180deg,#FFEFC9 0%, #DCEFC6 42%, #EFF7E7 100%); }
+  /* Riêng màn chơi: ảnh nền minh hoạ tĩnh do người dùng tự tạo bằng AI,
+     phủ kín toàn màn hình, thay cho lớp mây/mặt trời/tán cây/mặt đất vẽ
+     bằng CSS/SVG ở trên. */
+  .world-bg.forestphoto{ background:#EFF3E3 url('assets/backgrounds/forest-bg.jpg') center/cover no-repeat; }
+  .sun-glow{
+    position:absolute; top:16px; right:20px; width:76px; height:76px; border-radius:50%;
+    background:radial-gradient(circle, rgba(255,210,90,.95), rgba(255,210,90,0) 70%);
+    animation: sunpulse 5s ease-in-out infinite;
+  }
+  .cloud{ position:absolute; background:#fff; border-radius:999px; }
+  .cloud.c1{ width:64px; height:24px; top:64px; left:6%; opacity:.75; animation:driftx1 15s ease-in-out infinite; }
+  .cloud.c2{ width:46px; height:18px; top:104px; right:16%; opacity:.6; animation:driftx2 19s ease-in-out infinite; }
+  .canopy-band{ position:absolute; top:0; left:0; width:100%; height:88px; overflow:hidden; }
+  .canopy-band svg{ position:absolute; top:0; left:0; width:100%; height:88px; display:block; }
+  .ground-band{ position:absolute; bottom:0; left:0; width:100%; height:100px; overflow:hidden; }
+  .ground-band svg{ position:absolute; bottom:0; left:0; width:100%; height:100px; display:block; }
+
+  @keyframes sunpulse{ 0%,100%{ transform:scale(1); opacity:.9;} 50%{ transform:scale(1.07); opacity:1;} }
+  @keyframes driftx1{ 0%,100%{ transform:translateX(0);} 50%{ transform:translateX(10px);} }
+  @keyframes driftx2{ 0%,100%{ transform:translateX(0);} 50%{ transform:translateX(-8px);} }
+  .blade{ transform-origin:bottom center; animation: sway 3s ease-in-out infinite alternate; }
+  .blade:nth-child(3n){ animation-delay:-.6s; } .blade:nth-child(3n+1){ animation-delay:-1.3s; }
+  @keyframes sway{ from{ transform:rotate(-4deg);} to{ transform:rotate(4deg);} }
 
   .content{ position:relative; z-index:2; min-height:100vh; display:flex; flex-direction:column; padding:100px 16px 24px; }
 
@@ -135,6 +160,31 @@
   .gametile:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(20,40,25,.14); }
   .gametile .emoji{ font-size:2.1rem; }
   .gametile .name{ font-family:'Baloo 2', sans-serif; font-weight:700; font-size:.86rem; color:var(--ink); line-height:1.25; }
+  /* Ô "Khu rừng kỳ bí": nền là 1 khung crop nhỏ (không phải toàn ảnh) của
+     chính ảnh nền trong game — canh vào đúng đoạn sông+núi+đồng cỏ ở giữa
+     ảnh cho đẹp mắt, không lấy phần trời trống phía trên. */
+  .gametile.forest-tile{
+    position:relative; overflow:hidden; border:1px solid var(--glass-border);
+    background:#DCEFC6 url('assets/backgrounds/forest-bg.jpg') 50% 56%/240% no-repeat;
+  }
+  .gametile.forest-tile::before{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(20,35,25,0) 38%, rgba(15,28,20,.58) 100%);
+  }
+  .gametile.forest-tile .name{ position:relative; z-index:1; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.55); }
+  /* Mặt con hổ: crop tròn zoom vào đúng vùng đầu/mặt của ảnh hổ gốc (ảnh
+     gốc 900x900, vùng mặt nằm trong khung 620x620 bắt đầu từ (140,70) —
+     quy đổi sang % để không phụ thuộc kích thước hiển thị thật). Xoay qua
+     lại nhẹ bằng đúng hiệu ứng .tileswing/tileSway đã dùng ở màn chơi. */
+  .foresttile-face{
+    position:relative; z-index:1; display:block; width:68px; height:68px;
+    border-radius:50%; overflow:hidden; background:#fff;
+    border:3px solid rgba(255,255,255,.92); box-shadow:0 4px 10px rgba(20,40,25,.35);
+    animation:tileSway 2.6s ease-in-out infinite;
+  }
+  .foresttile-face img{
+    position:absolute; width:145.16%; height:145.16%; left:-22.58%; top:-11.29%;
+  }
   /* Ô "Sắp ra mắt": trước là ổ khoá xám xịt chiếm hết sự chú ý (7/8 ô) —
      đổi sang linh vật ngủ gật be bé, màu pastel dịu, có nhịp thở nhẹ để
      đỡ trông "chết"/dở dang mà vẫn rõ ràng là chưa mở khoá. */
@@ -281,8 +331,8 @@
   .contentmgr pre.log{ background:#233A2A; color:#DCEFE0; font-size:.72rem; padding:10px; border-radius:8px; margin-top:10px; max-height:160px; overflow:auto; white-space:pre-wrap; }
 
   @media (prefers-reduced-motion: reduce){
-    .owl-wing,.owl-blink,.soundbtn::after,.starburst svg,.fall,.starsrow svg,
-    .sleepy,.tileswing,.freetile.correct,.tileburst,.homemascot svg{ animation:none !important; }
+    .sun-glow,.cloud,.blade,.owl-wing,.owl-blink,.soundbtn::after,.starburst svg,.fall,.starsrow svg,
+    .sleepy,.tileswing,.freetile.correct,.tileburst,.homemascot svg,.foresttile-face{ animation:none !important; }
   }
   button:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
 </style>
