@@ -254,3 +254,53 @@ hind legs pushing off the ground together, front paws tucked close to
 the chest, long upright ears, round fluffy tail, gentle curious
 expression, soft white fur with pink inner ears.
 ```
+
+## Bước 7 — Ảnh nền "khu rừng" (thay cho nền vẽ bằng code hiện tại)
+
+Nền hiện tại (`--sky-top/--sky-mid/--sky-bottom` gradient + dải "canopy"
++ dải "ground" + mặt trời + mây, tất cả vẽ bằng CSS/SVG trong
+`index.html`, lớp `.world-bg`) dùng chung cho **toàn bộ app** (mọi màn
+hình, không chỉ riêng Thế giới động vật). Đây là phần sẽ được **thay
+bằng 1 ảnh nền vẽ tay/AI** thay vì code — sống động hơn, có núi non
+sông nước như ảnh mẫu người dùng mô tả.
+
+**Cách dùng:** copy nguyên đoạn prompt bên dưới, dán vào công cụ AI ảnh
+(Google ImageFX, Bing Image Creator, Leonardo.ai...), chọn tỉ lệ khung
+hình **dọc (portrait) 9:16** nếu công cụ cho chọn (khớp màn hình điện
+thoại). Tạo vài phiên bản, chọn ảnh ưng ý nhất rồi gửi trực tiếp vào
+cuộc trò chuyện — tôi sẽ resize/tối ưu và ghép thành nền thật cho app
+(thay `.world-bg`).
+
+```
+Vibrant, cheerful flat-vector cartoon illustration of a lush jungle
+forest landscape, background art for a children's mobile learning
+game, in the same cute soft cel-shaded style as a chibi baby-animal
+character illustration (smooth rounded shapes, no sharp or scary
+edges, thin clean outlines on major shapes, warm saturated colors,
+gentle gradient lighting). A warm cream-to-soft-green sky gradient at
+the top with a few fluffy white clouds and a warm glowing sun. In the
+middle distance, soft rounded mountain peaks and rolling green hills
+layered with a light misty haze. A gentle winding blue river with
+sparkling highlights flows from the mountains through a grassy
+clearing toward the bottom of the frame. Lush rounded trees, palm
+fronds, and leafy bushes with soft foliage clusters frame the left and
+right edges of the image, leaving the center and lower-middle area of
+the frame open as empty grassy ground (this open space is reserved for
+game characters that will be placed on top later, so keep it visually
+calm and uncluttered, not the busiest part of the image). Bright,
+inviting, playful mood. Portrait orientation, 9:16 aspect ratio,
+full-bleed edge-to-edge illustration filling the entire frame.
+Absolutely no animals, no people, no characters, no text, no letters,
+no logo, no watermark anywhere in the image.
+Avoid: photographic or realistic rendering, 3D render look, dark or
+scary mood, cluttered or busy composition, any animal or human
+character, any text or watermark, cropped or off-center composition.
+```
+
+Lưu ý khi chọn ảnh: ưu tiên ảnh có **khoảng trống rõ ràng ở giữa và
+phía dưới khung hình** (nơi các con vật trong game sẽ hiển thị đè lên
+trên) — tránh ảnh có quá nhiều chi tiết rậm rạp ngay giữa khung, sẽ làm
+con vật khó nhìn khi đặt chồng lên.
+
+Khác với ảnh con vật (Bước 1-6), ảnh nền này **không cần xoá nền/nền
+trong suốt** — giữ nguyên làm 1 ảnh nền đầy khung (JPG/PNG đều được).
