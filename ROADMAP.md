@@ -584,6 +584,25 @@ nút loa, chuyển xuống dưới cùng màn hình.
   giữ nguyên 3 giây, sau đó chỉ đúng 1 ô đổi vị trí+con vật, 3 ô còn lại
   giữ nguyên như thiết kế xuyên suốt dự án.
 
+## Vòng 6 — Bỏ khung ô vuông quanh con vật, nút loa to hơn
+
+- **Bỏ hẳn khung ô vuông** (`background`/`border`/`box-shadow` của
+  `.freetile`) — giờ chỉ còn đúng hình con vật, bấm thẳng vào ảnh (vùng
+  bấm vẫn giữ nguyên kích thước ô cũ dù không còn thấy viền, nên vẫn dễ
+  trúng hơn bấm đúng y hệt từng pixel không trong suốt của ảnh). Đúng/sai
+  giờ báo bằng **quầng sáng màu ôm theo đúng viền trong suốt của ảnh**
+  (`filter:drop-shadow(...)` 2 lớp thay vì `background-color`/
+  `border-color` của 1 hình vuông) — tự nhiên hơn nhiều vì ảnh chibi nền
+  trong suốt, quầng sáng sẽ ôm sát hình con vật chứ không tạo ra 1 khối
+  chữ nhật giả xung quanh.
+- **Nút loa to hơn** (46px → 68px, icon bên trong 18px → 26px) để bé dễ
+  bấm hơn.
+- Đã kiểm thử lại toàn bộ bộ Playwright của vòng trước (0% chồng lấn,
+  không còn ribbon, thứ tự phần tử, chơi hết 1 ván tới thắng chỉ bằng
+  "nghe", nhánh bấm sai giữ đúng 3 giây) — không có gì bị hỏng bởi thay
+  đổi giao diện lần này; chụp ảnh xác nhận bằng mắt quầng sáng xanh/đỏ ôm
+  đúng hình con vật, không còn khung vuông nào.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
