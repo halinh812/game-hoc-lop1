@@ -706,6 +706,44 @@ trắng/bóng đổ khung.
   con hổ (kể cả đuôi) trong khung chữ nhật của ô, không còn khung tròn;
   chạy lại test chơi hết 1 ván ở màn chơi — vẫn pass, không ảnh hưởng gì.
 
+## Vòng 10 — Gói "Thêm/sửa từ vựng" vào bảng (modal) mở từ nút +
+
+Trang phụ huynh trước đây hiện thẳng cả mục "Thêm/sửa ảnh, video cho từ
+vựng" ở cuối trang, khiến trang dài và rối mắt (nhất là khi báo cáo học
+tập có nhiều dòng). Đổi sang: mục này giờ ẩn sau 1 nút tròn "+" và chỉ mở
+ra khi cần.
+
+- **Nút +**: `header.insertAdjacentHTML(...)` chèn `<button class="cmFabBtn"
+  id="cmOpenBtn">+</button>` vào `#pHeader` (thêm `id` này cho `.pheader`
+  trong `renderParent()`) — chỉ hiện khi trang đang chạy qua server quản
+  trị local (đúng cơ chế feature-detect cũ qua `tryMountContentManager()`,
+  không đổi).
+- **Bảng (modal)**: toàn bộ form giờ nằm trong `#cmOverlay` (lớp phủ mờ
+  toàn màn hình, `position:fixed`) chứa `.cmModal` trượt lên từ đáy màn
+  hình — bấm nút + để mở (`overlay.hidden = false`), bấm ✕ hoặc bấm ra
+  ngoài vùng modal để đóng (`overlay.hidden = true`).
+- **Bớt chú thích**: bỏ hẳn đoạn giải thích dài ở đầu form (về tự xoá nền
+  trắng/tự nén video...) và rút ngắn tiêu đề còn "Thêm / sửa từ vựng".
+- **Đổi tên nhãn**: "Nhóm con" → **"Nhóm từ"** (đúng yêu cầu, tránh nhầm
+  với khái niệm khác) — chỉ đổi chữ hiển thị, id/logic phía sau
+  (`cmSubcategory`, `cmRebuildSubcategorySelect()`...) giữ nguyên.
+- **Bỏ hẳn "Độ khó"**: xoá `<select id="cmDifficulty">` khỏi giao diện —
+  độ khó của từ giờ để trò chơi tự quyết định lúc chơi, người nhập không
+  cần chọn. `cmSave()` không còn gửi field `difficulty` lên nữa; phía
+  server (`tools/admin-server.mjs`) đã sẵn có fallback đúng ý: từ MỚI mặc
+  định `difficulty=1`, từ đã có thì giữ nguyên giá trị cũ nếu không gửi gì
+  — không cần sửa gì bên server.
+- **Nút gọn/đẹp hơn**: "Lưu" + "Xuất bản" giờ xếp ngang hàng nhau
+  (`.cmBtnRow{ display:flex; gap:10px; }`, mỗi nút `flex:1`), bo góc to
+  hơn (12px), nút "Xuất bản" có thêm viền nhẹ để phân biệt rõ với nút
+  "Lưu" (nút chính, nền xanh lá).
+- Đã kiểm thử bằng Playwright: nút + hiện đúng, mở/đóng modal hoạt động
+  (bấm nút hoặc bấm ra ngoài), không còn `#cmDifficulty` trong DOM, nhãn
+  "Nhóm từ" hiển thị đúng, luồng "sửa từ có sẵn" (chọn "hổ" → tự điền
+  Tiếng Anh/Việt + hiện đúng ảnh preview, ẩn ô Mã từ) hoạt động đúng như
+  trước; chạy lại 24 unit test + test chơi hết 1 ván — đều pass, không có
+  gì bị ảnh hưởng.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs

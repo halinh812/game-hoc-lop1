@@ -300,14 +300,30 @@
   }
   .emptystate{ text-align:center; color:#8B968E; font-size:.86rem; padding:40px 10px; line-height:1.6; }
 
-  /* Phần "Thêm/sửa ảnh, video" trong Trang phụ huynh — chỉ tự hiện ra khi
-     trang này đang được mở qua server quản trị local (npm start), vì lúc
-     đó mới có API /api/* để ghi file. Trên GitHub Pages (web tĩnh, không
-     server) phần này không hiện gì cả — xem tryMountContentManager() trong
-     js/app.js. */
-  .contentmgr{ margin-top:26px; padding-top:18px; border-top:1px solid #EAE5D5; }
-  .contentmgr h2{ font-family:'Baloo 2', sans-serif; font-size:1rem; font-weight:800; margin:0 0 4px; }
-  .contentmgr .hint{ font-size:.78rem; color:#6B7A70; margin:0 0 14px; line-height:1.5; }
+  /* Phần "Thêm/sửa từ vựng" trong Trang phụ huynh — chỉ tự hiện ra (nút +
+     trong pheader) khi trang này đang được mở qua server quản trị local
+     (npm start), vì lúc đó mới có API /api/* để ghi file. Trên GitHub
+     Pages (web tĩnh, không server) không có gì thêm ở đây cả — xem
+     tryMountContentManager() trong js/app.js. Trước đây mục này nằm thẳng
+     ở cuối trang khiến trang dài/rối — giờ gói vào 1 bảng (modal) trượt
+     lên từ đáy màn hình, ẩn/hiện qua nút tròn "+". */
+  .parentpage .pheader .cmFabBtn{ margin-left:auto; background:#2f8f5b; color:#fff; font-size:1.3rem; font-weight:700; }
+  .cmOverlay{
+    position:fixed; inset:0; z-index:50; background:rgba(20,35,25,.45);
+    display:flex; align-items:flex-end; justify-content:center;
+  }
+  .cmOverlay[hidden]{ display:none; }
+  .cmModal{
+    width:100%; max-width:430px; max-height:88vh; overflow-y:auto;
+    background:#FBFAF6; border-radius:20px 20px 0 0; padding:16px 18px 22px;
+    box-shadow:0 -8px 28px rgba(20,40,25,.28);
+  }
+  .cmModalHead{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .cmModalHead h2{ font-family:'Baloo 2', sans-serif; font-size:1.05rem; font-weight:800; margin:0; }
+  .cmCloseBtn{
+    border:none; background:#EFEBDD; color:#233A2A; width:30px; height:30px; border-radius:9px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex:none; font-size:.95rem;
+  }
   .contentmgr label{ display:block; font-size:.75rem; font-weight:700; color:#6B7A70; margin:12px 0 4px; }
   .contentmgr label:first-of-type{ margin-top:0; }
   .contentmgr select, .contentmgr input[type=text]{
@@ -320,10 +336,13 @@
   .contentmgr .preview img, .contentmgr .preview video{ width:64px; height:64px; object-fit:contain; background:#F4F1E6; border-radius:8px; border:1px solid #EAE5D5; }
   .contentmgr .preview .empty{ font-size:.7rem; color:#8B968E; align-self:center; }
   .contentmgr .badge{ display:inline-block; font-size:.68rem; background:#F4F1E6; color:#6B7A70; padding:2px 7px; border-radius:999px; margin-left:4px; }
-  .contentmgr button{ appearance:none; border:none; border-radius:9px; padding:10px 16px; font-size:.85rem; font-weight:700; cursor:pointer; margin-top:14px; display:block; }
+  .contentmgr .hint{ font-size:.72rem; color:#8B968E; margin:4px 0 0; line-height:1.4; }
+  .contentmgr .cmBtnRow{ display:flex; gap:10px; margin-top:18px; }
+  .contentmgr button{ appearance:none; border:none; border-radius:12px; padding:11px 16px; font-size:.86rem; font-weight:700; cursor:pointer; }
+  .contentmgr .cmBtnRow button{ flex:1; }
   .contentmgr button.savebtn{ color:#fff; background:#2f8f5b; }
   .contentmgr button.savebtn:disabled{ background:#a9b8ac; }
-  .contentmgr button.pubbtn{ color:#233A2A; background:#EFEBDD; }
+  .contentmgr button.pubbtn{ color:#233A2A; background:#EFEBDD; border:1px solid #EAE5D5; }
   .contentmgr .msg{ margin-top:10px; padding:8px 10px; border-radius:8px; font-size:.78rem; white-space:pre-wrap; line-height:1.5; }
   .contentmgr .msg.ok{ background:#E6F5EC; color:#1f6d43; }
   .contentmgr .msg.err{ background:#FBECEB; color:#B24A43; }
