@@ -771,6 +771,33 @@ bảng theo đúng bộ từ/nhóm từ muốn xem.
   dòng phụ đề cũ; chạy lại 24 unit test + test chơi hết 1 ván + test sửa
   từ có sẵn trong bảng "+" — đều pass, không ảnh hưởng gì.
 
+## Vòng 12 — Đổi bộ lọc báo cáo sang dạng dropdown (bấm mới hiện ô tick)
+
+Vòng 11 hiện sẵn 2 hàng chip lúc nào cũng chiếm chỗ trên trang. Đổi sang
+đúng kiểu dropdown: 2 nút "Bộ từ ▾" / "Nhóm từ ▾" gọn 1 dòng, bấm vào mới
+xổ ra danh sách ô vuông tick bên trong.
+
+- `parentFilterDropdown(group, title, list)` (`js/app.js`) dựng 1 nút
+  `.filterddBtn` (nhãn + số lượng đang chọn dạng badge tròn nếu >0 + mũi
+  tên ▾) và 1 `.filterddPanel` ẩn sẵn (`hidden`) chứa các ô `.filterchip`
+  (đúng ô vuông tick đã có từ Vòng 11, chỉ đổi layout từ chip rời rạc
+  sang từng dòng trong panel).
+- Bấm nút → đóng hết panel khác đang mở rồi mở đúng panel này (chỉ 1
+  dropdown mở tại 1 thời điểm); bấm ra ngoài `.filterdd` (bảng, tiêu đề,
+  nút khác...) → tự đóng hết, xử lý qua 1 listener duy nhất gắn trên
+  `document`, được gỡ ra rồi gắn lại mỗi lần `renderParent()` chạy để
+  không cộng dồn listener qua nhiều lượt vào/ra Trang phụ huynh.
+- Tick 1 ô **không đóng panel** (đúng hành vi dropdown multi-select quen
+  thuộc — tick được nhiều ô liên tiếp mới đóng), đồng thời cập nhật ngay
+  badge số lượng trên nút (`parentUpdateFilterBadge()`) mà không cần vẽ
+  lại cả trang.
+- Đã kiểm thử bằng Playwright: panel ẩn mặc định, bấm đúng nút "Nhóm từ"
+  chỉ mở đúng panel đó, tick "Động vật nuôi" lọc đúng còn dog/cat/hen +
+  badge hiện "1" + panel vẫn mở sau khi tick, bấm ra ngoài đóng hết panel,
+  mở lại panel thấy đúng trạng thái tick cũ được giữ nguyên; chạy lại 24
+  unit test + test chơi hết 1 ván + test sửa từ có sẵn trong bảng "+" —
+  đều pass, không ảnh hưởng gì.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
