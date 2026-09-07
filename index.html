@@ -143,6 +143,14 @@
   }
   .profilebar .greet{ font-family:'Baloo 2', sans-serif; font-weight:800; font-size:1.15rem; color:var(--ink); text-shadow:0 1px 0 rgba(255,255,255,.5); }
   .profilebar .greet span{ display:block; font-family:'Be Vietnam Pro',sans-serif; font-weight:600; font-size:.76rem; color:var(--ink-soft); text-shadow:none; }
+  /* "Sao" học tập — tổng LV mọi kỹ năng của mọi từ đã học (xem
+     totalStars() trong js/learning-engine.js), hiện đối diện tên bé. */
+  .profilebar .starsbadge{
+    margin-left:auto; flex:none; display:flex; align-items:center; gap:5px;
+    background:var(--glass); border:1px solid var(--glass-border); border-radius:999px; padding:7px 12px;
+    box-shadow:0 4px 10px rgba(20,40,25,.16);
+    font-family:'Baloo 2', sans-serif; font-weight:800; font-size:1rem; color:var(--ink);
+  }
 
   .gamegrid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   /* Cú mèo linh vật lấp khoảng trống phía dưới lưới trò chơi — trước đây

@@ -15,6 +15,7 @@ import {
   applyAnswer,
   getSkillProgress,
   wrongRate,
+  totalStars,
   buildRound,
   createSessionQueue,
   requeueAfterAnswer,
@@ -141,6 +142,17 @@ test('wrongRate: tính đúng tỉ lệ sai, 0 khi chưa có lượt nào', func
   assert.equal(wrongRate(null), 0);
   assert.equal(wrongRate({ correctCount: 0, wrongCount: 0 }), 0);
   assert.equal(wrongRate({ correctCount: 1, wrongCount: 3 }), 0.75);
+});
+
+test('totalStars: cộng LV mọi kỹ năng của mọi từ, 0 khi chưa học gì', function () {
+  assert.equal(totalStars({}), 0);
+  assert.equal(totalStars(null), 0);
+  var words = {};
+  applyAnswer(words, 'tiger', 'listen', 'correct-fast'); // listen LV0->1
+  applyAnswer(words, 'tiger', 'read', 'correct-fast');   // read LV0->1
+  applyAnswer(words, 'lion', 'listen', 'correct-fast');
+  applyAnswer(words, 'lion', 'listen', 'correct-fast');  // listen LV0->1->2
+  assert.equal(totalStars(words), 4, 'tiger(1+1) + lion(2) = 4 sao');
 });
 
 // --- buildRound (theo 1 kỹ năng cụ thể) ---

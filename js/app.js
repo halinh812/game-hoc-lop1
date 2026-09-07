@@ -18,7 +18,8 @@ import {
   applyAnswer,
   classifyAnswer,
   getSkillProgress,
-  wrongRate
+  wrongRate,
+  totalStars
 } from './learning-engine.js';
 import { createAudioProvider } from './audio-provider.js';
 import { getAvatars, avatarSvg } from './avatars.js';
@@ -273,6 +274,7 @@ function renderHome() {
     '<div class="profilebar">' +
     '<button type="button" class="avatarcircle" id="avatarEditBtn" aria-label="Đổi hồ sơ">' + avatarSvg(profile.avatarId, 44) + '</button>' +
     '<div class="greet">Chào ' + profile.name + '! <span>Chọn trò chơi để bắt đầu nhé</span></div>' +
+    '<div class="starsbadge" title="Tổng số sao đã đạt được">' + starIcon('#FFD25A', 20, '#E4952A') + '<span>' + totalStars(store.words) + '</span></div>' +
     '</div>' +
     '<div class="gamegrid" id="gameGrid">' + tiles + '</div>' +
     '<div class="homemascot">' + owlMascot(72) + '</div>' +
