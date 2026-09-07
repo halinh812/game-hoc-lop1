@@ -683,6 +683,29 @@ vẽ bằng CSS/SVG cũ. Đồng thời đổi luôn icon của ô trò chơi n�
   hình; chạy lại 2 test Playwright cũ (đúng/sai, chơi hết 1 ván) — vẫn
   pass, không ảnh hưởng gì.
 
+## Vòng 9 — Bỏ khung tròn quanh icon con hổ, hiện cả con trong khung chữ nhật
+
+Phản hồi sau Vòng 8: icon crop tròn zoom vào mặt hổ trông "khung ảnh đại
+diện" hơn là 1 nhân vật thật; đổi sang hiện **nguyên cả con hổ** (đúng ảnh
+gốc, không crop) trong khung hình chữ nhật, không còn viền tròn/nền
+trắng/bóng đổ khung.
+
+- `.foresttile-face` (`index.html`): bỏ hết `border-radius:50%`,
+  `overflow:hidden`, `background:#fff`, `border`, `box-shadow` — chỉ còn
+  1 khung `84×84px` chứa `<img>` `object-fit:contain` (giữ nguyên tỉ lệ
+  ảnh gốc, không méo), có `filter:drop-shadow(...)` nhẹ đúng kiểu con vật
+  trong màn chơi (không còn khung/hộp bao quanh, chỉ có ảnh + bóng đổ).
+  Vẫn giữ animation `tileSway` (xoay ±2.5°) để lắc lư nhẹ như cũ.
+- Bỏ toàn bộ phần crop-zoom-vào-mặt bằng % (`width:145.16%`,
+  `left:-22.58%`, `top:-11.29%`...) của Vòng 8 — không còn cần thiết vì
+  hiện nguyên cả ảnh chứ không crop 1 phần.
+- Không đụng tới file ảnh `assets/animals/tiger.png` (đúng ảnh có sẵn,
+  chỉ đổi cách hiển thị bằng CSS) — không vi phạm rule "hỏi trước khi sửa
+  ảnh" trong `CLAUDE.md`.
+- Đã kiểm thử: 24 unit test pass; chụp ảnh xác nhận icon giờ hiện nguyên
+  con hổ (kể cả đuôi) trong khung chữ nhật của ô, không còn khung tròn;
+  chạy lại test chơi hết 1 ván ở màn chơi — vẫn pass, không ảnh hưởng gì.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
