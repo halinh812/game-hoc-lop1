@@ -172,18 +172,18 @@
     background:linear-gradient(180deg, rgba(20,35,25,0) 38%, rgba(15,28,20,.58) 100%);
   }
   .gametile.forest-tile .name{ position:relative; z-index:1; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.55); }
-  /* Mặt con hổ: crop tròn zoom vào đúng vùng đầu/mặt của ảnh hổ gốc (ảnh
-     gốc 900x900, vùng mặt nằm trong khung 620x620 bắt đầu từ (140,70) —
-     quy đổi sang % để không phụ thuộc kích thước hiển thị thật). Xoay qua
-     lại nhẹ bằng đúng hiệu ứng .tileswing/tileSway đã dùng ở màn chơi. */
+  /* Cả con hổ (không crop mặt, không khung tròn/viền/nền trắng) — đúng ảnh
+     gốc assets/animals/tiger.png hiển thị nguyên trong khung hình chữ
+     nhật, giống hệt cách con vật hiện trong màn chơi (chỉ có ảnh + bóng
+     đổ, không có khung/hộp bao quanh). Xoay qua lại nhẹ bằng đúng hiệu
+     ứng .tileswing/tileSway đã dùng ở màn chơi. */
   .foresttile-face{
-    position:relative; z-index:1; display:block; width:68px; height:68px;
-    border-radius:50%; overflow:hidden; background:#fff;
-    border:3px solid rgba(255,255,255,.92); box-shadow:0 4px 10px rgba(20,40,25,.35);
+    position:relative; z-index:1; display:block; width:84px; height:84px;
     animation:tileSway 2.6s ease-in-out infinite;
   }
   .foresttile-face img{
-    position:absolute; width:145.16%; height:145.16%; left:-22.58%; top:-11.29%;
+    width:100%; height:100%; object-fit:contain;
+    filter:drop-shadow(0 4px 3px rgba(20,40,25,.3));
   }
   /* Ô "Sắp ra mắt": trước là ổ khoá xám xịt chiếm hết sự chú ý (7/8 ô) —
      đổi sang linh vật ngủ gật be bé, màu pastel dịu, có nhịp thở nhẹ để
