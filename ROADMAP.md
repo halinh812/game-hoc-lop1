@@ -603,6 +603,41 @@ nút loa, chuyển xuống dưới cùng màn hình.
   đổi giao diện lần này; chụp ảnh xác nhận bằng mắt quầng sáng xanh/đỏ ôm
   đúng hình con vật, không còn khung vuông nào.
 
+## Vòng 7 — Nền "khu rừng" bằng ảnh AI thay cho nền vẽ CSS/SVG
+
+Người dùng dùng prompt tạo ảnh đã thống nhất trước (xem "Bước 7" trong
+`ANIMAL_ART_PIPELINE.md`) để tự tạo 1 ảnh nền khu rừng bằng AI (mây,
+mặt trời, núi, sông, cây cối, khoảng đất trống ở giữa dưới cho nhân vật
+đứng lên trên) rồi gửi trực tiếp — thay hẳn cho nền trước đây vẽ bằng
+CSS/SVG nhiều lớp chồng nhau (`.sun-glow` + `.cloud` + `.canopy-band` +
+`.ground-band`, sinh ra trong hàm `worldBg()` của `js/app.js`).
+
+- Ảnh lưu tại `assets/backgrounds/forest-bg.jpg` (768×1376, tỉ lệ dọc
+  gần 9:16, khớp màn hình điện thoại), dùng chung cho **toàn bộ app**
+  (mọi màn dùng `worldBg()`: onboarding, chọn trò chơi, Thế giới động
+  vật, màn kết quả...) — không riêng cho 1 trò chơi, vì `.world-bg` vốn
+  là nền chia sẻ của cả app, không phải nền riêng của Thế giới động vật.
+  Trang phụ huynh (`.parentpage`) có nền riêng, không đụng tới.
+- `.world-bg` (CSS) đổi từ `background:linear-gradient(...)` sang
+  `background:#EFF3E3 url('assets/backgrounds/forest-bg.jpg')
+  center/cover no-repeat` (màu nền `#EFF3E3` chỉ là dự phòng trong lúc
+  ảnh đang tải).
+- `worldBg()` (`js/app.js`) rút gọn chỉ còn trả về
+  `<div class="world-bg" aria-hidden="true"></div>` — xoá hết phần sinh
+  SVG mây/mặt trời/tán cây/mặt đất/cỏ lay động trước đây (đã "vẽ sẵn"
+  trong ảnh, không cần code nữa). Dọn theo các CSS rule/keyframe không
+  còn dùng tới (`.sun-glow`, `.cloud`, `.canopy-band`, `.ground-band`,
+  `.blade`, `@keyframes sunpulse/driftx1/driftx2/sway`) và bỏ chúng khỏi
+  danh sách `prefers-reduced-motion`.
+- Ảnh nền này **không phải chỉnh sửa 1 ảnh có sẵn trong repo** (không
+  đụng tới rule "hỏi trước khi sửa ảnh" trong `CLAUDE.md`) — là ảnh mới
+  hoàn toàn do người dùng tự tạo và gửi để thêm vào.
+- Đã kiểm thử: chạy lại 24 unit test (đều pass), khởi động server cục bộ
+  và chụp ảnh 3 màn hình chính (onboarding, chọn trò chơi, Thế giới động
+  vật) xác nhận ảnh nền hiển thị đúng full màn hình ở mọi nơi; chạy lại 2
+  test Playwright của vòng trước (đúng/sai + chơi hết 1 ván) — vẫn pass,
+  không có gì bị ảnh hưởng bởi việc đổi nền.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs

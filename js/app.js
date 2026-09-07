@@ -86,37 +86,7 @@ function sleepyMascot(size) {
 }
 
 function worldBg() {
-  return '<div class="world-bg" aria-hidden="true">' +
-    '<div class="sun-glow"></div>' +
-    '<div class="cloud c1"></div><div class="cloud c2"></div>' +
-    '<div class="canopy-band"><svg viewBox="0 0 400 88" preserveAspectRatio="none">' +
-    '<path d="M-10 50 Q40 14 100 46 T220 40 T340 50 T410 28 V-10 H-10 Z" fill="#8FC48A"/>' +
-    '<path d="M-10 66 Q50 32 130 62 T280 54 T410 50 V-10 H-10 Z" fill="#4E8F58"/>' +
-    // Cụm cây tán tròn rậm (nhiều hình tròn chồng nhau) thay cho 1 hình
-    // chữ nhật thân cây trơ trọi trước đây — giống dáng cây bụi tròn trong
-    // ảnh mẫu khu rừng minh hoạ.
-    '<rect x="40" y="46" width="12" height="30" rx="5" fill="#7A5636"/>' +
-    '<circle cx="30" cy="38" r="20" fill="#5FA766"/><circle cx="48" cy="30" r="24" fill="#6FBB74"/><circle cx="64" cy="40" r="18" fill="#5FA766"/>' +
-    '<rect x="330" y="42" width="14" height="34" rx="5" fill="#6B4B2E"/>' +
-    '<circle cx="318" cy="32" r="22" fill="#5FA766"/><circle cx="340" cy="24" r="26" fill="#6FBB74"/><circle cx="358" cy="36" r="20" fill="#5FA766"/>' +
-    '<rect x="196" y="52" width="9" height="20" rx="4" fill="#7A5636"/><circle cx="200" cy="46" r="16" fill="#6FBB74" opacity=".9"/>' +
-    '</svg></div>' +
-    '<div class="ground-band"><svg viewBox="0 0 400 112" preserveAspectRatio="none">' +
-    '<path d="M0 30 Q100 5 200 25 T400 15 V112 H0 Z" fill="#8FC48A" opacity=".4"/>' +
-    '<path d="M0 55 Q100 35 200 50 T400 42 V112 H0 Z" fill="#4B8A57"/>' +
-    '<path d="M0 78 H400 V112 H0 Z" fill="#356B44"/>' +
-    // Đá cuội + hoa nhỏ ven đường — chi tiết trang trí để mặt đất đỡ trống.
-    '<ellipse cx="90" cy="86" rx="16" ry="10" fill="#9A9488"/><ellipse cx="90" cy="83" rx="12" ry="6" fill="#B4AEA0"/>' +
-    '<ellipse cx="300" cy="90" rx="20" ry="12" fill="#9A9488"/><ellipse cx="300" cy="86" rx="14" ry="7" fill="#B4AEA0"/>' +
-    '<g><line x1="140" y1="90" x2="140" y2="78" stroke="#356B44" stroke-width="2"/><circle cx="140" cy="76" r="4" fill="#FFD25A"/></g>' +
-    '<g><line x1="250" y1="94" x2="250" y2="80" stroke="#356B44" stroke-width="2"/><circle cx="250" cy="78" r="4" fill="#F4958A"/></g>' +
-    '<g><line x1="60" y1="96" x2="60" y2="84" stroke="#356B44" stroke-width="2"/><circle cx="60" cy="82" r="3.5" fill="#FFD25A"/></g>' +
-    '<g stroke="#356B44" stroke-width="3.4" stroke-linecap="round">' +
-    '<path class="blade" d="M20 80 Q15 64 22 52"/><path class="blade" d="M40 80 Q45 62 38 50"/>' +
-    '<path class="blade" d="M360 80 Q355 64 362 52"/><path class="blade" d="M380 80 Q385 62 378 50"/>' +
-    '<path class="blade" d="M200 80 Q195 64 202 52"/>' +
-    '</g></svg></div>' +
-    '</div>';
+  return '<div class="world-bg" aria-hidden="true"></div>';
 }
 
 var audio = createAudioProvider();
