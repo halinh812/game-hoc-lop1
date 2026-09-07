@@ -165,40 +165,41 @@
   @keyframes sleepyBreathe{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.06); } }
 
   /* ---------- forest game ---------- */
-  .ribbon{
-    align-self:center; background:var(--coral); color:#fff; font-family:'Baloo 2', sans-serif;
-    font-weight:700; font-size:.9rem; padding:9px 20px; border-radius:999px;
-    box-shadow:0 5px 0 #b8482c, 0 8px 14px rgba(20,40,25,.2); margin-bottom:14px; text-align:center;
-  }
-  .ribbon b{ color:var(--star); }
   .starsrow{ display:flex; justify-content:center; gap:5px; margin-bottom:10px; }
   .starsrow svg{ width:16px; height:16px; opacity:.35; transition:opacity .2s ease, transform .2s ease; }
   .starsrow svg.lit{ opacity:1; transform:scale(1.15); }
+  /* Nút loa giờ là thứ DUY NHẤT ở khu vực chữ/nút — không còn dòng "Bắt
+     con: X" nữa (bé nghe bằng tai, không đọc chữ) — và chuyển xuống cuối
+     màn thay vì ở trên đầu khu chơi. */
   .soundbtn{
     width:46px; height:46px; border-radius:50%; border:none; background:var(--glass);
-    display:flex; align-items:center; justify-content:center; margin:0 auto 14px;
-    box-shadow:0 6px 14px rgba(20,40,25,.2); position:relative; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; margin:14px auto 0;
+    box-shadow:0 6px 14px rgba(20,40,25,.2); position:relative; cursor:pointer; flex:none;
   }
   .soundbtn::after{
     content:''; position:absolute; inset:-7px; border-radius:50%; border:2px solid rgba(228,99,63,.45);
     animation:pulsering 2s ease-out infinite;
   }
   @keyframes pulsering{ 0%{ transform:scale(.9); opacity:.8;} 100%{ transform:scale(1.4); opacity:0;} }
-  /* 4 hàng xếp dọc, mỗi hàng 1 con đi ngang qua lại. Quãng đường đi dùng
-     left:% (không phải translateX theo px cố định) để luôn khớp đúng
-     chiều rộng màn hình thật — điện thoại to hay nhỏ đều đi hết chiều
-     rộng, không bị hụt hay tràn. */
-  /* Kiểu cổ điển: lưới 2x2 ô ảnh tĩnh, bấm chọn — không có chuyển động/đi
-     lại. object-fit:contain giúp ảnh to vừa khít ô mà vẫn giữ đúng tỉ lệ
-     khung hình gốc (hươu cao cổ vẫn cao, cá sấu vẫn dẹt, không bị méo). */
-  .optiongrid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; flex:1; align-content:start; }
-  .optiontile{
-    position:relative; background:var(--glass); border:2px solid var(--glass-border); border-radius:18px;
-    aspect-ratio:1; padding:10px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  /* Con vật hiện ở vị trí ngẫu nhiên trong khu chơi thay vì lưới ô vuông
+     cố định. Để KHÔNG BAO GIỜ đè lên nhau mà vẫn chọn vị trí ngẫu nhiên
+     thật sự (không phải đoán/thử lại), chia khu chơi thành 4 góc phần tư
+     cố định (trên-trái/trên-phải/dưới-trái/dưới-phải, theo data-idx 0-3)
+     — 2 góc phần tư khác nhau không thể chồng lấn nên đảm bảo an toàn
+     100%, còn VỊ TRÍ CHÍNH XÁC bên trong mỗi góc (do forestPositionTile()
+     trong app.js tính bằng JS, ghi thẳng vào style.left/top) mới random
+     mỗi khi con vật ở góc đó đổi. Góc phần tử gán cho từng ô giữ cố định
+     suốt ván để con không "nhảy" sang góc khác gây khó theo dõi — chỉ
+     phần trong góc là ngẫu nhiên. */
+  .freeplay{ position:relative; flex:1; margin:4px 0 0; }
+  .freetile{
+    position:absolute; width:34vw; height:34vw; max-width:170px; max-height:170px;
+    background:var(--glass); border:2px solid var(--glass-border); border-radius:18px;
+    padding:8px; cursor:pointer; display:flex; align-items:center; justify-content:center;
     box-shadow:0 4px 0 rgba(20,40,25,.14), 0 10px 18px rgba(20,40,25,.16);
     transition:transform .1s ease, box-shadow .1s ease, background-color .2s ease, border-color .2s ease;
   }
-  .optiontile:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(20,40,25,.14); }
+  .freetile:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(20,40,25,.14); }
   /* "Hiện ra và lắc lư nhẹ nhàng" — không đi lại/chạy (đã thử và bị chê
      rối ở các vòng trước), chỉ xoay qua lại vài độ tại chỗ như đang thở/
      đung đưa. Đặt animation trên .tileswing (span bọc ảnh/video), KHÔNG
@@ -206,15 +207,15 @@
      trạng thái .correct bên dưới (2 phần tử cha/con transform độc lập,
      không đè lên nhau). */
   .tileswing{ display:block; width:100%; height:100%; animation:tileSway 2.6s ease-in-out infinite; }
-  .optiontile[data-idx="0"] .tileswing{ animation-delay:0s; }
-  .optiontile[data-idx="1"] .tileswing{ animation-delay:.4s; }
-  .optiontile[data-idx="2"] .tileswing{ animation-delay:.8s; }
-  .optiontile[data-idx="3"] .tileswing{ animation-delay:1.2s; }
+  .freetile[data-idx="0"] .tileswing{ animation-delay:0s; }
+  .freetile[data-idx="1"] .tileswing{ animation-delay:.4s; }
+  .freetile[data-idx="2"] .tileswing{ animation-delay:.8s; }
+  .freetile[data-idx="3"] .tileswing{ animation-delay:1.2s; }
   @keyframes tileSway{ 0%,100%{ transform:rotate(-2.5deg); } 50%{ transform:rotate(2.5deg); } }
-  .optiontile img, .optiontile video{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 6px 4px rgba(20,40,25,.3)); border-radius:12px; }
-  .optiontile.wrong{ background:rgba(178,74,67,.32); border-color:#B24A43; }
-  .optiontile.correct{ background:rgba(47,143,91,.32); border-color:var(--success); animation:tileCorrectBounce .5s cubic-bezier(.34,1.56,.64,1) both; }
-  .optiontile.correct img, .optiontile.correct video{ transform:scale(1.08); }
+  .freetile img, .freetile video{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 6px 4px rgba(20,40,25,.3)); border-radius:12px; }
+  .freetile.wrong{ background:rgba(178,74,67,.32); border-color:#B24A43; }
+  .freetile.correct{ background:rgba(47,143,91,.32); border-color:var(--success); animation:tileCorrectBounce .5s cubic-bezier(.34,1.56,.64,1) both; }
+  .freetile.correct img, .freetile.correct video{ transform:scale(1.08); }
   @keyframes tileCorrectBounce{ 0%{ transform:scale(1); } 40%{ transform:scale(1.1); } 65%{ transform:scale(.96); } 100%{ transform:scale(1.03); } }
   /* Hạt "ăn mừng" nhỏ bắn ra từ chính ô vừa bấm đúng — khác với .fall (rơi
      từ trên xuống, dùng cho màn thắng cả ván), đây bắn ra rồi tan biến
@@ -297,7 +298,7 @@
 
   @media (prefers-reduced-motion: reduce){
     .sun-glow,.cloud,.blade,.owl-wing,.owl-blink,.soundbtn::after,.starburst svg,.fall,.starsrow svg,
-    .sleepy,.tileswing,.optiontile.correct,.tileburst,.homemascot svg{ animation:none !important; }
+    .sleepy,.tileswing,.freetile.correct,.tileburst,.homemascot svg{ animation:none !important; }
   }
   button:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
 </style>

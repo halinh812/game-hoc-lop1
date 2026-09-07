@@ -542,6 +542,48 @@ id/tên).
   ván (tới lúc thắng) xác nhận không con vật nuôi nào từng xuất hiện —
   trò rừng vẫn chỉ lấy đúng "wild" như thiết kế.
 
+## Vòng 5 — Bỏ hẳn lưới ô vuông, hiện vị trí ngẫu nhiên không đè nhau
+
+Yêu cầu mới: (1) bỏ lưới 2x2 ô vuông cố định, con vật hiện ở vị trí ngẫu
+nhiên trên màn hình; (2) 2 con không bao giờ đè lên nhau; (3) bỏ hẳn dòng
+chữ "🦁 Bắt con: X" — bé chỉ nghe âm thanh, không đọc chữ; (4) chỉ giữ
+nút loa, chuyển xuống dưới cùng màn hình.
+
+- **Không đè nhau bằng góc phần tư cố định, không phải thử-sai**: chia
+  khu chơi (`#freeplayArea`) thành 4 góc phần tư cố định theo `data-idx`
+  (0=trên-trái, 1=trên-phải, 2=dưới-trái, 3=dưới-phải) — 2 góc khác nhau
+  không thể chồng lấn nên đảm bảo an toàn 100% mà không cần vòng lặp
+  thử lại vị trí (rejection sampling, có nguy cơ bị "kẹt" nếu ô quá to).
+  `forestPositionTile(tileEl, idx)` (js/app.js) đo kích thước thật của
+  khu chơi + ô bằng `clientWidth`/`offsetWidth` (không tính bằng % cố
+  định, để luôn đúng với màn hình thật), rồi random 1 vị trí TRONG đúng
+  góc phần tư được gán — góc gán cho mỗi ô giữ NGUYÊN suốt ván, chỉ toạ
+  độ cụ thể bên trong góc đổi mỗi khi ô đó đổi con, để con không "nhảy"
+  sang góc khác gây khó theo dõi.
+  Đổi `.optiongrid`/`.optiontile` (CSS grid) thành `.freeplay`/`.freetile`
+  (`position:absolute`, toạ độ ghi thẳng bằng JS vào `style.left/top`).
+  Giữ nguyên hiệu ứng lắc lư nhẹ (`.tileswing`), ăn mừng khi đúng
+  (`.tileburst`, `tileCorrectBounce`) — chỉ đổi cách ĐỊNH VỊ ô, không đổi
+  các hiệu ứng đã có.
+- **Bỏ hẳn `<div class="ribbon">`** (dòng "Bắt con: X") — bé giờ hoàn
+  toàn dựa vào âm thanh (`speakForestTarget()` đọc "Catch the X!"), không
+  còn chữ nào gợi ý trước khi bấm. Bong bóng phản hồi SAU khi bấm
+  (`feedbackBubble` — "Bắt được rồi! X" / "Chưa đúng. Đây là X") vẫn giữ
+  nguyên vì đó là phản hồi sau khi trả lời, không phải gợi ý trước.
+- **Nút loa chuyển xuống cuối `.content`** (dưới cả khu chơi lẫn bong
+  bóng phản hồi) — trước đó nằm ngay dưới thanh trên cùng.
+- Đã kiểm thử bằng Playwright: đo `getBoundingClientRect()` của cả 4 ô,
+  xác nhận 0% chồng lấn giữa mọi cặp và cả 4 ô nằm trọn trong khu chơi;
+  xác nhận không còn phần tử `.ribbon` và không còn chữ "Bắt con" ở đâu
+  trên trang; xác nhận thứ tự phần tử trong `.content` đặt nút loa cuối
+  cùng (dưới đáy màn hình); chơi thử toàn bộ 1 ván tới thắng (10 câu
+  đúng) bằng cách "nghe" — chặn `SpeechSynthesisUtterance` để lấy đúng
+  chữ đang được đọc làm căn cứ bấm, giống hệt cách bé thật sẽ chơi (không
+  đọc chữ, chỉ dựa vào âm thanh) — xác nhận đến được màn "Giỏi quá!"; thử
+  thêm nhánh bấm sai xác nhận ô bấm sai chuyển đỏ + ô đúng chuyển xanh,
+  giữ nguyên 3 giây, sau đó chỉ đúng 1 ô đổi vị trí+con vật, 3 ô còn lại
+  giữ nguyên như thiết kế xuyên suốt dự án.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
