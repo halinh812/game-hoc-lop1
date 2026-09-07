@@ -1,7 +1,7 @@
 // App — nối Content Loader + Progress Store + Learning Engine + AudioProvider
 // + bộ avatar với giao diện. Cấu trúc 3 trang thuần game cho trẻ em:
 //   1. Trang chủ: hồ sơ bé (tên + avatar) + lưới chọn trò chơi (2 cột x 4)
-//   2. Trò chơi: "Thế giới động vật" — nghe tên tiếng Anh, bắt đúng con vật
+//   2. Trò chơi: "Khu rừng kỳ bí" — nghe tên tiếng Anh, bắt đúng con vật
 //      đang đi trong rừng (chỉ luyện kỹ năng "Nghe" của Learning Engine)
 //   3. Trang phụ huynh: xem LV của từng kỹ năng (Nghe/Nói/Đọc/Viết/Nhìn)
 //
@@ -34,7 +34,7 @@ var CONTENT_PACKS = [
 var FOREST_WIN_TARGET = 10;
 
 var GAMES = [
-  { id: 'forest', title: 'Thế giới động vật', emoji: '🦁', skill: 'listen', available: true },
+  { id: 'forest', title: 'Khu rừng kỳ bí', emoji: '🦁', skill: 'listen', available: true },
   { id: 'g2', title: 'Sắp ra mắt', available: false },
   { id: 'g3', title: 'Sắp ra mắt', available: false },
   { id: 'g4', title: 'Sắp ra mắt', available: false },
@@ -85,8 +85,42 @@ function sleepyMascot(size) {
     '</svg>';
 }
 
-function worldBg() {
-  return '<div class="world-bg" aria-hidden="true"></div>';
+// photo=true: dùng ảnh nền tĩnh (assets/backgrounds/forest-bg.jpg) — chỉ
+// dùng riêng cho màn chơi "Khu rừng kỳ bí" (renderForest). Mọi màn khác
+// vẫn giữ nguyên nền vẽ bằng CSS/SVG (mây/mặt trời/tán cây/mặt đất).
+function worldBg(photo) {
+  if (photo) return '<div class="world-bg forestphoto" aria-hidden="true"></div>';
+  return '<div class="world-bg" aria-hidden="true">' +
+    '<div class="sun-glow"></div>' +
+    '<div class="cloud c1"></div><div class="cloud c2"></div>' +
+    '<div class="canopy-band"><svg viewBox="0 0 400 88" preserveAspectRatio="none">' +
+    '<path d="M-10 50 Q40 14 100 46 T220 40 T340 50 T410 28 V-10 H-10 Z" fill="#8FC48A"/>' +
+    '<path d="M-10 66 Q50 32 130 62 T280 54 T410 50 V-10 H-10 Z" fill="#4E8F58"/>' +
+    // Cụm cây tán tròn rậm (nhiều hình tròn chồng nhau) thay cho 1 hình
+    // chữ nhật thân cây trơ trọi trước đây — giống dáng cây bụi tròn trong
+    // ảnh mẫu khu rừng minh hoạ.
+    '<rect x="40" y="46" width="12" height="30" rx="5" fill="#7A5636"/>' +
+    '<circle cx="30" cy="38" r="20" fill="#5FA766"/><circle cx="48" cy="30" r="24" fill="#6FBB74"/><circle cx="64" cy="40" r="18" fill="#5FA766"/>' +
+    '<rect x="330" y="42" width="14" height="34" rx="5" fill="#6B4B2E"/>' +
+    '<circle cx="318" cy="32" r="22" fill="#5FA766"/><circle cx="340" cy="24" r="26" fill="#6FBB74"/><circle cx="358" cy="36" r="20" fill="#5FA766"/>' +
+    '<rect x="196" y="52" width="9" height="20" rx="4" fill="#7A5636"/><circle cx="200" cy="46" r="16" fill="#6FBB74" opacity=".9"/>' +
+    '</svg></div>' +
+    '<div class="ground-band"><svg viewBox="0 0 400 112" preserveAspectRatio="none">' +
+    '<path d="M0 30 Q100 5 200 25 T400 15 V112 H0 Z" fill="#8FC48A" opacity=".4"/>' +
+    '<path d="M0 55 Q100 35 200 50 T400 42 V112 H0 Z" fill="#4B8A57"/>' +
+    '<path d="M0 78 H400 V112 H0 Z" fill="#356B44"/>' +
+    // Đá cuội + hoa nhỏ ven đường — chi tiết trang trí để mặt đất đỡ trống.
+    '<ellipse cx="90" cy="86" rx="16" ry="10" fill="#9A9488"/><ellipse cx="90" cy="83" rx="12" ry="6" fill="#B4AEA0"/>' +
+    '<ellipse cx="300" cy="90" rx="20" ry="12" fill="#9A9488"/><ellipse cx="300" cy="86" rx="14" ry="7" fill="#B4AEA0"/>' +
+    '<g><line x1="140" y1="90" x2="140" y2="78" stroke="#356B44" stroke-width="2"/><circle cx="140" cy="76" r="4" fill="#FFD25A"/></g>' +
+    '<g><line x1="250" y1="94" x2="250" y2="80" stroke="#356B44" stroke-width="2"/><circle cx="250" cy="78" r="4" fill="#F4958A"/></g>' +
+    '<g><line x1="60" y1="96" x2="60" y2="84" stroke="#356B44" stroke-width="2"/><circle cx="60" cy="82" r="3.5" fill="#FFD25A"/></g>' +
+    '<g stroke="#356B44" stroke-width="3.4" stroke-linecap="round">' +
+    '<path class="blade" d="M20 80 Q15 64 22 52"/><path class="blade" d="M40 80 Q45 62 38 50"/>' +
+    '<path class="blade" d="M360 80 Q355 64 362 52"/><path class="blade" d="M380 80 Q385 62 378 50"/>' +
+    '<path class="blade" d="M200 80 Q195 64 202 52"/>' +
+    '</g></svg></div>' +
+    '</div>';
 }
 
 var audio = createAudioProvider();
@@ -220,6 +254,14 @@ function renderHome() {
 
   var tiles = GAMES.map(function (g) {
     if (g.available) {
+      // Riêng ô "Khu rừng kỳ bí": nền là ảnh crop nhỏ của ảnh nền trong
+      // game (assets/backgrounds/forest-bg.jpg) + mặt con hổ (crop từ
+      // assets/animals/tiger.png, lắc lư nhẹ) thay cho emoji 🦁 phẳng.
+      if (g.id === 'forest') {
+        return '<button type="button" class="gametile forest-tile" data-id="' + g.id + '">' +
+          '<span class="foresttile-face"><img src="assets/animals/tiger.png" alt=""></span>' +
+          '<span class="name">' + g.title + '</span></button>';
+      }
       return '<button type="button" class="gametile" data-id="' + g.id + '">' +
         '<span class="emoji">' + g.emoji + '</span><span class="name">' + g.title + '</span></button>';
     }
@@ -253,7 +295,7 @@ function renderHome() {
   });
 }
 
-// ---------------- Trò chơi: Thế giới động vật ----------------
+// ---------------- Trò chơi: Khu rừng kỳ bí ----------------
 
 // Chọn slot nào (trong 4 slot đang hiển thị) sẽ là câu hỏi tiếp theo —
 // ưu tiên từ đã đến hạn ôn, trong đó ưu tiên tỉ lệ sai cao hơn, LV thấp
@@ -411,7 +453,7 @@ function renderForest() {
     return '<div class="freetile" data-idx="' + i + '">' + forestTileMedia(w) + '</div>';
   }).join('');
 
-  root.innerHTML = worldBg() +
+  root.innerHTML = worldBg(true) +
     '<div class="content">' +
     '<div class="topbar">' +
     '<button class="iconbtn" id="homeBtn" aria-label="Về trang chủ">' + CLOSE_SVG + '</button>' +
