@@ -609,7 +609,7 @@ function renderParent() {
 
   root.innerHTML =
     '<div class="parentpage" id="parentPageRoot">' +
-    '<div class="pheader">' +
+    '<div class="pheader" id="pHeader">' +
     '<button id="backBtn" aria-label="Về trang bé">' + BACK_SVG + '</button>' +
     '<div><h1>Báo cáo học tập</h1><p class="psub">' + (profile ? profile.name : 'Bé') + ' — LV0 (chưa học) đến LV' + MAX_LEVEL + ' (đã nhớ rất lâu)</p></div>' +
     '</div>' +
@@ -640,50 +640,64 @@ async function tryMountContentManager() {
   } catch (e) { return; }
 
   var container = document.getElementById('parentPageRoot');
-  if (!container) return;
+  var header = document.getElementById('pHeader');
+  if (!container || !header) return;
   cmState.category = packs[0].category;
 
   var catOptions = packs.map(function (p) {
     return '<option value="' + p.category + '">' + (p.icon || '') + ' ' + p.label + '</option>';
   }).join('');
 
+  header.insertAdjacentHTML('beforeend',
+    '<button class="cmFabBtn" id="cmOpenBtn" aria-label="Thêm từ vựng">+</button>'
+  );
+
   container.insertAdjacentHTML('beforeend',
+    '<div class="cmOverlay" id="cmOverlay" hidden>' +
+    '<div class="cmModal">' +
+    '<div class="cmModalHead"><h2>Thêm / sửa từ vựng</h2>' +
+    '<button class="cmCloseBtn" id="cmCloseBtn" aria-label="Đóng">✕</button></div>' +
     '<div class="contentmgr" id="cmSection">' +
-    '<h2>🛠️ Thêm / sửa ảnh, video cho từ vựng</h2>' +
-    '<p class="hint">Chọn 1 từ có sẵn để thay ảnh/video, hoặc "➕ Thêm từ mới". Ảnh sẽ tự co nhỏ + tự xoá nền trắng, video sẽ tự nén — không cần chỉnh gì trước khi tải lên.</p>' +
     '<label for="cmCategory">Bộ từ</label>' +
     '<select id="cmCategory">' + catOptions + '</select>' +
-    '<label for="cmSubcategory">Nhóm con</label>' +
+    '<label for="cmSubcategory">Nhóm từ</label>' +
     '<select id="cmSubcategory"></select>' +
     '<div id="cmNewSubcatRow" style="display:none;">' +
-    '<label for="cmNewSubcatLabel">Tên nhóm mới (tiếng Việt)</label>' +
+    '<label for="cmNewSubcatLabel">Tên nhóm từ mới</label>' +
     '<input type="text" id="cmNewSubcatLabel" placeholder="vd: Động vật nuôi">' +
-    '<p class="hint" id="cmNewSubcatIdHint" style="margin:4px 0 0;"></p>' +
+    '<p class="hint" id="cmNewSubcatIdHint"></p>' +
     '</div>' +
     '<label for="cmItem">Từ <span id="cmItemCount" class="badge"></span></label>' +
     '<select id="cmItem"></select>' +
     '<div id="cmIdRow" style="display:none;">' +
-    '<label for="cmId">Mã từ (id) — chữ thường, không dấu, không khoảng trắng</label>' +
+    '<label for="cmId">Mã từ (id)</label>' +
     '<input type="text" id="cmId" placeholder="vd: red_panda">' +
     '</div>' +
     '<div class="row2">' +
     '<div><label for="cmEn">Tiếng Anh</label><input type="text" id="cmEn" placeholder="vd: red panda"></div>' +
     '<div><label for="cmVi">Tiếng Việt</label><input type="text" id="cmVi" placeholder="vd: gấu trúc đỏ"></div>' +
     '</div>' +
-    '<label for="cmDifficulty">Độ khó</label>' +
-    '<select id="cmDifficulty"><option value="1">1 — Dễ</option><option value="2">2 — Khó hơn</option></select>' +
-    '<label>Hiện có</label>' +
+    '<label>Ảnh/video hiện có</label>' +
     '<div class="preview" id="cmPreview"></div>' +
-    '<label for="cmImage">Ảnh mới (tuỳ chọn)</label>' +
-    '<input type="file" id="cmImage" accept="image/*">' +
-    '<label for="cmVideo">Video mới (tuỳ chọn)</label>' +
-    '<input type="file" id="cmVideo" accept="video/*">' +
+    '<div class="row2">' +
+    '<div><label for="cmImage">Ảnh mới</label><input type="file" id="cmImage" accept="image/*"></div>' +
+    '<div><label for="cmVideo">Video mới</label><input type="file" id="cmVideo" accept="video/*"></div>' +
+    '</div>' +
+    '<div class="cmBtnRow">' +
     '<button class="savebtn" id="cmSaveBtn">💾 Lưu</button>' +
+    '<button class="pubbtn" id="cmPublishBtn">🚀 Xuất bản</button>' +
+    '</div>' +
     '<div id="cmSaveMsg"></div>' +
-    '<button class="pubbtn" id="cmPublishBtn">🚀 Xuất bản lên GitHub</button>' +
     '<pre class="log" id="cmPublishLog" style="display:none;"></pre>' +
+    '</div>' +
+    '</div>' +
     '</div>'
   );
+
+  var overlay = document.getElementById('cmOverlay');
+  document.getElementById('cmOpenBtn').addEventListener('click', function () { overlay.hidden = false; });
+  document.getElementById('cmCloseBtn').addEventListener('click', function () { overlay.hidden = true; });
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.hidden = true; });
 
   document.getElementById('cmCategory').addEventListener('change', function () {
     cmState.category = this.value;
@@ -786,7 +800,6 @@ function cmApplySelectedItem() {
   var idInput = document.getElementById('cmId');
   var enInput = document.getElementById('cmEn');
   var viInput = document.getElementById('cmVi');
-  var difficultySelect = document.getElementById('cmDifficulty');
 
   if (itemSelect.value === CM_NEW_VALUE) {
     idRow.style.display = '';
@@ -794,7 +807,6 @@ function cmApplySelectedItem() {
     idInput.dataset.touched = '';
     enInput.value = '';
     viInput.value = '';
-    difficultySelect.value = '1';
     cmRenderPreview(null);
     return;
   }
@@ -803,7 +815,6 @@ function cmApplySelectedItem() {
   if (!item) return;
   enInput.value = item.en;
   viInput.value = item.vi;
-  difficultySelect.value = String(item.difficulty || 1);
   cmRenderPreview(item);
 }
 
@@ -849,7 +860,10 @@ async function cmSave() {
   form.set('id', id);
   form.set('text_en', document.getElementById('cmEn').value.trim());
   form.set('text_vi', document.getElementById('cmVi').value.trim());
-  form.set('difficulty', document.getElementById('cmDifficulty').value);
+  // Không còn ô "Độ khó" trên giao diện — độ khó của từ do trò chơi tự
+  // quyết định lúc chơi (không phải người nhập), nên không gửi field này:
+  // server mặc định 1 khi thêm từ mới, và giữ nguyên giá trị cũ khi sửa từ
+  // có sẵn (xem tools/admin-server.mjs).
   if (subcategoryId) {
     form.set('subcategory', subcategoryId);
     form.set('subcategory_label_vi', subcategoryLabel);
