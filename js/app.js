@@ -644,7 +644,55 @@ function parentFilterChip(group, item) {
     '</label>';
 }
 
+function parentSelectedCount(group) {
+  return Object.keys(parentFilter[group]).filter(function (k) { return parentFilter[group][k]; }).length;
+}
+
+// Dropdown: nút "Bộ từ ▾" / "Nhóm từ ▾" — bấm vào mới hiện danh sách ô
+// vuông tick bên trong (không chiếm chỗ cố định trên trang như trước).
+function parentFilterDropdown(group, title, list) {
+  if (!list.length) return '';
+  var count = parentSelectedCount(group);
+  var rows = list.map(function (item) { return parentFilterChip(group, item); }).join('');
+  return '<div class="filterdd">' +
+    '<button type="button" class="filterddBtn" data-group="' + group + '">' +
+    '<span class="fddLabel">' + title + '</span>' +
+    (count ? '<span class="fddBadge">' + count + '</span>' : '') +
+    '<span class="fddCaret">▾</span>' +
+    '</button>' +
+    '<div class="filterddPanel" hidden>' + rows + '</div>' +
+    '</div>';
+}
+
+function parentUpdateFilterBadge(group) {
+  var btn = document.querySelector('.filterddBtn[data-group="' + group + '"]');
+  if (!btn) return;
+  var count = parentSelectedCount(group);
+  var badge = btn.querySelector('.fddBadge');
+  if (count) {
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'fddBadge';
+      btn.insertBefore(badge, btn.querySelector('.fddCaret'));
+    }
+    badge.textContent = String(count);
+  } else if (badge) {
+    badge.remove();
+  }
+}
+
+// 1 handler dùng chung để đóng dropdown khi bấm ra ngoài — gỡ ra rồi gắn
+// lại mỗi lần renderParent() để không cộng dồn qua nhiều lần vào/ra Trang
+// phụ huynh trong 1 phiên (root.innerHTML bị thay mới mỗi lần nhưng
+// listener gắn trên document thì không tự mất theo).
+var parentFilterDocClickHandler = null;
+
 function renderParent() {
+  if (parentFilterDocClickHandler) {
+    document.removeEventListener('click', parentFilterDocClickHandler);
+    parentFilterDocClickHandler = null;
+  }
+
   var touchedWords = parentTouchedWords();
 
   var catGroups = {}, subGroups = {};
@@ -660,15 +708,7 @@ function renderParent() {
   var catList = Object.keys(catGroups).map(function (k) { return catGroups[k]; }).sort(byLabel);
   var subList = Object.keys(subGroups).map(function (k) { return subGroups[k]; }).sort(byLabel);
 
-  var filtersHtml = '';
-  if (catList.length) {
-    filtersHtml += '<div class="filtergroup"><span class="fglabel">Bộ từ</span><div class="fgchips">' +
-      catList.map(function (c) { return parentFilterChip('cats', c); }).join('') + '</div></div>';
-  }
-  if (subList.length) {
-    filtersHtml += '<div class="filtergroup"><span class="fglabel">Nhóm từ</span><div class="fgchips">' +
-      subList.map(function (s) { return parentFilterChip('subcats', s); }).join('') + '</div></div>';
-  }
+  var filtersHtml = parentFilterDropdown('cats', 'Bộ từ', catList) + parentFilterDropdown('subcats', 'Nhóm từ', subList);
 
   root.innerHTML =
     '<div class="parentpage" id="parentPageRoot">' +
@@ -684,13 +724,40 @@ function renderParent() {
     state.screen = 'home'; render();
   });
 
-  Array.prototype.forEach.call(document.querySelectorAll('.filterchip input[type=checkbox]'), function (cb) {
+  Array.prototype.forEach.call(document.querySelectorAll('.filterddBtn'), function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var wrap = this.closest('.filterdd');
+      var panel = wrap.querySelector('.filterddPanel');
+      var wasHidden = panel.hidden;
+      Array.prototype.forEach.call(document.querySelectorAll('.filterdd'), function (w) {
+        w.classList.remove('ddopen');
+        w.querySelector('.filterddPanel').hidden = true;
+      });
+      if (wasHidden) { panel.hidden = false; wrap.classList.add('ddopen'); }
+    });
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll('.filterddPanel input[type=checkbox]'), function (cb) {
     cb.addEventListener('change', function () {
-      parentFilter[this.dataset.group][this.value] = this.checked;
+      var grp = this.dataset.group;
+      parentFilter[grp][this.value] = this.checked;
       this.closest('label').classList.toggle('checked', this.checked);
+      parentUpdateFilterBadge(grp);
       parentRenderTable();
     });
   });
+
+  if (filtersHtml) {
+    parentFilterDocClickHandler = function (e) {
+      if (e.target.closest('.filterdd')) return;
+      Array.prototype.forEach.call(document.querySelectorAll('.filterdd'), function (w) {
+        w.classList.remove('ddopen');
+        w.querySelector('.filterddPanel').hidden = true;
+      });
+    };
+    document.addEventListener('click', parentFilterDocClickHandler);
+  }
 
   parentRenderTable();
   tryMountContentManager();
