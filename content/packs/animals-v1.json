@@ -14,6 +14,16 @@
     {"id":"bear","type":"vocab","prompt_audio_text":"bear","answer":{"text_en":"bear","text_vi":"con gấu","image":"assets/animals/bear.png"},"difficulty":1,"subcategory":"wild","subcategory_label_vi":"Động vật hoang dã"},
     {"id":"kangaroo","type":"vocab","prompt_audio_text":"kangaroo","answer":{"text_en":"kangaroo","text_vi":"chuột túi","image":"assets/animals/kangaroo.png"},"difficulty":2,"subcategory":"wild","subcategory_label_vi":"Động vật hoang dã"},
     {"id":"panda","type":"vocab","prompt_audio_text":"panda","answer":{"text_en":"panda","text_vi":"gấu trúc","image":"assets/animals/panda.png"},"difficulty":2,"subcategory":"wild","subcategory_label_vi":"Động vật hoang dã"},
-    {"id":"crocodile","type":"vocab","prompt_audio_text":"crocodile","answer":{"text_en":"crocodile","text_vi":"cá sấu","image":"assets/animals/crocodile.png"},"difficulty":2,"subcategory":"wild","subcategory_label_vi":"Động vật hoang dã"}
+    {"id":"crocodile","type":"vocab","prompt_audio_text":"crocodile","answer":{"text_en":"crocodile","text_vi":"cá sấu","image":"assets/animals/crocodile.png"},"difficulty":2,"subcategory":"wild","subcategory_label_vi":"Động vật hoang dã"},
+    {"id":"dog","type":"vocab","prompt_audio_text":"dog","answer":{"text_en":"dog","text_vi":"con chó","image":"assets/animals/dog.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"cat","type":"vocab","prompt_audio_text":"cat","answer":{"text_en":"cat","text_vi":"con mèo","image":"assets/animals/cat.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"hen","type":"vocab","prompt_audio_text":"hen","answer":{"text_en":"hen","text_vi":"con gà","image":"assets/animals/hen.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"duck","type":"vocab","prompt_audio_text":"duck","answer":{"text_en":"duck","text_vi":"con vịt","image":"assets/animals/duck.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"pig","type":"vocab","prompt_audio_text":"pig","answer":{"text_en":"pig","text_vi":"con lợn","image":"assets/animals/pig.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"cow","type":"vocab","prompt_audio_text":"cow","answer":{"text_en":"cow","text_vi":"con bò","image":"assets/animals/cow.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"buffalo","type":"vocab","prompt_audio_text":"buffalo","answer":{"text_en":"buffalo","text_vi":"con trâu","image":"assets/animals/buffalo.png"},"difficulty":2,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"horse","type":"vocab","prompt_audio_text":"horse","answer":{"text_en":"horse","text_vi":"con ngựa","image":"assets/animals/horse.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"goat","type":"vocab","prompt_audio_text":"goat","answer":{"text_en":"goat","text_vi":"con dê","image":"assets/animals/goat.png"},"difficulty":2,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"rabbit","type":"vocab","prompt_audio_text":"rabbit","answer":{"text_en":"rabbit","text_vi":"con thỏ","image":"assets/animals/rabbit.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"}
   ]
 }
