@@ -304,3 +304,99 @@ con vật khó nhìn khi đặt chồng lên.
 
 Khác với ảnh con vật (Bước 1-6), ảnh nền này **không cần xoá nền/nền
 trong suốt** — giữ nguyên làm 1 ảnh nền đầy khung (JPG/PNG đều được).
+
+## Bước 8 — Thêm 10 con "Động vật hoang dã" (đợt 2) cho Khu rừng kỳ bí
+
+Mở rộng vốn từ cho trò chơi "Khu rừng kỳ bí" (hiện chỉ lấy nhóm con
+`subcategory: "wild"` — xem Bước 6) — chọn 10 con tiếp theo khác hẳn
+dáng vẻ với 10 con Sở thú đã có (Bước 5: hổ/sư tử/voi/hươu cao cổ/ngựa
+vằn/khỉ/gấu/chuột túi/gấu trúc/cá sấu) để bé dễ phân biệt, đều là con
+vật hoang dã quen thuộc, phổ biến với trẻ lớp 1.
+
+Quy trình giống hệt Bước 1-3: dùng đúng "Khung phong cách" ở Bước 1 +
+1 đoạn prompt riêng bên dưới, dán vào Google Flow (hoặc ImageFX/Bing
+Image Creator...), tỉ lệ khung hình **1:1 (vuông)**, dáng đứng/ngồi đơn
+giản (không cần dáng đi — xem lý do ở Bước 4). Tạo xong tải PNG về, gửi
+vào cuộc trò chuyện này để tôi tự xoá nền + tối ưu + ghép vào game.
+
+- [ ] Sói (Wolf)
+- [ ] Cáo (Fox)
+- [ ] Hươu/Nai (Deer)
+- [ ] Hà Mã (Hippo)
+- [ ] Tê Giác (Rhino)
+- [ ] Gấu Túi Koala (Koala)
+- [ ] Công (Peacock)
+- [ ] Sóc (Squirrel)
+- [ ] Gấu Mèo (Raccoon)
+- [ ] Chim Cánh Cụt (Penguin)
+
+### Prompt riêng cho từng con
+
+```
+Sói (Wolf):
+A baby wolf character, sitting or standing calmly, pointed upright
+ears, bushy tail curled near the body, thick fluffy grey fur with a
+lighter cream chest and muzzle, big sparkling amber eyes, gentle
+curious expression.
+
+Cáo (Fox):
+A baby red fox character, sitting or standing calmly, large pointed
+ears, bushy tail with a white tip curled near the body, vivid
+orange-red fur with a white chest and chin, black lower legs, big
+sparkling eyes, playful curious expression.
+
+Hươu/Nai (Deer):
+A baby deer (fawn) character, standing or sitting calmly, small soft
+antlers or antler buds on top of the head, short fluffy tail, tan fur
+with soft white spots on the back, lighter cream underbelly, big
+sparkling dark eyes, gentle shy expression.
+
+Hà Mã (Hippo):
+A baby hippo character, sitting or standing calmly, plump rounded
+body, small rounded ears on top of the head, wide friendly snout,
+smooth grey skin with a lighter pinkish-grey belly, big sparkling
+eyes, cheerful happy expression.
+
+Tê Giác (Rhino):
+A baby rhino character, standing or sitting calmly, one small rounded
+horn on the snout, sturdy plump rounded body, thick grey skin with
+soft rounded folds (not sharp/armored looking), big sparkling eyes,
+calm friendly expression.
+
+Gấu Túi Koala (Koala):
+A baby koala character, sitting calmly, large round fluffy ears, big
+round black nose, plump rounded body, soft grey fur with a lighter
+cream chest, big sparkling eyes, sleepy gentle expression, one arm
+resting on a short stub of eucalyptus branch beside it.
+
+Công (Peacock):
+A baby peacock character, standing calmly, small crest of feathers on
+top of the head, short elegant neck, vivid blue-teal chest feathers,
+a compact fanned tail with a few soft round eye-spot feather patterns
+in teal/green/gold, big sparkling eyes, proud cheerful expression.
+
+Sóc (Squirrel):
+A baby squirrel character, sitting upright on its haunches, extremely
+large fluffy curled tail arching over its back, small round ears,
+reddish-brown fur with a lighter cream chest and belly, tiny paws held
+together in front, big sparkling eyes, curious playful expression.
+
+Gấu Mèo (Raccoon):
+A baby raccoon character, sitting or standing calmly, distinctive dark
+mask marking around the eyes, bushy ringed tail curled near the body,
+grey fur with a lighter cream face and chest, rounded ears, big
+sparkling eyes, mischievous curious expression.
+
+Chim Cánh Cụt (Penguin):
+A baby penguin character, standing upright calmly, small flipper-wings
+held close to the round body, glossy black back and head, white belly
+and face, small orange-yellow beak and feet, big sparkling eyes,
+cheerful happy expression.
+```
+
+Lưu file PNG tải về theo đúng tên tiếng Anh không dấu, chữ thường (vd
+`wolf.png`, `fox.png`, `deer.png`, `hippo.png`, `rhino.png`,
+`koala.png`, `peacock.png`, `squirrel.png`, `raccoon.png`,
+`penguin.png`) — trùng đúng mã (id)/`text_en` sẽ dùng khi thêm từ qua
+Trang phụ huynh (nút "+" → Bộ từ "Con vật" → Nhóm từ "Động vật hoang
+dã" → "➕ Thêm từ mới"), để đỡ phải gõ lại tay.
