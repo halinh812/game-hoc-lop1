@@ -400,3 +400,53 @@ Lưu file PNG tải về theo đúng tên tiếng Anh không dấu, chữ thư�
 `penguin.png`) — trùng đúng mã (id)/`text_en` sẽ dùng khi thêm từ qua
 Trang phụ huynh (nút "+" → Bộ từ "Con vật" → Nhóm từ "Động vật hoang
 dã" → "➕ Thêm từ mới"), để đỡ phải gõ lại tay.
+
+## Bước 9 — Ảnh nền "nông trại" cho game #2 "Nông trại của bé"
+
+Giống hệt Bước 7 (ảnh nền Khu rừng kỳ bí) nhưng đổi bối cảnh sang nông
+trại — dùng cho `games/nong-trai-cua-be/farm.css`, file lưu tại
+`assets/backgrounds/farm-bg.jpg`.
+
+**Cách dùng:** copy nguyên đoạn prompt bên dưới, dán vào Google Flow (hoặc
+ImageFX/Bing Image Creator...), chọn tỉ lệ khung hình **dọc (portrait)
+9:16**. Tạo vài phiên bản, chọn ảnh ưng ý nhất — ưu tiên ảnh có **khoảng
+trống rõ ràng ở giữa/phía dưới khung hình** (nơi các con vật nuôi trong
+game sẽ hiển thị đè lên trên), tránh ảnh quá rậm rạp ngay giữa khung.
+
+```
+Vibrant, cheerful flat-vector cartoon illustration of a cozy countryside
+farm landscape, background art for a children's mobile learning game,
+in the same cute soft cel-shaded style as a chibi baby-animal character
+illustration (smooth rounded shapes, no sharp or scary edges, thin
+clean outlines on major shapes, warm saturated colors, gentle gradient
+lighting). A warm cream-to-soft-blue sky gradient at the top with a few
+fluffy white clouds and a warm glowing sun. In the middle distance, a
+charming red wooden barn with a white-trimmed roof and a small hayloft
+window, next to a simple wooden fence running along a rolling green
+pasture, with soft rolling hills layered behind under a light haze. A
+narrow dirt path winds from the barn through the grassy field toward
+the bottom of the frame. A few round golden haystacks, a cluster of
+sunflowers, and a small vegetable garden patch with neat little rows
+sit near the edges. Lush leafy trees and bushes frame the left and
+right edges of the image, leaving the center and lower-middle area of
+the frame open as empty grassy ground (this open space is reserved for
+game characters that will be placed on top later, so keep it visually
+calm and uncluttered, not the busiest part of the image). Bright,
+inviting, playful mood. Portrait orientation, 9:16 aspect ratio,
+full-bleed edge-to-edge illustration filling the entire frame.
+Absolutely no animals, no people, no characters, no text, no letters,
+no logo, no watermark anywhere in the image.
+Avoid: photographic or realistic rendering, 3D render look, dark or
+scary mood, cluttered or busy composition, any animal or human
+character, any text or watermark, cropped or off-center composition.
+```
+
+Không cần xoá nền/nền trong suốt (giống Bước 7) — giữ nguyên làm 1 ảnh
+nền đầy khung (JPG/PNG đều được).
+
+Sau khi có ảnh, lưu vào `assets/backgrounds/farm-bg.jpg` — code phía
+game (icon ô chọn game + nền màn chơi) đã trỏ sẵn tới đúng đường dẫn
+này, chỉ cần thêm file là chạy được ngay, không cần sửa code. Vị trí
+crop/zoom của ảnh trong ô icon nhỏ (`.gametile.farm-tile`) có thể cần
+chỉnh lại chút cho khớp bố cục ảnh thật — báo lại khi có ảnh để tinh
+chỉnh.
