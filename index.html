@@ -162,8 +162,9 @@
   .gametile:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(20,40,25,.14); }
   .gametile .emoji{ font-size:2.1rem; }
   .gametile .name{ font-family:'Baloo 2', sans-serif; font-weight:700; font-size:.86rem; color:var(--ink); line-height:1.25; }
-  /* .gametile.forest-tile / .foresttile-face (icon riêng của ô "Khu rừng
-     kỳ bí") định nghĩa trong games/khu-rung-ky-bi/forest.css. */
+  /* Icon riêng của ô từng game (vd .gametile.forest-tile/.foresttile-face,
+     .gametile.farm-tile/.farmtile-face) định nghĩa trong games/<slug>/*.css
+     của game đó. */
   /* Ô "Sắp ra mắt": trước là ổ khoá xám xịt chiếm hết sự chú ý (7/8 ô) —
      đổi sang linh vật ngủ gật be bé, màu pastel dịu, có nhịp thở nhẹ để
      đỡ trông "chết"/dở dang mà vẫn rõ ràng là chưa mở khoá. */
@@ -173,9 +174,10 @@
   .gametile.locked:active{ transform:none; }
   @keyframes sleepyBreathe{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.06); } }
 
-  /* CSS của màn chơi + màn kết quả "Khu rừng kỳ bí" (starsrow, soundbtn,
+  /* CSS của màn chơi + màn kết quả kiểu "bắt con vật" (starsrow, soundbtn,
      freeplay/freetile, tileswing, tileburst, summary-mid, starburst,
-     fall...) chuyển sang games/khu-rung-ky-bi/forest.css. */
+     fall...) dùng chung cho mọi game kiểu này — nằm ở
+     engine/catch-game.css, không phải ở đây. */
 
   /* ---------- parent dashboard: clean, KHÔNG dùng phong cách thế giới game ---------- */
   .parentpage{ background:#FBFAF6; min-height:100vh; color:#233A2A; padding:20px 18px 30px; }
@@ -291,8 +293,12 @@
   }
   button:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
 </style>
+<!-- CSS dùng chung cho cơ chế "bắt con vật" (mọi game kiểu nghe tên +
+     bấm đúng con vật dùng lại) -->
+<link rel="stylesheet" href="engine/catch-game.css">
 <!-- CSS riêng của từng game — mỗi game 1 file, xem games/<slug>/*.css -->
 <link rel="stylesheet" href="games/khu-rung-ky-bi/forest.css">
+<link rel="stylesheet" href="games/nong-trai-cua-be/farm.css">
 </head>
 <body>
 

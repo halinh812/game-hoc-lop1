@@ -23,6 +23,7 @@ import { createAudioProvider } from './engine/audio-provider.js';
 import { getAvatars, avatarSvg } from './engine/avatars.js';
 import { starIcon, BACK_SVG, owlMascot, sleepyMascot, worldBg } from './engine/ui-shared.js';
 import { createForestGame } from './games/khu-rung-ky-bi/forest.js';
+import { createFarmGame } from './games/nong-trai-cua-be/farm.js';
 
 var CONTENT_PACKS = [
   'content/packs/colors-v1.json',
@@ -34,7 +35,7 @@ var CONTENT_PACKS = [
 
 var GAMES = [
   { id: 'forest', title: 'Khu rừng kỳ bí', emoji: '🦁', skill: 'listen', available: true },
-  { id: 'g2', title: 'Sắp ra mắt', available: false },
+  { id: 'farm', title: 'Nông trại của bé', emoji: '🐶', skill: 'listen', available: true },
   { id: 'g3', title: 'Sắp ra mắt', available: false },
   { id: 'g4', title: 'Sắp ra mắt', available: false },
   { id: 'g5', title: 'Sắp ra mắt', available: false },
@@ -57,6 +58,7 @@ var state = {
   answered: false, // true trong lúc khoá bấm (đang chờ tự chuyển câu)
   cardShownAt: 0,
   forestPool: [],
+  farmPool: [],
   slots: [],      // 4 từ đang hiển thị trên 4 hàng, giữ nguyên xuyên suốt
   targetIdx: 0    // slot nào đang là đáp án đúng của câu hỏi hiện tại
 };
@@ -77,6 +79,14 @@ var forestGame = createForestGame({
   render: render,
   owlMascot: owlMascot
 });
+var farmGame = createFarmGame({
+  state: state,
+  getStore: function () { return store; },
+  getWords: function () { return WORDS; },
+  speak: speak,
+  render: render,
+  owlMascot: owlMascot
+});
 
 function render() {
   if (state.screen === 'loading') renderLoading();
@@ -85,6 +95,8 @@ function render() {
   else if (state.screen === 'home') renderHome();
   else if (state.screen === 'forest') forestGame.renderForest();
   else if (state.screen === 'forestSummary') forestGame.renderForestSummary();
+  else if (state.screen === 'farm') farmGame.renderFarm();
+  else if (state.screen === 'farmSummary') farmGame.renderFarmSummary();
   else if (state.screen === 'parent') renderParent();
 }
 
@@ -174,6 +186,7 @@ function renderHome() {
       // ảnh nền + con hổ lắc lư) — app.js chỉ biết game nào ứng với id
       // nào, không biết chi tiết markup từng game.
       if (g.id === 'forest') return forestGame.gameTileHtml(g.title);
+      if (g.id === 'farm') return farmGame.gameTileHtml(g.title);
       return '<button type="button" class="gametile" data-id="' + g.id + '">' +
         '<span class="emoji">' + g.emoji + '</span><span class="name">' + g.title + '</span></button>';
     }
@@ -204,7 +217,9 @@ function renderHome() {
   document.getElementById('gameGrid').addEventListener('click', function (e) {
     var tile = e.target.closest('.gametile[data-id]');
     if (!tile) return;
-    if (tile.getAttribute('data-id') === 'forest') forestGame.startForestGame();
+    var id = tile.getAttribute('data-id');
+    if (id === 'forest') forestGame.startForestGame();
+    else if (id === 'farm') farmGame.startFarmGame();
   });
 }
 
