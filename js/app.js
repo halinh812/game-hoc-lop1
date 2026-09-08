@@ -372,24 +372,41 @@ function speakForestTarget() {
 // không cần file âm thanh riêng. Trước đây bấm đúng chỉ đổi màu viền +
 // 1 dòng chữ nhỏ, gần như không có gì "ăn mừng" thật sự.
 var sharedAudioCtx = null;
+// Chuỗi hợp âm đi lên C5-E5-G5-C6 (thay cho 2 nốt sine đơn điệu trước
+// đây) — mỗi nốt có 1 lớp "thân" (triangle, nhiều bội âm hơn sine trơn)
+// + 1 lớp "lấp lánh" nhỏ (sine cao hơn 1 quãng 8) chồng lên, cho tiếng
+// đầy và rõ hơn hẳn, giống hiệu ứng "ăn điểm" quen thuộc trong game.
 function playDing() {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   try {
     if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
     var ctx = sharedAudioCtx;
     var now = ctx.currentTime;
-    [880, 1318.5].forEach(function (freq, i) {
-      var osc = ctx.createOscillator();
-      var gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      var start = now + i * 0.09;
-      gain.gain.setValueAtTime(0, start);
-      gain.gain.linearRampToValueAtTime(0.18, start + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.28);
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(start);
-      osc.stop(start + 0.3);
+    [523.25, 659.25, 783.99, 1046.5].forEach(function (freq, i) {
+      var start = now + i * 0.075;
+      var dur = 0.32;
+
+      var body = ctx.createOscillator();
+      var bodyGain = ctx.createGain();
+      body.type = 'triangle';
+      body.frequency.value = freq;
+      bodyGain.gain.setValueAtTime(0, start);
+      bodyGain.gain.linearRampToValueAtTime(0.22, start + 0.015);
+      bodyGain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+      body.connect(bodyGain).connect(ctx.destination);
+      body.start(start);
+      body.stop(start + dur);
+
+      var sparkle = ctx.createOscillator();
+      var sparkleGain = ctx.createGain();
+      sparkle.type = 'sine';
+      sparkle.frequency.value = freq * 2;
+      sparkleGain.gain.setValueAtTime(0, start);
+      sparkleGain.gain.linearRampToValueAtTime(0.08, start + 0.015);
+      sparkleGain.gain.exponentialRampToValueAtTime(0.001, start + dur * 0.8);
+      sparkle.connect(sparkleGain).connect(ctx.destination);
+      sparkle.start(start);
+      sparkle.stop(start + dur * 0.8);
     });
   } catch (e) { /* Web Audio không khả dụng — bỏ qua, không phá UI */ }
 }
@@ -463,7 +480,6 @@ function renderForest() {
     '<span style="width:38px;"></span>' +
     '</div>' +
     '<div class="freeplay" id="freeplayArea">' + tiles + '</div>' +
-    '<div class="glasscard" id="feedbackBubble" style="display:none;"><p id="feedbackText" style="margin:0;font-weight:600;font-size:.9rem;"></p></div>' +
     '<button class="soundbtn" id="speakBtn" aria-label="Nghe lại">' + SPEAK_SVG + '</button>' +
     '</div>';
 
@@ -491,10 +507,6 @@ function handleForestAnswer(idx) {
   var isCorrect = idx === state.targetIdx;
   var responseTimeMs = Date.now() - state.cardShownAt;
 
-  var bubble = document.getElementById('feedbackBubble');
-  var text = document.getElementById('feedbackText');
-  bubble.style.display = 'block';
-
   if (isCorrect) {
     var outcome = classifyAnswer(true, responseTimeMs);
     applyAnswer(store.words, targetWord.id, 'listen', outcome);
@@ -504,7 +516,6 @@ function handleForestAnswer(idx) {
     tileEls[idx].classList.add('correct');
     playDing();
     celebrateTile(tileEls[idx]);
-    text.innerHTML = '<b>Bắt được rồi!</b> 🎉 ' + targetWord.en;
 
     var isDone = state.correct >= FOREST_WIN_TARGET;
     setTimeout(function () {
@@ -517,7 +528,6 @@ function handleForestAnswer(idx) {
     tileEls[idx].classList.add('wrong');
     tileEls[state.targetIdx].classList.add('correct');
     speak(targetWord.en);
-    text.innerHTML = 'Chưa đúng. Đây là <b>' + targetWord.en + '</b>';
     setTimeout(function () { advanceForestRound(state.targetIdx); }, 3000);
   }
 }
@@ -537,7 +547,6 @@ function advanceForestRound(replaceIdx) {
   tileEls[replaceIdx].innerHTML = forestTileMedia(state.slots[replaceIdx]);
   forestPositionTile(tileEls[replaceIdx], replaceIdx);
 
-  document.getElementById('feedbackBubble').style.display = 'none';
   document.getElementById('forestStars').innerHTML = forestStarsRow();
 
   speakForestTarget();

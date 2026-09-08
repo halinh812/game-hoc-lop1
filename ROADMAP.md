@@ -822,6 +822,33 @@ Thêm chỉ số động viên bé nhìn thấy ngay: tổng số "sao" đã đ�
   đúng số 4 sau khi gán tiến độ giả qua localStorage rồi tải lại trang;
   chạy lại test chơi hết 1 ván ở "Khu rừng kỳ bí" — vẫn pass.
 
+## Vòng 14 — Bỏ hẳn chữ phản hồi đúng/sai, âm thanh ăn mừng rõ/hay hơn
+
+Mục tiêu: bé chỉ tập trung vào tai nghe (kỹ năng "Nghe" đúng như thiết kế
+gốc của "Khu rừng kỳ bí"), không còn chữ tiếng Anh nào hiện lên màn hình
+sau mỗi lượt trả lời để "gà bài".
+
+- **Bỏ hẳn bong bóng chữ phản hồi**: xoá `#feedbackBubble`/`#feedbackText`
+  khỏi `renderForest()` — trước đây hiện `"Bắt được rồi! 🎉 tiger"` (đúng)
+  hoặc `"Chưa đúng. Đây là tiger"` (sai), để lộ chữ tiếng Anh ngay trên
+  màn hình. Dọn theo các chỗ set nội dung/ẩn hiện bong bóng này trong
+  `handleForestAnswer()` và `advanceForestRound()`. Phản hồi đúng/sai giờ
+  chỉ còn quầng sáng xanh/đỏ quanh con vật (đã có từ Vòng 6) + giọng đọc
+  audio tên con vật (`speak()` — đây là ÂM THANH, không phải chữ hiện
+  trên màn, vẫn giữ nguyên vì đúng là kênh "Nghe" bài học muốn luyện).
+- **Âm thanh ăn mừng rõ/hay hơn**: `playDing()` (`js/app.js`) đổi từ 2 nốt
+  sine đơn điệu (880Hz→1318.5Hz) sang **chuỗi hợp âm đi lên C5-E5-G5-C6**
+  — mỗi nốt có 2 lớp: 1 dao động "thân" (triangle, nhiều bội âm hơn sine
+  trơn nên nghe đầy/rõ hơn) + 1 dao động "lấp lánh" nhỏ (sine cao hơn 1
+  quãng 8, âm lượng thấp) chồng lên, tạo hiệu ứng "ăn điểm" sáng và vui
+  tai hơn hẳn 2 tiếng "tút" phẳng trước đây. Tổng thời lượng vẫn ngắn
+  gọn (~0.55s), không làm chậm nhịp chơi.
+- Đã kiểm thử bằng Playwright: xác nhận `#feedbackBubble` không còn tồn
+  tại trong DOM ở cả nhánh đúng và sai, chụp ảnh xác nhận màn hình sạch
+  chữ (chỉ còn quầng sáng), dựng thử đúng sơ đồ node Web Audio mới của
+  `playDing()` không lỗi; chạy lại 25 unit test + test chơi hết 1 ván —
+  đều pass, không ảnh hưởng gì tới phần còn lại.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
