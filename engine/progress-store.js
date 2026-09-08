@@ -2,7 +2,7 @@
 // cấu trúc sau này mà không mất tiến độ đã lưu của trẻ.
 //
 // v3 đổi cấu trúc progress mỗi từ từ "1 LV chung" sang "5 kỹ năng độc lập"
-// (xem js/learning-engine.js) — đây là thay đổi không thể quy đổi ngược từ
+// (xem engine/learning-engine.js) — đây là thay đổi không thể quy đổi ngược từ
 // dữ liệu v1/v2 một cách có ý nghĩa (LV chung cũ không cho biết nó thuộc
 // kỹ năng nào), nên theo quyết định của người phát triển, mọi store ở
 // version < 3 bị coi là dữ liệu thử nghiệm cũ và được XOÁ SẠCH khi migrate

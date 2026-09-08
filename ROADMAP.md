@@ -849,6 +849,82 @@ sau mỗi lượt trả lời để "gà bài".
   `playDing()` không lỗi; chạy lại 25 unit test + test chơi hết 1 ván —
   đều pass, không ảnh hưởng gì tới phần còn lại.
 
+## Vòng 15 — Tái cấu trúc thư mục: tách "engine" dùng chung khỏi "games" riêng từng game
+
+Chuẩn bị cho việc mở rộng lên hàng chục/hàng trăm game: `js/app.js` trước
+đó đã lên tới **1096 dòng** dù mới có đúng 1 game, trộn lẫn code dùng
+chung (icon, mascot, router, trang phụ huynh, bảng admin) với code CHỈ
+riêng "Khu rừng kỳ bí" — càng thêm game mới càng khó tra cứu/sửa đúng
+chỗ. Tái cấu trúc lại theo đúng tinh thần đã ghi ở "Kiến trúc tổng thể"
+đầu file này (Content Packs → Learning Engine → Mini-game Engine →
+Progress Store, mini-game là plugin) nhưng trước giờ code chưa theo kịp.
+
+**Cấu trúc thư mục mới:**
+```
+app.js                       ← khung/router dùng chung (chuyển ra khỏi js/)
+engine/                      ← dùng chung cho MỌI game, không lặp lại
+  content-loader.js, learning-engine.js, progress-store.js,
+  audio-provider.js, avatars.js, ui-shared.js (icon/mascot/worldBg — mới)
+games/
+  khu-rung-ky-bi/
+    forest.js                ← toàn bộ logic riêng của game này
+    forest.css                ← style riêng (tách khỏi <style> khổng lồ)
+content/packs/, assets/      ← KHÔNG đổi — tổ chức theo CHỦ ĐỀ (animals,
+                                colors...), không theo game, vì 1 bộ từ
+                                dùng lại được cho nhiều game khác nhau
+```
+
+- **Quy ước đặt tên**: dùng slug ổn định (`khu-rung-ky-bi`), KHÔNG đánh số
+  thứ tự vào tên folder (kiểu `001_...`) — thứ tự hiển thị trong lưới chọn
+  trò chơi nằm ở 1 chỗ duy nhất trong code (mảng `GAMES` trong `app.js`),
+  đổi thứ tự/thêm/xoá game sau này không phải đổi tên folder nào cả.
+- **Ranh giới "chung" vs "riêng game"**: quy tắc chọn — cái gì mọi game
+  tương lai đều cần lại (icon SVG, mascot, nền "thế giới" mặc định, đọc
+  nội dung, tính điểm/LV, lưu tiến độ) thì vào `engine/`; cái gì chỉ nghĩa
+  lý khi đúng trong bối cảnh "Khu rừng kỳ bí" (`.freetile`, `.tileswing`,
+  màn kết quả bắt đủ 10 con...) thì vào `games/khu-rung-ky-bi/`. Icon ô
+  chọn game của Khu rừng kỳ bí (`.gametile.forest-tile`) và markup của nó
+  cũng chuyển hẳn vào `forest.js`/`forest.css` — `app.js` chỉ biết "id
+  'forest' ứng với module nào", không biết chi tiết icon trông ra sao.
+- **Cách app.js gắn 1 game vào router** (tránh import vòng — game không tự
+  import ngược lại app.js để lấy state/store): `forest.js` export 1 hàm
+  factory `createForestGame(ctx)`, `app.js` gọi đúng 1 lần lúc khởi động,
+  truyền vào đúng những gì game cần — `state` dùng chung (cùng 1 object,
+  mutate tại chỗ nên không cần getter), `getStore()`/`getWords()` (hàm
+  getter, KHÔNG truyền thẳng giá trị, vì `store`/`WORDS` bị **gán lại**
+  lúc tải xong nội dung/lúc phụ huynh thêm từ mới qua bảng "+" — truyền
+  thẳng lúc tạo sẽ đọc phải giá trị cũ), `speak()`, `render()`,
+  `owlMascot`. Factory trả về đúng những hàm app.js cần gọi từ ngoài:
+  `startForestGame`, `renderForest`, `renderForestSummary`,
+  `gameTileHtml`. Mẫu này lặp lại y hệt cho game tiếp theo.
+- **Bẫy cần nhớ khi tách CSS ra file riêng**: `url()` ảnh trong 1 file
+  `.css` external tính từ đường dẫn của CHÍNH FILE CSS ĐÓ, không phải từ
+  `index.html` — khác hẳn với JS (`fetch()`/`src=""` trong JS luôn tính
+  từ URL trang, không phải URL module). Nên `forest.css` (nằm ở
+  `games/khu-rung-ky-bi/`) phải viết `url('../../assets/backgrounds/
+  forest-bg.jpg')` chứ không phải `url('assets/backgrounds/...')` như
+  lúc còn nằm trong `index.html` — nếu quên bước này ảnh nền sẽ vỡ âm
+  thầm (không lỗi console, computed style vẫn ra URL nhưng ảnh không
+  load), rất dễ bỏ sót nếu không kiểm tra bằng ảnh chụp thật.
+- `wordsInCat(words, catId, subcategory)` chuyển từ `app.js` sang
+  `engine/content-loader.js`, đổi chữ ký nhận thẳng `words` làm tham số
+  (thay vì đọc biến module `WORDS`) — vì đây là hàm lọc nội dung dùng
+  chung, không thuộc riêng 1 game, và nếu đọc biến module cũ sẽ tạo phụ
+  thuộc ngược vào `app.js`.
+- Dọn theo: xoá `el()` (hàm helper không còn nơi nào gọi tới) và
+  `.glasscard` (CSS không còn dùng từ khi bỏ bong bóng chữ phản hồi ở
+  Vòng 14).
+- Đã kiểm thử: 25 unit test pass; kiểm tra trực tiếp `http.get` từng file
+  mới (app.js, engine/*, games/khu-rung-ky-bi/*) đều trả 200; Playwright
+  full-regression toàn bộ luồng (onboarding → trang chủ + huy hiệu sao →
+  vào Khu rừng kỳ bí → trả lời sai (đúng quầng đỏ) → chơi hết ván (đúng
+  10 vòng, tới màn thắng) → về trang chủ (huy hiệu sao cập nhật đúng) →
+  Trang phụ huynh (đúng danh sách từ đã học, bộ lọc, bảng "+" mở/sửa từ
+  hoạt động) — không có lỗi console nào ngoài network-noise vô hại đã
+  thấy lặp lại xuyên suốt phiên làm việc; xác nhận riêng ảnh nền
+  `forest-bg.jpg` (cả ở icon ô chọn game lẫn trong màn chơi) load đúng
+  URL tuyệt đối, không bị vỡ đường dẫn sau khi chuyển CSS ra file riêng.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs

@@ -1,28 +1,28 @@
-// App — nối Content Loader + Progress Store + Learning Engine + AudioProvider
-// + bộ avatar với giao diện. Cấu trúc 3 trang thuần game cho trẻ em:
+// App — khung/router dùng chung: nối Content Loader + Progress Store +
+// Learning Engine + AudioProvider + bộ avatar với giao diện, rồi gắn từng
+// GAME (games/<slug>/) vào router theo id. Cấu trúc 3 trang thuần game
+// cho trẻ em:
 //   1. Trang chủ: hồ sơ bé (tên + avatar) + lưới chọn trò chơi (2 cột x 4)
-//   2. Trò chơi: "Khu rừng kỳ bí" — nghe tên tiếng Anh, bắt đúng con vật
-//      đang đi trong rừng (chỉ luyện kỹ năng "Nghe" của Learning Engine)
+//   2. Từng trò chơi: xem games/<slug>/ — mỗi game tự quản lý màn/logic
+//      riêng của nó, chỉ luyện ĐÚNG 1 kỹ năng của Learning Engine
 //   3. Trang phụ huynh: xem LV của từng kỹ năng (Nghe/Nói/Đọc/Viết/Nhìn)
 //
 // Không hiển thị số liệu học tập (số từ đã thuộc...) ở bất kỳ đâu trẻ nhìn
 // thấy — chỉ trang phụ huynh mới có số liệu.
 
-import { loadContentPacks } from './content-loader.js';
-import { loadProgress, saveProgress, setProfile, getProfile } from './progress-store.js';
+import { loadContentPacks } from './engine/content-loader.js';
+import { loadProgress, saveProgress, setProfile, getProfile } from './engine/progress-store.js';
 import {
   SKILLS,
   SKILL_LABELS,
   MAX_LEVEL,
-  buildRound,
-  applyAnswer,
-  classifyAnswer,
   getSkillProgress,
-  wrongRate,
   totalStars
-} from './learning-engine.js';
-import { createAudioProvider } from './audio-provider.js';
-import { getAvatars, avatarSvg } from './avatars.js';
+} from './engine/learning-engine.js';
+import { createAudioProvider } from './engine/audio-provider.js';
+import { getAvatars, avatarSvg } from './engine/avatars.js';
+import { starIcon, BACK_SVG, owlMascot, sleepyMascot, worldBg } from './engine/ui-shared.js';
+import { createForestGame } from './games/khu-rung-ky-bi/forest.js';
 
 var CONTENT_PACKS = [
   'content/packs/colors-v1.json',
@@ -31,8 +31,6 @@ var CONTENT_PACKS = [
   'content/packs/fruits-v1.json',
   'content/packs/family-v1.json'
 ];
-
-var FOREST_WIN_TARGET = 10;
 
 var GAMES = [
   { id: 'forest', title: 'Khu rừng kỳ bí', emoji: '🦁', skill: 'listen', available: true },
@@ -44,85 +42,6 @@ var GAMES = [
   { id: 'g7', title: 'Sắp ra mắt', available: false },
   { id: 'g8', title: 'Sắp ra mắt', available: false }
 ];
-
-function starIcon(fill, size, stroke) {
-  return '<svg viewBox="0 0 24 24" width="' + (size || 16) + '" height="' + (size || 16) + '" aria-hidden="true"><path d="M12 2l2.9 6.1 6.7.7-5 4.5 1.4 6.6L12 16.9l-6 3.5 1.4-6.6-5-4.5 6.7-.7z" fill="' + fill + '" stroke="' + (stroke || 'none') + '" stroke-width="1.2"/></svg>';
-}
-var BACK_SVG = '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-var CLOSE_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg>';
-var SPEAK_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="#E4633F"/><path d="M16.4 8.6a5 5 0 010 6.8" stroke="#E4633F" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>';
-
-function owlMascot(size) {
-  size = size || 64;
-  return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 100 100" aria-hidden="true">' +
-    '<ellipse cx="50" cy="58" rx="34" ry="37" fill="#F4A93B"/>' +
-    '<ellipse cx="50" cy="60" rx="26" ry="29" fill="#FBC46C"/>' +
-    '<path class="owl-wing" d="M20 55 Q4 46 8 26 Q22 32 26 52 Z" fill="#E4633F"/>' +
-    '<path d="M80 62 Q94 58 92 42 Q80 46 76 58 Z" fill="#E4633F"/>' +
-    '<circle class="owl-blink" cx="38" cy="52" r="13" fill="#FFFDF7"/>' +
-    '<circle class="owl-blink" cx="62" cy="52" r="13" fill="#FFFDF7"/>' +
-    '<circle cx="39" cy="52" r="6" fill="#2A3B2E"/><circle cx="63" cy="52" r="6" fill="#2A3B2E"/>' +
-    '<circle cx="41" cy="49" r="1.8" fill="#fff"/><circle cx="65" cy="49" r="1.8" fill="#fff"/>' +
-    '<ellipse cx="27" cy="66" rx="5" ry="3.4" fill="#F3958A" opacity=".8"/><ellipse cx="73" cy="66" rx="5" ry="3.4" fill="#F3958A" opacity=".8"/>' +
-    '<path d="M46 60 L50 68 L54 60 Z" fill="#E4633F"/>' +
-    '<path d="M28 32 L20 12 L36 24 Z" fill="#F4A93B"/><path d="M72 32 L80 12 L64 24 Z" fill="#F4A93B"/>' +
-    '</svg>';
-}
-
-// Linh vật "đang ngủ" cho các ô trò chơi "Sắp ra mắt" — trước đây là ổ
-// khoá xám xịt chiếm 7/8 ô ở Trang chủ, nhìn như sản phẩm dở dang. Đổi
-// sang 1 khuôn mặt tròn pastel đang nhắm mắt + chữ "z" bay lên, có nhịp
-// thở nhẹ (CSS .sleepy) để đỡ "chết" mà vẫn rõ ràng là chưa mở khoá.
-function sleepyMascot(size) {
-  size = size || 40;
-  return '<svg class="sleepy" width="' + size + '" height="' + size + '" viewBox="0 0 100 100" aria-hidden="true">' +
-    '<circle cx="50" cy="54" r="34" fill="#C9C2E8"/>' +
-    '<path d="M32 52 Q38 46 44 52" stroke="#5B5480" stroke-width="4" fill="none" stroke-linecap="round"/>' +
-    '<path d="M56 52 Q62 46 68 52" stroke="#5B5480" stroke-width="4" fill="none" stroke-linecap="round"/>' +
-    '<path d="M42 66 Q50 71 58 66" stroke="#5B5480" stroke-width="4" fill="none" stroke-linecap="round"/>' +
-    '<ellipse cx="30" cy="64" rx="4.5" ry="3" fill="#A79BD1" opacity=".8"/><ellipse cx="70" cy="64" rx="4.5" ry="3" fill="#A79BD1" opacity=".8"/>' +
-    '<text x="64" y="28" font-size="15" fill="#C9C2E8" font-family="Baloo 2,sans-serif" font-weight="700">z</text>' +
-    '<text x="75" y="17" font-size="11" fill="#C9C2E8" font-family="Baloo 2,sans-serif" font-weight="700">z</text>' +
-    '</svg>';
-}
-
-// photo=true: dùng ảnh nền tĩnh (assets/backgrounds/forest-bg.jpg) — chỉ
-// dùng riêng cho màn chơi "Khu rừng kỳ bí" (renderForest). Mọi màn khác
-// vẫn giữ nguyên nền vẽ bằng CSS/SVG (mây/mặt trời/tán cây/mặt đất).
-function worldBg(photo) {
-  if (photo) return '<div class="world-bg forestphoto" aria-hidden="true"></div>';
-  return '<div class="world-bg" aria-hidden="true">' +
-    '<div class="sun-glow"></div>' +
-    '<div class="cloud c1"></div><div class="cloud c2"></div>' +
-    '<div class="canopy-band"><svg viewBox="0 0 400 88" preserveAspectRatio="none">' +
-    '<path d="M-10 50 Q40 14 100 46 T220 40 T340 50 T410 28 V-10 H-10 Z" fill="#8FC48A"/>' +
-    '<path d="M-10 66 Q50 32 130 62 T280 54 T410 50 V-10 H-10 Z" fill="#4E8F58"/>' +
-    // Cụm cây tán tròn rậm (nhiều hình tròn chồng nhau) thay cho 1 hình
-    // chữ nhật thân cây trơ trọi trước đây — giống dáng cây bụi tròn trong
-    // ảnh mẫu khu rừng minh hoạ.
-    '<rect x="40" y="46" width="12" height="30" rx="5" fill="#7A5636"/>' +
-    '<circle cx="30" cy="38" r="20" fill="#5FA766"/><circle cx="48" cy="30" r="24" fill="#6FBB74"/><circle cx="64" cy="40" r="18" fill="#5FA766"/>' +
-    '<rect x="330" y="42" width="14" height="34" rx="5" fill="#6B4B2E"/>' +
-    '<circle cx="318" cy="32" r="22" fill="#5FA766"/><circle cx="340" cy="24" r="26" fill="#6FBB74"/><circle cx="358" cy="36" r="20" fill="#5FA766"/>' +
-    '<rect x="196" y="52" width="9" height="20" rx="4" fill="#7A5636"/><circle cx="200" cy="46" r="16" fill="#6FBB74" opacity=".9"/>' +
-    '</svg></div>' +
-    '<div class="ground-band"><svg viewBox="0 0 400 112" preserveAspectRatio="none">' +
-    '<path d="M0 30 Q100 5 200 25 T400 15 V112 H0 Z" fill="#8FC48A" opacity=".4"/>' +
-    '<path d="M0 55 Q100 35 200 50 T400 42 V112 H0 Z" fill="#4B8A57"/>' +
-    '<path d="M0 78 H400 V112 H0 Z" fill="#356B44"/>' +
-    // Đá cuội + hoa nhỏ ven đường — chi tiết trang trí để mặt đất đỡ trống.
-    '<ellipse cx="90" cy="86" rx="16" ry="10" fill="#9A9488"/><ellipse cx="90" cy="83" rx="12" ry="6" fill="#B4AEA0"/>' +
-    '<ellipse cx="300" cy="90" rx="20" ry="12" fill="#9A9488"/><ellipse cx="300" cy="86" rx="14" ry="7" fill="#B4AEA0"/>' +
-    '<g><line x1="140" y1="90" x2="140" y2="78" stroke="#356B44" stroke-width="2"/><circle cx="140" cy="76" r="4" fill="#FFD25A"/></g>' +
-    '<g><line x1="250" y1="94" x2="250" y2="80" stroke="#356B44" stroke-width="2"/><circle cx="250" cy="78" r="4" fill="#F4958A"/></g>' +
-    '<g><line x1="60" y1="96" x2="60" y2="84" stroke="#356B44" stroke-width="2"/><circle cx="60" cy="82" r="3.5" fill="#FFD25A"/></g>' +
-    '<g stroke="#356B44" stroke-width="3.4" stroke-linecap="round">' +
-    '<path class="blade" d="M20 80 Q15 64 22 52"/><path class="blade" d="M40 80 Q45 62 38 50"/>' +
-    '<path class="blade" d="M360 80 Q355 64 362 52"/><path class="blade" d="M380 80 Q385 62 378 50"/>' +
-    '<path class="blade" d="M200 80 Q195 64 202 52"/>' +
-    '</g></svg></div>' +
-    '</div>';
-}
 
 var audio = createAudioProvider();
 var root = document.getElementById('root');
@@ -142,34 +61,30 @@ var state = {
   targetIdx: 0    // slot nào đang là đáp án đúng của câu hỏi hiện tại
 };
 
-function el(html) {
-  var d = document.createElement('div');
-  d.innerHTML = html.trim();
-  return d.firstElementChild;
-}
-
 function speak(text) {
   audio.speak(text, { lang: 'en-US' });
 }
 
-// subcategory tuỳ chọn — truyền vào để chỉ lấy đúng 1 "nhóm con" bên
-// trong category đó (vd category="animal", subcategory="wild" chỉ lấy
-// động vật hoang dã, bỏ qua động vật nuôi dù cùng category).
-function wordsInCat(catId, subcategory) {
-  return WORDS.filter(function (w) {
-    if (w.cat !== catId) return false;
-    if (subcategory && w.subcategory !== subcategory) return false;
-    return true;
-  });
-}
+// Gắn 1 lần lúc khởi động — mỗi game chỉ nhận đúng những gì nó cần thay
+// vì tự ý import ngược lại app.js (tránh import vòng). store/WORDS dùng
+// getter vì 2 biến này bị GÁN LẠI lúc tải xong nội dung/lúc phụ huynh
+// thêm từ mới qua Trang phụ huynh — truyền thẳng giá trị lúc tạo sẽ cũ.
+var forestGame = createForestGame({
+  state: state,
+  getStore: function () { return store; },
+  getWords: function () { return WORDS; },
+  speak: speak,
+  render: render,
+  owlMascot: owlMascot
+});
 
 function render() {
   if (state.screen === 'loading') renderLoading();
   else if (state.screen === 'error') renderError();
   else if (state.screen === 'onboarding') renderOnboarding();
   else if (state.screen === 'home') renderHome();
-  else if (state.screen === 'forest') renderForest();
-  else if (state.screen === 'forestSummary') renderForestSummary();
+  else if (state.screen === 'forest') forestGame.renderForest();
+  else if (state.screen === 'forestSummary') forestGame.renderForestSummary();
   else if (state.screen === 'parent') renderParent();
 }
 
@@ -255,14 +170,10 @@ function renderHome() {
 
   var tiles = GAMES.map(function (g) {
     if (g.available) {
-      // Riêng ô "Khu rừng kỳ bí": nền là ảnh crop nhỏ của ảnh nền trong
-      // game (assets/backgrounds/forest-bg.jpg) + mặt con hổ (crop từ
-      // assets/animals/tiger.png, lắc lư nhẹ) thay cho emoji 🦁 phẳng.
-      if (g.id === 'forest') {
-        return '<button type="button" class="gametile forest-tile" data-id="' + g.id + '">' +
-          '<span class="foresttile-face"><img src="assets/animals/tiger.png" alt=""></span>' +
-          '<span class="name">' + g.title + '</span></button>';
-      }
+      // Mỗi game tự quyết định icon riêng của nó (vd Khu rừng kỳ bí có
+      // ảnh nền + con hổ lắc lư) — app.js chỉ biết game nào ứng với id
+      // nào, không biết chi tiết markup từng game.
+      if (g.id === 'forest') return forestGame.gameTileHtml(g.title);
       return '<button type="button" class="gametile" data-id="' + g.id + '">' +
         '<span class="emoji">' + g.emoji + '</span><span class="name">' + g.title + '</span></button>';
     }
@@ -293,296 +204,7 @@ function renderHome() {
   document.getElementById('gameGrid').addEventListener('click', function (e) {
     var tile = e.target.closest('.gametile[data-id]');
     if (!tile) return;
-    if (tile.getAttribute('data-id') === 'forest') startForestGame();
-  });
-}
-
-// ---------------- Trò chơi: Khu rừng kỳ bí ----------------
-
-// Chọn slot nào (trong 4 slot đang hiển thị) sẽ là câu hỏi tiếp theo —
-// ưu tiên từ đã đến hạn ôn, trong đó ưu tiên tỉ lệ sai cao hơn, LV thấp
-// hơn; có yếu tố ngẫu nhiên để không luôn rơi vào cùng 1 slot khi các từ
-// đang ngang điểm nhau (vd lúc mới bắt đầu, chưa từ nào được học).
-function pickTargetIndex(slots) {
-  var now = Date.now();
-  var scored = slots.map(function (w, i) {
-    var p = getSkillProgress(store.words, w.id, 'listen');
-    var due = (p && p.seen && p.next <= now) ? 1 : 0;
-    return { i: i, due: due, wr: wrongRate(p), level: p ? p.level : 0, rnd: Math.random() };
-  });
-  scored.sort(function (a, b) {
-    return (b.due - a.due) || (b.wr - a.wr) || (a.level - b.level) || (a.rnd - b.rnd);
-  });
-  return scored[0].i;
-}
-
-// Chọn từ mới thay cho slot vừa được hỏi — loại trừ cả 4 từ đang hiển thị
-// (kể cả từ vừa hỏi) để tránh lặp lại ngay, ưu tiên due/tỉ lệ sai cao
-// trong số từ còn lại của bộ.
-function pickReplacementWord(replaceIdx) {
-  var exclude = {};
-  state.slots.forEach(function (w) { exclude[w.id] = true; });
-  var candidates = state.forestPool.filter(function (w) { return !exclude[w.id]; });
-  if (!candidates.length) candidates = state.forestPool.filter(function (w) { return w.id !== state.slots[replaceIdx].id; });
-  if (!candidates.length) candidates = state.forestPool.slice();
-  return buildRound(candidates, store.words, 'listen', { size: 1 })[0];
-}
-
-function startForestGame() {
-  // Chỉ lấy động vật hoang dã — trò "vật nuôi" (chưa làm) sẽ lấy
-  // subcategory="pet" cùng category="animal" riêng, không lẫn vào đây.
-  state.forestPool = wordsInCat('animal', 'wild');
-  state.slots = buildRound(state.forestPool, store.words, 'listen', { size: 4 });
-  state.targetIdx = pickTargetIndex(state.slots);
-  state.correct = 0;
-  state.answered = false;
-  state.screen = 'forest';
-  render();
-}
-
-// Ảnh tĩnh hoặc video lặp (nếu từ có "video") cho 1 ô — object-fit:contain
-// (CSS) tự co vừa ô, giữ đúng tỉ lệ khung hình gốc. Bọc trong span
-// .tileswing để có hiệu ứng "lắc lư nhẹ nhàng" tại chỗ (CSS, xem
-// index.html) — không cho con vật chạy/di chuyển vị trí, chỉ đứng yên và
-// đung đưa như đang thở, theo đúng yêu cầu (đã thử "chạy" ở các vòng
-// trước và bị chê rối).
-function forestTileMedia(w) {
-  var media = w.video
-    ? '<video src="' + w.video + '" autoplay loop muted playsinline poster="' + w.image + '"></video>'
-    : '<img src="' + w.image + '" alt="' + w.en + '">';
-  return '<span class="tileswing">' + media + '</span>';
-}
-
-function forestStarsRow() {
-  var row = '';
-  for (var i = 0; i < FOREST_WIN_TARGET; i++) {
-    var lit = i < state.correct;
-    var starMarkup = starIcon(lit ? '#FFD25A' : 'rgba(255,255,255,.55)', 16, 'rgba(35,58,42,.35)');
-    row += starMarkup.replace('<svg ', '<svg class="' + (lit ? 'lit' : '') + '" ');
-  }
-  return row;
-}
-
-function speakForestTarget() {
-  var w = state.slots[state.targetIdx];
-  speak('Catch the ' + w.en + '!');
-}
-
-// Chuông "ting" 2 nốt lên cao khi bấm đúng — tự tổng hợp bằng Web Audio,
-// không cần file âm thanh riêng. Trước đây bấm đúng chỉ đổi màu viền +
-// 1 dòng chữ nhỏ, gần như không có gì "ăn mừng" thật sự.
-var sharedAudioCtx = null;
-// Chuỗi hợp âm đi lên C5-E5-G5-C6 (thay cho 2 nốt sine đơn điệu trước
-// đây) — mỗi nốt có 1 lớp "thân" (triangle, nhiều bội âm hơn sine trơn)
-// + 1 lớp "lấp lánh" nhỏ (sine cao hơn 1 quãng 8) chồng lên, cho tiếng
-// đầy và rõ hơn hẳn, giống hiệu ứng "ăn điểm" quen thuộc trong game.
-function playDing() {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  try {
-    if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    var ctx = sharedAudioCtx;
-    var now = ctx.currentTime;
-    [523.25, 659.25, 783.99, 1046.5].forEach(function (freq, i) {
-      var start = now + i * 0.075;
-      var dur = 0.32;
-
-      var body = ctx.createOscillator();
-      var bodyGain = ctx.createGain();
-      body.type = 'triangle';
-      body.frequency.value = freq;
-      bodyGain.gain.setValueAtTime(0, start);
-      bodyGain.gain.linearRampToValueAtTime(0.22, start + 0.015);
-      bodyGain.gain.exponentialRampToValueAtTime(0.001, start + dur);
-      body.connect(bodyGain).connect(ctx.destination);
-      body.start(start);
-      body.stop(start + dur);
-
-      var sparkle = ctx.createOscillator();
-      var sparkleGain = ctx.createGain();
-      sparkle.type = 'sine';
-      sparkle.frequency.value = freq * 2;
-      sparkleGain.gain.setValueAtTime(0, start);
-      sparkleGain.gain.linearRampToValueAtTime(0.08, start + 0.015);
-      sparkleGain.gain.exponentialRampToValueAtTime(0.001, start + dur * 0.8);
-      sparkle.connect(sparkleGain).connect(ctx.destination);
-      sparkle.start(start);
-      sparkle.stop(start + dur * 0.8);
-    });
-  } catch (e) { /* Web Audio không khả dụng — bỏ qua, không phá UI */ }
-}
-
-// Bắn vài hạt "ăn mừng" nhỏ từ chính ô vừa bấm đúng rồi tự dọn — khác với
-// confetti rơi từ trên xuống ở màn thắng cả ván (.fall), đây là phản hồi
-// tức thời ngay tại chỗ cho MỖI câu trả lời đúng.
-function celebrateTile(tileEl) {
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var colors = ['#F4A93B', '#E4633F', '#2F8F5B', '#FFD25A'];
-  for (var i = 0; i < 8; i++) {
-    var p = document.createElement('span');
-    p.className = 'tileburst';
-    var angle = (Math.PI * 2 * i) / 8 + Math.random() * 0.4;
-    var dist = 26 + Math.random() * 20;
-    p.style.setProperty('--dx', (Math.cos(angle) * dist) + 'px');
-    p.style.setProperty('--dy', (Math.sin(angle) * dist - 10) + 'px');
-    p.style.setProperty('--rot', (Math.random() * 360) + 'deg');
-    p.style.background = colors[i % colors.length];
-    tileEl.appendChild(p);
-    (function (el) { setTimeout(function () { el.remove(); }, 750); })(p);
-  }
-}
-
-// Mỗi ô (0-3) có 1 góc phần tư cố định trong khu chơi suốt cả ván — chỉ
-// vị trí CHÍNH XÁC bên trong góc đó là ngẫu nhiên, tính lại mỗi khi con
-// vật ở ô đó đổi (xem forestPositionTile()). 2 góc phần tư khác nhau
-// không bao giờ chồng lấn nên đảm bảo 2 con không bao giờ đè lên nhau,
-// mà không cần thử-sai (rejection sampling) vốn có thể bị "kẹt".
-function forestPositionTile(tileEl, idx) {
-  var container = document.getElementById('freeplayArea');
-  if (!container) return;
-  var cw = container.clientWidth;
-  var ch = container.clientHeight;
-  var tw = tileEl.offsetWidth;
-  var th = tileEl.offsetHeight;
-  var halfW = cw / 2;
-  var halfH = ch / 2;
-  var qx = idx % 2;
-  var qy = idx < 2 ? 0 : 1;
-  var maxJitterX = Math.max(halfW - tw, 0);
-  var maxJitterY = Math.max(halfH - th, 0);
-  tileEl.style.left = (qx * halfW + Math.random() * maxJitterX) + 'px';
-  tileEl.style.top = (qy * halfH + Math.random() * maxJitterY) + 'px';
-}
-
-function forestPositionAllTiles() {
-  var tileEls = document.getElementById('freeplayArea').querySelectorAll('.freetile');
-  Array.prototype.forEach.call(tileEls, function (tileEl, i) { forestPositionTile(tileEl, i); });
-}
-
-function renderForest() {
-  state.cardShownAt = Date.now();
-
-  // Vị trí ngẫu nhiên trong khu chơi thay vì lưới ô vuông — không đi
-  // lại/chạy (đã thử và bị chê rối ở các vòng trước), chỉ đứng yên tại
-  // vị trí ngẫu nhiên đó và lắc lư nhẹ. Chỉ đúng 1 ô (ô vừa được hỏi) bị
-  // đổi con + đổi vị trí mới sau mỗi câu, 3 ô kia giữ nguyên DOM (xem
-  // advanceForestRound) — quan trọng với ô có <video>: nếu dựng lại toàn
-  // bộ innerHTML mỗi câu, video của các ô KHÔNG đổi cũng bị tạo lại từ
-  // đầu và chạy lại từ giây 0, giật hình mỗi lượt.
-  var tiles = state.slots.map(function (w, i) {
-    return '<div class="freetile" data-idx="' + i + '">' + forestTileMedia(w) + '</div>';
-  }).join('');
-
-  root.innerHTML = worldBg(true) +
-    '<div class="content">' +
-    '<div class="topbar">' +
-    '<button class="iconbtn" id="homeBtn" aria-label="Về trang chủ">' + CLOSE_SVG + '</button>' +
-    '<div class="starsrow" id="forestStars" style="margin:0;">' + forestStarsRow() + '</div>' +
-    '<span style="width:38px;"></span>' +
-    '</div>' +
-    '<div class="freeplay" id="freeplayArea">' + tiles + '</div>' +
-    '<button class="soundbtn" id="speakBtn" aria-label="Nghe lại">' + SPEAK_SVG + '</button>' +
-    '</div>';
-
-  document.getElementById('homeBtn').addEventListener('click', function () {
-    state.screen = 'home'; render();
-  });
-  document.getElementById('speakBtn').addEventListener('click', speakForestTarget);
-  speakForestTarget();
-
-  var freeplayArea = document.getElementById('freeplayArea');
-  Array.prototype.forEach.call(freeplayArea.querySelectorAll('.freetile'), function (tileEl) {
-    tileEl.addEventListener('click', function () {
-      handleForestAnswer(parseInt(tileEl.getAttribute('data-idx'), 10));
-    });
-  });
-  forestPositionAllTiles();
-}
-
-function handleForestAnswer(idx) {
-  if (state.answered) return;
-  state.answered = true;
-
-  var tileEls = document.getElementById('freeplayArea').querySelectorAll('.freetile');
-  var targetWord = state.slots[state.targetIdx];
-  var isCorrect = idx === state.targetIdx;
-  var responseTimeMs = Date.now() - state.cardShownAt;
-
-  if (isCorrect) {
-    var outcome = classifyAnswer(true, responseTimeMs);
-    applyAnswer(store.words, targetWord.id, 'listen', outcome);
-    saveProgress(store);
-    state.correct++;
-    speak(targetWord.en);
-    tileEls[idx].classList.add('correct');
-    playDing();
-    celebrateTile(tileEls[idx]);
-
-    var isDone = state.correct >= FOREST_WIN_TARGET;
-    setTimeout(function () {
-      if (isDone) { state.screen = 'forestSummary'; render(); }
-      else advanceForestRound(state.targetIdx);
-    }, isDone ? 500 : 800);
-  } else {
-    applyAnswer(store.words, targetWord.id, 'listen', 'wrong');
-    saveProgress(store);
-    tileEls[idx].classList.add('wrong');
-    tileEls[state.targetIdx].classList.add('correct');
-    speak(targetWord.en);
-    setTimeout(function () { advanceForestRound(state.targetIdx); }, 3000);
-  }
-}
-
-// Chỉ thay từ ở slot vừa được hỏi (replaceIdx) — 3 slot kia giữ nguyên con
-// đang hiển thị, không đổi. Cập nhật DOM tại chỗ (không gọi render() dựng
-// lại toàn màn) để 3 ô còn lại — kể cả ô đang phát <video> — không bị tạo
-// lại và chạy lại từ đầu mỗi câu.
-function advanceForestRound(replaceIdx) {
-  state.slots[replaceIdx] = pickReplacementWord(replaceIdx);
-  state.targetIdx = pickTargetIndex(state.slots);
-  state.answered = false;
-  state.cardShownAt = Date.now();
-
-  var tileEls = document.getElementById('freeplayArea').querySelectorAll('.freetile');
-  Array.prototype.forEach.call(tileEls, function (el) { el.classList.remove('wrong', 'correct'); });
-  tileEls[replaceIdx].innerHTML = forestTileMedia(state.slots[replaceIdx]);
-  forestPositionTile(tileEls[replaceIdx], replaceIdx);
-
-  document.getElementById('forestStars').innerHTML = forestStarsRow();
-
-  speakForestTarget();
-}
-
-function renderForestSummary() {
-  root.innerHTML = worldBg() +
-    '<div class="content">' +
-    '<div class="summary-mid" id="summaryMid">' +
-    '<div class="starburst">' + starIcon('#FFD25A', 28) + starIcon('#F4A93B', 36) + starIcon('#FFD25A', 28) + '</div>' +
-    owlMascot(64) +
-    '<h2>Giỏi quá!</h2>' +
-    '<p>Bé bắt được hết các bạn thú rồi!</p>' +
-    '<div class="summary-btns">' +
-    '<button class="chunkybtn coral" id="againBtn">Chơi lại</button>' +
-    '<button class="ghostbtn" id="homeBtn2">Chọn trò khác</button>' +
-    '</div></div></div>';
-
-  var mid = document.getElementById('summaryMid');
-  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    var colors = ['#F4A93B', '#E4633F', '#2F8F5B', '#FFD25A'];
-    for (var i = 0; i < 14; i++) {
-      var f = document.createElement('div');
-      f.className = 'fall';
-      f.style.left = (10 + Math.random() * 90) + '%';
-      f.style.width = '7px'; f.style.height = '11px';
-      f.style.background = colors[i % colors.length];
-      f.style.animationDuration = (2 + Math.random() * 1.4) + 's';
-      f.style.animationDelay = (Math.random() * 2.4) + 's';
-      mid.appendChild(f);
-    }
-  }
-
-  document.getElementById('againBtn').addEventListener('click', startForestGame);
-  document.getElementById('homeBtn2').addEventListener('click', function () {
-    state.screen = 'home'; render();
+    if (tile.getAttribute('data-id') === 'forest') forestGame.startForestGame();
   });
 }
 

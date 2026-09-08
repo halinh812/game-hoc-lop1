@@ -38,10 +38,8 @@
      mọi màn TRỪ màn chơi "Khu rừng kỳ bí" (xem .world-bg.forestphoto). */
   .world-bg{ position:absolute; inset:0; z-index:0; overflow:hidden;
     background:linear-gradient(180deg,#FFEFC9 0%, #DCEFC6 42%, #EFF7E7 100%); }
-  /* Riêng màn chơi: ảnh nền minh hoạ tĩnh do người dùng tự tạo bằng AI,
-     phủ kín toàn màn hình, thay cho lớp mây/mặt trời/tán cây/mặt đất vẽ
-     bằng CSS/SVG ở trên. */
-  .world-bg.forestphoto{ background:#EFF3E3 url('assets/backgrounds/forest-bg.jpg') center/cover no-repeat; }
+  /* .world-bg.forestphoto (ảnh nền riêng của Khu rừng kỳ bí) định nghĩa
+     trong games/khu-rung-ky-bi/forest.css, không phải ở đây. */
   .sun-glow{
     position:absolute; top:16px; right:20px; width:76px; height:76px; border-radius:50%;
     background:radial-gradient(circle, rgba(255,210,90,.95), rgba(255,210,90,0) 70%);
@@ -65,10 +63,6 @@
   .content{ position:relative; z-index:2; min-height:100vh; display:flex; flex-direction:column; padding:100px 16px 24px; }
 
   /* ---------- shared UI ---------- */
-  .glasscard{
-    background:var(--glass); border:1px solid var(--glass-border); border-radius:18px;
-    padding:12px 14px; box-shadow:0 10px 22px rgba(20,40,25,.16); backdrop-filter:blur(3px);
-  }
   .topbar{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:14px; }
   .topbar h1{ font-family:'Baloo 2', sans-serif; font-weight:800; font-size:1.3rem; color:var(--ink); text-shadow:0 1px 0 rgba(255,255,255,.5); }
   .iconbtn{
@@ -144,7 +138,7 @@
   .profilebar .greet{ font-family:'Baloo 2', sans-serif; font-weight:800; font-size:1.15rem; color:var(--ink); text-shadow:0 1px 0 rgba(255,255,255,.5); }
   .profilebar .greet span{ display:block; font-family:'Be Vietnam Pro',sans-serif; font-weight:600; font-size:.76rem; color:var(--ink-soft); text-shadow:none; }
   /* "Sao" học tập — tổng LV mọi kỹ năng của mọi từ đã học (xem
-     totalStars() trong js/learning-engine.js), hiện đối diện tên bé. */
+     totalStars() trong engine/learning-engine.js), hiện đối diện tên bé. */
   .profilebar .starsbadge{
     margin-left:auto; flex:none; display:flex; align-items:center; gap:5px;
     background:var(--glass); border:1px solid var(--glass-border); border-radius:999px; padding:7px 12px;
@@ -168,31 +162,8 @@
   .gametile:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(20,40,25,.14); }
   .gametile .emoji{ font-size:2.1rem; }
   .gametile .name{ font-family:'Baloo 2', sans-serif; font-weight:700; font-size:.86rem; color:var(--ink); line-height:1.25; }
-  /* Ô "Khu rừng kỳ bí": nền là 1 khung crop nhỏ (không phải toàn ảnh) của
-     chính ảnh nền trong game — canh vào đúng đoạn sông+núi+đồng cỏ ở giữa
-     ảnh cho đẹp mắt, không lấy phần trời trống phía trên. */
-  .gametile.forest-tile{
-    position:relative; overflow:hidden; border:1px solid var(--glass-border);
-    background:#DCEFC6 url('assets/backgrounds/forest-bg.jpg') 50% 56%/240% no-repeat;
-  }
-  .gametile.forest-tile::before{
-    content:''; position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(20,35,25,0) 38%, rgba(15,28,20,.58) 100%);
-  }
-  .gametile.forest-tile .name{ position:relative; z-index:1; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.55); }
-  /* Cả con hổ (không crop mặt, không khung tròn/viền/nền trắng) — đúng ảnh
-     gốc assets/animals/tiger.png hiển thị nguyên trong khung hình chữ
-     nhật, giống hệt cách con vật hiện trong màn chơi (chỉ có ảnh + bóng
-     đổ, không có khung/hộp bao quanh). Xoay qua lại nhẹ bằng đúng hiệu
-     ứng .tileswing/tileSway đã dùng ở màn chơi. */
-  .foresttile-face{
-    position:relative; z-index:1; display:block; width:84px; height:84px;
-    animation:tileSway 2.6s ease-in-out infinite;
-  }
-  .foresttile-face img{
-    width:100%; height:100%; object-fit:contain;
-    filter:drop-shadow(0 4px 3px rgba(20,40,25,.3));
-  }
+  /* .gametile.forest-tile / .foresttile-face (icon riêng của ô "Khu rừng
+     kỳ bí") định nghĩa trong games/khu-rung-ky-bi/forest.css. */
   /* Ô "Sắp ra mắt": trước là ổ khoá xám xịt chiếm hết sự chú ý (7/8 ô) —
      đổi sang linh vật ngủ gật be bé, màu pastel dịu, có nhịp thở nhẹ để
      đỡ trông "chết"/dở dang mà vẫn rõ ràng là chưa mở khoá. */
@@ -202,87 +173,9 @@
   .gametile.locked:active{ transform:none; }
   @keyframes sleepyBreathe{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.06); } }
 
-  /* ---------- forest game ---------- */
-  .starsrow{ display:flex; justify-content:center; gap:5px; margin-bottom:10px; }
-  .starsrow svg{ width:16px; height:16px; opacity:.35; transition:opacity .2s ease, transform .2s ease; }
-  .starsrow svg.lit{ opacity:1; transform:scale(1.15); }
-  /* Nút loa giờ là thứ DUY NHẤT ở khu vực chữ/nút — không còn dòng "Bắt
-     con: X" nữa (bé nghe bằng tai, không đọc chữ) — và chuyển xuống cuối
-     màn thay vì ở trên đầu khu chơi. */
-  .soundbtn{
-    width:68px; height:68px; border-radius:50%; border:none; background:var(--glass);
-    display:flex; align-items:center; justify-content:center; margin:14px auto 0;
-    box-shadow:0 6px 14px rgba(20,40,25,.2); position:relative; cursor:pointer; flex:none;
-  }
-  .soundbtn svg{ width:26px; height:26px; }
-  .soundbtn::after{
-    content:''; position:absolute; inset:-7px; border-radius:50%; border:2px solid rgba(228,99,63,.45);
-    animation:pulsering 2s ease-out infinite;
-  }
-  @keyframes pulsering{ 0%{ transform:scale(.9); opacity:.8;} 100%{ transform:scale(1.4); opacity:0;} }
-  /* Con vật hiện ở vị trí ngẫu nhiên trong khu chơi thay vì lưới ô vuông
-     cố định. Để KHÔNG BAO GIỜ đè lên nhau mà vẫn chọn vị trí ngẫu nhiên
-     thật sự (không phải đoán/thử lại), chia khu chơi thành 4 góc phần tư
-     cố định (trên-trái/trên-phải/dưới-trái/dưới-phải, theo data-idx 0-3)
-     — 2 góc phần tư khác nhau không thể chồng lấn nên đảm bảo an toàn
-     100%, còn VỊ TRÍ CHÍNH XÁC bên trong mỗi góc (do forestPositionTile()
-     trong app.js tính bằng JS, ghi thẳng vào style.left/top) mới random
-     mỗi khi con vật ở góc đó đổi. Góc phần tử gán cho từng ô giữ cố định
-     suốt ván để con không "nhảy" sang góc khác gây khó theo dõi — chỉ
-     phần trong góc là ngẫu nhiên. */
-  .freeplay{ position:relative; flex:1; margin:4px 0 0; }
-  /* Bỏ hẳn khung/nền ô vuông quanh con vật — chỉ còn đúng hình con vật,
-     bấm thẳng vào hình. Đúng/sai giờ báo bằng quầng sáng màu ôm theo
-     đúng viền trong suốt của ảnh (filter:drop-shadow, không phải
-     background/border của 1 hình vuông), nên không tạo ra viền hình chữ
-     nhật giả quanh con vật. */
-  .freetile{
-    position:absolute; width:34vw; height:34vw; max-width:170px; max-height:170px;
-    cursor:pointer; display:flex; align-items:center; justify-content:center;
-    transition:transform .1s ease;
-  }
-  .freetile:active{ transform:scale(.92); }
-  /* "Hiện ra và lắc lư nhẹ nhàng" — không đi lại/chạy (đã thử và bị chê
-     rối ở các vòng trước), chỉ xoay qua lại vài độ tại chỗ như đang thở/
-     đung đưa. Đặt animation trên .tileswing (span bọc ảnh/video), KHÔNG
-     đặt thẳng lên img/video, để không đụng transform:scale(...) riêng của
-     trạng thái .correct bên dưới (2 phần tử cha/con transform độc lập,
-     không đè lên nhau). */
-  .tileswing{ display:block; width:100%; height:100%; animation:tileSway 2.6s ease-in-out infinite; }
-  .freetile[data-idx="0"] .tileswing{ animation-delay:0s; }
-  .freetile[data-idx="1"] .tileswing{ animation-delay:.4s; }
-  .freetile[data-idx="2"] .tileswing{ animation-delay:.8s; }
-  .freetile[data-idx="3"] .tileswing{ animation-delay:1.2s; }
-  @keyframes tileSway{ 0%,100%{ transform:rotate(-2.5deg); } 50%{ transform:rotate(2.5deg); } }
-  .freetile img, .freetile video{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 6px 4px rgba(20,40,25,.3)); }
-  .freetile.wrong img, .freetile.wrong video{ filter:drop-shadow(0 0 3px #B24A43) drop-shadow(0 0 12px #B24A43); }
-  .freetile.correct{ animation:tileCorrectBounce .5s cubic-bezier(.34,1.56,.64,1) both; }
-  .freetile.correct img, .freetile.correct video{ filter:drop-shadow(0 0 3px var(--success)) drop-shadow(0 0 12px var(--success)); transform:scale(1.08); }
-  @keyframes tileCorrectBounce{ 0%{ transform:scale(1); } 40%{ transform:scale(1.1); } 65%{ transform:scale(.96); } 100%{ transform:scale(1.03); } }
-  /* Hạt "ăn mừng" nhỏ bắn ra từ chính ô vừa bấm đúng — khác với .fall (rơi
-     từ trên xuống, dùng cho màn thắng cả ván), đây bắn ra rồi tan biến
-     nhanh trong lúc vẫn đang chơi tiếp câu khác. */
-  .tileburst{
-    position:absolute; top:50%; left:50%; width:7px; height:11px; border-radius:2px;
-    pointer-events:none; opacity:1; animation:tileBurst .7s ease-out forwards;
-  }
-  @keyframes tileBurst{
-    0%{ transform:translate(-50%,-50%) rotate(0deg) scale(1); opacity:1; }
-    100%{ transform:translate(calc(-50% + var(--dx,20px)),calc(-50% + var(--dy,-40px))) rotate(var(--rot,180deg)) scale(.5); opacity:0; }
-  }
-
-  /* ---------- forest summary ---------- */
-  .summary-mid{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; }
-  .starburst{ display:flex; gap:5px; margin-bottom:8px; }
-  .starburst svg{ width:28px; height:28px; animation:starpop .6s cubic-bezier(.2,1.5,.4,1) both; }
-  .starburst svg:nth-child(2){ animation-delay:.08s; width:36px; height:36px; }
-  .starburst svg:nth-child(3){ animation-delay:.16s; }
-  @keyframes starpop{ from{ transform:scale(0) rotate(-20deg); opacity:0;} to{ transform:scale(1) rotate(0deg); opacity:1;} }
-  .summary-mid h2{ font-family:'Baloo 2', sans-serif; font-weight:800; font-size:1.5rem; color:var(--ink); margin:6px 0 4px; }
-  .summary-mid p{ font-size:.92rem; color:var(--ink-soft); margin:0 0 18px; font-weight:600; }
-  .summary-btns{ display:flex; flex-direction:column; gap:10px; width:100%; max-width:260px; }
-  .fall{ position:absolute; top:-10px; border-radius:2px; opacity:.9; animation:confettifall linear infinite; }
-  @keyframes confettifall{ 0%{ transform:translateY(-10px) rotate(0deg); opacity:1;} 100%{ transform:translateY(640px) rotate(260deg); opacity:0;} }
+  /* CSS của màn chơi + màn kết quả "Khu rừng kỳ bí" (starsrow, soundbtn,
+     freeplay/freetile, tileswing, tileburst, summary-mid, starburst,
+     fall...) chuyển sang games/khu-rung-ky-bi/forest.css. */
 
   /* ---------- parent dashboard: clean, KHÔNG dùng phong cách thế giới game ---------- */
   .parentpage{ background:#FBFAF6; min-height:100vh; color:#233A2A; padding:20px 18px 30px; }
@@ -348,7 +241,7 @@
      trong pheader) khi trang này đang được mở qua server quản trị local
      (npm start), vì lúc đó mới có API /api/* để ghi file. Trên GitHub
      Pages (web tĩnh, không server) không có gì thêm ở đây cả — xem
-     tryMountContentManager() trong js/app.js. Trước đây mục này nằm thẳng
+     tryMountContentManager() trong app.js. Trước đây mục này nằm thẳng
      ở cuối trang khiến trang dài/rối — giờ gói vào 1 bảng (modal) trượt
      lên từ đáy màn hình, ẩn/hiện qua nút tròn "+". */
   .parentpage .pheader .cmFabBtn{ margin-left:auto; background:#2f8f5b; color:#fff; font-size:1.3rem; font-weight:700; }
@@ -394,11 +287,12 @@
   .contentmgr pre.log{ background:#233A2A; color:#DCEFE0; font-size:.72rem; padding:10px; border-radius:8px; margin-top:10px; max-height:160px; overflow:auto; white-space:pre-wrap; }
 
   @media (prefers-reduced-motion: reduce){
-    .sun-glow,.cloud,.blade,.owl-wing,.owl-blink,.soundbtn::after,.starburst svg,.fall,.starsrow svg,
-    .sleepy,.tileswing,.freetile.correct,.tileburst,.homemascot svg,.foresttile-face{ animation:none !important; }
+    .sun-glow,.cloud,.blade,.owl-wing,.owl-blink,.sleepy,.homemascot svg{ animation:none !important; }
   }
   button:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
 </style>
+<!-- CSS riêng của từng game — mỗi game 1 file, xem games/<slug>/*.css -->
+<link rel="stylesheet" href="games/khu-rung-ky-bi/forest.css">
 </head>
 <body>
 
@@ -406,7 +300,7 @@
   <div class="world" id="root"></div>
 </div>
 
-<script type="module" src="js/app.js"></script>
+<script type="module" src="app.js"></script>
 
 </body>
 </html>
