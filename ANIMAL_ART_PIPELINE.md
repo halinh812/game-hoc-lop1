@@ -450,3 +450,98 @@ Flow, tải về dạng `.jpeg` rồi đổi tên thành `.jpg` — 2 đuôi nà
 icon ô chọn game (`.gametile.farm-tile`) đã tinh chỉnh khớp bố cục ảnh
 thật (`55% 58% / 220%` — canh vào đoạn đường mòn uốn lượn + cây hai
 bên).
+
+## Bước 10 — Thêm 10 con "Động vật nuôi" (đợt 2) cho Nông trại của bé
+
+Mở rộng vốn từ cho trò chơi "Nông trại của bé" (nhóm con
+`subcategory: "pet"` — xem Bước 6) — chọn 10 con vật nuôi/thú cưng tiếp
+theo khác hẳn dáng vẻ với 10 con đã có (Bước 6: chó/mèo/gà/vịt/lợn/bò/
+trâu/ngựa/dê/thỏ) để bé dễ phân biệt, đều quen thuộc, phổ biến với trẻ
+Việt Nam (cả vật nuôi ngoài sân trại lẫn thú cưng trong nhà).
+
+Quy trình giống hệt Bước 8: dùng đúng "Khung phong cách" ở Bước 1 + 1
+đoạn prompt riêng bên dưới, dán vào Google Flow (hoặc ImageFX/Bing Image
+Creator...), tỉ lệ khung hình **1:1 (vuông)**, dáng đứng/ngồi đơn giản
+(không cần dáng đi — xem lý do ở Bước 4). Tạo xong tải PNG về lưu theo
+tên tiếng Anh gợi ý bên dưới.
+
+- [ ] Cừu (Sheep)
+- [ ] Ngỗng (Goose)
+- [ ] Lừa (Donkey)
+- [ ] Bồ Câu (Pigeon)
+- [ ] Vẹt (Parrot)
+- [ ] Gà Tây (Turkey)
+- [ ] Chuột Hamster (Hamster)
+- [ ] Chuột Lang (Guinea Pig)
+- [ ] Rùa (Tortoise)
+- [ ] Chim Cút (Quail)
+
+### Prompt riêng cho từng con
+
+```
+Cừu (Sheep):
+A baby sheep character, standing or sitting calmly, thick fluffy
+cloud-like white wool covering the round body, a small black or pink
+face peeking out from the wool, short floppy ears, no horns, big
+sparkling eyes, gentle calm expression.
+
+Ngỗng (Goose):
+A baby goose character, standing calmly, a long graceful curved neck,
+plump rounded white body, an orange flat bill and orange webbed feet,
+small wings held close to the body, big sparkling eyes, alert friendly
+expression.
+
+Lừa (Donkey):
+A baby donkey character, standing or sitting calmly, extra-long
+upright ears, a short upright dark mane, grey-brown fur with a lighter
+cream muzzle and belly, a thin dark stripe down the back, big
+sparkling eyes, gentle patient expression.
+
+Bồ Câu (Pigeon):
+A baby pigeon character, standing calmly, a plump rounded body, a
+small round head with a short beak, soft grey feathers with a subtle
+glossy green-purple sheen around the neck, pink-orange feet, big
+sparkling eyes, calm friendly expression.
+
+Vẹt (Parrot):
+A baby parrot character, standing or perching calmly, vivid green
+feathers with colorful red and yellow accents on the wings, a short
+curved beak, big sparkling eyes, cheerful playful expression.
+
+Gà Tây (Turkey):
+A baby turkey character, standing calmly, a compact fanned tail with
+soft round brown and cream feather patterns, a small featherless red
+head and wattle, plump rounded body, dark brown feathers, big
+sparkling eyes, proud cheerful expression.
+
+Chuột Hamster (Hamster):
+A baby hamster character, sitting upright on its haunches, an
+extremely round plump body, a tiny stubby tail, small round ears,
+golden-brown fur with lighter cream cheeks and belly, tiny paws held
+together in front, big sparkling eyes, cheerful curious expression.
+
+Chuột Lang (Guinea Pig):
+A baby guinea pig character, sitting calmly, a rounded elongated body
+with no visible tail, short stubby legs, small rounded ears, soft fur
+in patches of white, brown, and black, big sparkling eyes, gentle
+curious expression.
+
+Rùa (Tortoise):
+A baby tortoise character, standing or sitting calmly, a domed rounded
+shell with a soft patchwork pattern in warm brown and cream tones,
+short stubby legs, a small head with a gentle smile, big sparkling
+eyes, calm friendly expression.
+
+Chim Cút (Quail):
+A baby quail character, standing calmly, a small rounded plump body, a
+tiny curved feather plume on top of the head, a short tail, warm brown
+and cream speckled feathers, tiny feet, big sparkling eyes, alert
+curious expression.
+```
+
+Lưu file PNG tải về theo đúng tên tiếng Anh không dấu, chữ thường (vd
+`sheep.png`, `goose.png`, `donkey.png`, `pigeon.png`, `parrot.png`,
+`turkey.png`, `hamster.png`, `guineapig.png`, `tortoise.png`,
+`quail.png`) — trùng đúng mã (id)/`text_en` sẽ dùng khi thêm từ qua
+Trang phụ huynh (nút "+" → Bộ từ "Con vật" → Nhóm từ "Động vật nuôi" →
+"➕ Thêm từ mới"), để đỡ phải gõ lại tay.
