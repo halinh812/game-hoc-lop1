@@ -997,6 +997,46 @@ về dạng `.jpeg` rồi tự đổi tên thành `.jpg` qua Explorer (không d�
   màn chọn trò chơi lẫn màn chơi đều hiển thị đúng, đẹp, đồng bộ phong
   cách với Khu rừng kỳ bí.
 
+## Vòng 18 — Sửa lỗi "con nào cũng đọc giống nhau" (đua tranh cancel()/speak())
+
+Người dùng báo âm thanh đọc tên con vật không đổi theo từng con — nghi
+ngờ đầu tiên là logic chọn từ sai, nhưng kiểm tra lại (nhiều lần capture
+`window.__lastSpeech`/`speak()` xuyên suốt phiên làm việc trước đó, và
+chơi thắng được cả ván nhờ đúng câu đọc) xác nhận **logic chọn từ hoàn
+toàn đúng** — từ được chọn để đọc luôn khớp đúng slot mục tiêu. Vậy lỗi
+nằm ở tầng phát âm thanh trình duyệt, không phải game logic.
+
+- **Nguyên nhân nghi nhiều nhất**: lỗi đã biết của Web Speech API (rõ
+  nhất trên Chrome Android) — gọi `speechSynthesis.cancel()` rồi gọi
+  `speechSynthesis.speak()` ngay lập tức (như code cũ vẫn làm) có thể bị
+  máy "nuốt" lệnh speak() mới, khiến engine cứ phát lặp lại câu CŨ thay
+  vì câu vừa gọi — đúng khớp triệu chứng "con nào cũng đọc như nhau".
+- **Sửa** (`engine/audio-provider.js`): chỉ gọi `cancel()` khi thật sự
+  đang có câu phát dở (`synth.speaking || synth.pending`, thay vì gọi vô
+  điều kiện mỗi lần), rồi chờ 1 nhịp rất ngắn (60ms, qua `setTimeout`)
+  cho `cancel()` xử lý xong hẳn mới xếp câu mới vào hàng đợi thật —
+  khắc phục đúng race condition trên. Thêm cơ chế đánh số thứ tự lần gọi
+  (`latestSpeakId`) để nếu `speak()` bị gọi liên tiếp rất nhanh (vd bấm
+  đúp nút "Nghe lại"), lần gọi CŨ đang chờ trong `setTimeout` tự nhận ra
+  đã có lần gọi MỚI hơn và bỏ qua — không phát nhầm câu cũ ra sau câu
+  mới, không xếp hàng chồng chéo nhiều utterance.
+- Không thể tái hiện/nghe thử âm thanh thật trong môi trường chạy test ở
+  đây (Chromium headless không có engine phát âm thanh thật) — đã kiểm
+  chứng bằng cách khác: chèn (mock) `window.speechSynthesis.speak` để
+  ghi lại chính xác utterance nào THẬT SỰ được gọi và lúc nào, xác nhận:
+  (1) sau khi đợi hết 60ms, đúng câu mới nhất được gọi; (2) bấm 2 lần
+  liên tiếp cực nhanh thì trình duyệt chỉ thật sự gọi `speak()` đúng 1
+  lần với đúng câu mới nhất (không phát trùng/phát nhầm câu cũ); (3)
+  chơi hết cả ván ở cả 2 game vẫn đúng như trước, không có gì bị ảnh
+  hưởng bởi độ trễ 60ms thêm vào. 25 unit test vẫn pass.
+- Nếu người dùng thử lại vẫn còn hiện tượng tương tự, nhiều khả năng là
+  do **chính giọng đọc (voice) trên máy/trình duyệt cụ thể của họ** phát
+  âm nhiều tên con vật nghe gần giống nhau (chất lượng giọng phụ thuộc
+  thiết bị, ngoài tầm kiểm soát của code — xem "Ghi chú kỹ thuật lâu dài"
+  bên dưới về giới hạn Web Speech API) — lúc đó bước tiếp theo là thử
+  trình duyệt khác trên cùng máy để so sánh trước khi cân nhắc giọng trả
+  phí.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs

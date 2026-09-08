@@ -52,6 +52,11 @@ function pickBestVoice(voices) {
 
 export function createWebSpeechProvider() {
   var cachedBestVoice = null;
+  // ID của lần gọi speak() gần nhất — dùng để lần gọi CŨ (đang chờ trong
+  // setTimeout bên dưới) tự biết mình đã bị 1 lần gọi MỚI hơn ghi đè, để
+  // không phát nhầm câu cũ ra sau câu mới nếu 2 lần gọi speak() liền nhau
+  // quá nhanh (vd bấm rất nhanh giữa 2 câu).
+  var latestSpeakId = 0;
 
   function refreshVoice() {
     try {
@@ -71,7 +76,9 @@ export function createWebSpeechProvider() {
       opts = opts || {};
       try {
         if (!this.isSupported()) return;
-        window.speechSynthesis.cancel();
+        var synth = window.speechSynthesis;
+        var myId = ++latestSpeakId;
+
         var u = new SpeechSynthesisUtterance(text);
         u.lang = opts.lang || 'en-US';
         // Tốc độ/cao độ tự nhiên hơn bản trước (0.82/1.05 nghe hơi chậm và
@@ -79,7 +86,18 @@ export function createWebSpeechProvider() {
         u.rate = opts.rate != null ? opts.rate : 0.92;
         u.pitch = opts.pitch != null ? opts.pitch : 1.0;
         if (cachedBestVoice) u.voice = cachedBestVoice;
-        window.speechSynthesis.speak(u);
+
+        if (synth.speaking || synth.pending) synth.cancel();
+        // Lỗi trình duyệt đã biết (nhiều nhất trên Chrome Android): gọi
+        // speak() ngay sau cancel() có thể bị "nuốt" — máy cứ phát lặp lại
+        // câu CŨ thay vì câu vừa gọi (đúng triệu chứng "con nào cũng đọc
+        // như nhau" người dùng gặp phải), vì cancel() chưa xử lý xong lúc
+        // speak() mới đã gọi tới. Chờ 1 nhịp rất ngắn cho cancel() thật sự
+        // hoàn tất rồi mới xếp câu mới vào hàng đợi.
+        setTimeout(function () {
+          if (myId !== latestSpeakId) return; // đã có lần gọi mới hơn, bỏ qua
+          synth.speak(u);
+        }, 60);
       } catch (e) {
         // Một số trình duyệt (đặc biệt Safari iOS) yêu cầu tương tác người
         // dùng trước khi phát được âm thanh — bỏ qua lỗi, không phá UI.
