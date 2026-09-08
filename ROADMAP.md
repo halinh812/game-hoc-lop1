@@ -975,6 +975,28 @@ từ là 10 "Động vật nuôi" (`subcategory: "pet"`) **đã có sẵn** tron
   Vòng 9 (không phải lỗi thật — xác nhận lại bằng chụp riêng phần tử +
   đếm số node `<img>`/`<video>` thật trong DOM, cả 2 đều đúng).
 
+## Vòng 17 — Có ảnh farm-bg.jpg thật, chỉnh crop icon cho khớp
+
+Người dùng tạo ảnh nền nông trại bằng Google Flow (prompt Bước 9), tải
+về dạng `.jpeg` rồi tự đổi tên thành `.jpg` qua Explorer (không dùng
+`git mv` nên Git ban đầu hiểu nhầm thành "xoá file cũ + có file mới lạ"
+— gộp lại bằng `git add -A` là xong, không có gì bất thường).
+
+- Xem ảnh thật, thử vài phương án `background-position/-size` cho
+  `.gametile.farm-tile` rồi chốt **`55% 58% / 220%`** (đường mòn uốn
+  lượn + cây hai bên) — đẹp và rõ nét nhất khi thu nhỏ, đồng bộ cảm giác
+  với tile Khu rừng kỳ bí (crop vào đúng đoạn có "điểm nhấn" thay vì mảng
+  màu trơn).
+- `.world-bg.farmphoto` (nền toàn màn hình lúc chơi) giữ nguyên
+  `center/cover` — không cần chỉnh, ảnh phủ đẹp ngay.
+- Đã kiểm thử: 25 unit test pass; xác nhận `background-image` của cả
+  icon ô chọn game lẫn nền màn chơi đều resolve đúng URL
+  `assets/backgrounds/farm-bg.jpg`; chơi hết 1 ván đầy đủ (10 câu, tới
+  màn thắng) với ảnh nền thật — không lỗi console nào ngoài network-noise
+  vô hại đã thấy lặp lại xuyên suốt phiên; chụp ảnh xác nhận bằng mắt cả
+  màn chọn trò chơi lẫn màn chơi đều hiển thị đúng, đẹp, đồng bộ phong
+  cách với Khu rừng kỳ bí.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
