@@ -444,9 +444,9 @@ character, any text or watermark, cropped or off-center composition.
 Không cần xoá nền/nền trong suốt (giống Bước 7) — giữ nguyên làm 1 ảnh
 nền đầy khung (JPG/PNG đều được).
 
-Sau khi có ảnh, lưu vào `assets/backgrounds/farm-bg.jpg` — code phía
-game (icon ô chọn game + nền màn chơi) đã trỏ sẵn tới đúng đường dẫn
-này, chỉ cần thêm file là chạy được ngay, không cần sửa code. Vị trí
-crop/zoom của ảnh trong ô icon nhỏ (`.gametile.farm-tile`) có thể cần
-chỉnh lại chút cho khớp bố cục ảnh thật — báo lại khi có ảnh để tinh
-chỉnh.
+Ảnh `assets/backgrounds/farm-bg.jpg` đã có (người dùng tự tạo qua Google
+Flow, tải về dạng `.jpeg` rồi đổi tên thành `.jpg` — 2 đuôi này là 1
+định dạng, chỉ cần đổi tên, không cần chuyển đổi gì). Vị trí crop cho
+icon ô chọn game (`.gametile.farm-tile`) đã tinh chỉnh khớp bố cục ảnh
+thật (`55% 58% / 220%` — canh vào đoạn đường mòn uốn lượn + cây hai
+bên).

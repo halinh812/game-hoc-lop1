@@ -16,12 +16,12 @@
 
 /* Ô "Nông trại của bé" trong lưới chọn trò chơi ở Trang chủ: nền là 1
    khung crop nhỏ (không phải toàn ảnh) của chính ảnh nền trong game —
-   canh vào đúng đoạn đồng cỏ/chuồng trại ở giữa ảnh cho đẹp mắt. Vị trí
-   crop (50% 56%/240%) tạm lấy giống Khu rừng kỳ bí — cần chỉnh lại khi
-   có ảnh farm-bg.jpg thật để khớp đúng bố cục ảnh. */
+   đã có ảnh farm-bg.jpg thật, canh crop vào đúng đoạn đường mòn uốn
+   lượn + cây hai bên (đẹp và rõ nét nhất khi thu nhỏ, tránh phần trời
+   trống phía trên và mảng cỏ trơn phía dưới). */
 .gametile.farm-tile{
   position:relative; overflow:hidden; border:1px solid var(--glass-border);
-  background:#EDE0BE url('../../assets/backgrounds/farm-bg.jpg') 50% 56%/240% no-repeat;
+  background:#EDE0BE url('../../assets/backgrounds/farm-bg.jpg') 55% 58%/220% no-repeat;
 }
 .gametile.farm-tile::before{
   content:''; position:absolute; inset:0;
