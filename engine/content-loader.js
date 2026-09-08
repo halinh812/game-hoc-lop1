@@ -128,3 +128,16 @@ export async function loadContentPacks(urls) {
 
   return { words: words, categories: categories, errors: errors };
 }
+
+// Lọc 1 danh sách từ (đã nạp bằng loadContentPacks) theo category, kèm
+// "nhóm con" (subcategory) tuỳ chọn — vd category="animal",
+// subcategory="wild" chỉ lấy động vật hoang dã, bỏ qua động vật nuôi dù
+// cùng category. Dùng chung cho mọi game (không riêng game nào), nên đặt ở
+// đây thay vì trong 1 game cụ thể.
+export function wordsInCat(words, catId, subcategory) {
+  return words.filter(function (w) {
+    if (w.cat !== catId) return false;
+    if (subcategory && w.subcategory !== subcategory) return false;
+    return true;
+  });
+}

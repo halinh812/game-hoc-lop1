@@ -21,7 +21,7 @@ import {
   requeueAfterAnswer,
   pickOptions,
   shuffle
-} from '../js/learning-engine.js';
+} from '../engine/learning-engine.js';
 
 var tests = [];
 function test(name, fn) { tests.push({ name: name, fn: fn }); }
