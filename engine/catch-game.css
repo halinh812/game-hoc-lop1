@@ -1,0 +1,98 @@
+/* CSS dùng chung cho MỌI game kiểu "nghe tên tiếng Anh, bấm đúng con vật
+   đang lắc lư trong khu chơi" — cơ chế đã dùng cho "Khu rừng kỳ bí"
+   (games/khu-rung-ky-bi/) và "Nông trại của bé" (games/nong-trai-cua-be/),
+   trích ra đây từ lần đầu 2 game dùng chung y hệt để tránh copy-paste lặp
+   lại. Game nào dùng cơ chế này chỉ cần render đúng các class ở đây
+   (.freeplay/.freetile/.starsrow/.soundbtn...) — không cần định nghĩa
+   lại CSS. Phần RIÊNG của từng game (ảnh nền, icon ô chọn game) vẫn nằm
+   trong games/<slug>/*.css của game đó.
+   Không có url() ảnh nào trong file này nên không cần lo đường dẫn tương
+   đối như games/<slug>/*.css. */
+
+/* ---------- màn chơi ---------- */
+.starsrow{ display:flex; justify-content:center; gap:5px; margin-bottom:10px; }
+.starsrow svg{ width:16px; height:16px; opacity:.35; transition:opacity .2s ease, transform .2s ease; }
+.starsrow svg.lit{ opacity:1; transform:scale(1.15); }
+/* Nút loa là thứ DUY NHẤT ở khu vực chữ/nút — không có dòng "Bắt con: X"
+   (bé nghe bằng tai, không đọc chữ) — nằm cuối màn thay vì ở trên đầu
+   khu chơi. */
+.soundbtn{
+  width:68px; height:68px; border-radius:50%; border:none; background:var(--glass);
+  display:flex; align-items:center; justify-content:center; margin:14px auto 0;
+  box-shadow:0 6px 14px rgba(20,40,25,.2); position:relative; cursor:pointer; flex:none;
+}
+.soundbtn svg{ width:26px; height:26px; }
+.soundbtn::after{
+  content:''; position:absolute; inset:-7px; border-radius:50%; border:2px solid rgba(228,99,63,.45);
+  animation:pulsering 2s ease-out infinite;
+}
+@keyframes pulsering{ 0%{ transform:scale(.9); opacity:.8;} 100%{ transform:scale(1.4); opacity:0;} }
+/* Con vật hiện ở vị trí ngẫu nhiên trong khu chơi thay vì lưới ô vuông
+   cố định. Để KHÔNG BAO GIỜ đè lên nhau mà vẫn chọn vị trí ngẫu nhiên
+   thật sự (không phải đoán/thử lại), chia khu chơi thành 4 góc phần tư
+   cố định (trên-trái/trên-phải/dưới-trái/dưới-phải, theo data-idx 0-3)
+   — 2 góc phần tư khác nhau không thể chồng lấn nên đảm bảo an toàn
+   100%, còn VỊ TRÍ CHÍNH XÁC bên trong mỗi góc (JS của từng game tính,
+   ghi thẳng vào style.left/top) mới random mỗi khi con vật ở góc đó
+   đổi. Góc phần tử gán cho từng ô giữ cố định suốt ván để con không
+   "nhảy" sang góc khác gây khó theo dõi — chỉ phần trong góc là ngẫu
+   nhiên. */
+.freeplay{ position:relative; flex:1; margin:4px 0 0; }
+/* Bỏ hẳn khung/nền ô vuông quanh con vật — chỉ còn đúng hình con vật,
+   bấm thẳng vào hình. Đúng/sai giờ báo bằng quầng sáng màu ôm theo
+   đúng viền trong suốt của ảnh (filter:drop-shadow, không phải
+   background/border của 1 hình vuông), nên không tạo ra viền hình chữ
+   nhật giả quanh con vật. */
+.freetile{
+  position:absolute; width:34vw; height:34vw; max-width:170px; max-height:170px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:transform .1s ease;
+}
+.freetile:active{ transform:scale(.92); }
+/* "Hiện ra và lắc lư nhẹ nhàng" — không đi lại/chạy (đã thử và bị chê
+   rối ở các vòng trước), chỉ xoay qua lại vài độ tại chỗ như đang thở/
+   đung đưa. Đặt animation trên .tileswing (span bọc ảnh/video), KHÔNG
+   đặt thẳng lên img/video, để không đụng transform:scale(...) riêng của
+   trạng thái .correct bên dưới (2 phần tử cha/con transform độc lập,
+   không đè lên nhau). Icon ô chọn game của từng game (vd .foresttile-face,
+   .farmtile-face) cũng dùng lại đúng keyframe tileSway này. */
+.tileswing{ display:block; width:100%; height:100%; animation:tileSway 2.6s ease-in-out infinite; }
+.freetile[data-idx="0"] .tileswing{ animation-delay:0s; }
+.freetile[data-idx="1"] .tileswing{ animation-delay:.4s; }
+.freetile[data-idx="2"] .tileswing{ animation-delay:.8s; }
+.freetile[data-idx="3"] .tileswing{ animation-delay:1.2s; }
+@keyframes tileSway{ 0%,100%{ transform:rotate(-2.5deg); } 50%{ transform:rotate(2.5deg); } }
+.freetile img, .freetile video{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 6px 4px rgba(20,40,25,.3)); }
+.freetile.wrong img, .freetile.wrong video{ filter:drop-shadow(0 0 3px #B24A43) drop-shadow(0 0 12px #B24A43); }
+.freetile.correct{ animation:tileCorrectBounce .5s cubic-bezier(.34,1.56,.64,1) both; }
+.freetile.correct img, .freetile.correct video{ filter:drop-shadow(0 0 3px var(--success)) drop-shadow(0 0 12px var(--success)); transform:scale(1.08); }
+@keyframes tileCorrectBounce{ 0%{ transform:scale(1); } 40%{ transform:scale(1.1); } 65%{ transform:scale(.96); } 100%{ transform:scale(1.03); } }
+/* Hạt "ăn mừng" nhỏ bắn ra từ chính ô vừa bấm đúng — khác với .fall (rơi
+   từ trên xuống, dùng cho màn thắng cả ván), đây bắn ra rồi tan biến
+   nhanh trong lúc vẫn đang chơi tiếp câu khác. */
+.tileburst{
+  position:absolute; top:50%; left:50%; width:7px; height:11px; border-radius:2px;
+  pointer-events:none; opacity:1; animation:tileBurst .7s ease-out forwards;
+}
+@keyframes tileBurst{
+  0%{ transform:translate(-50%,-50%) rotate(0deg) scale(1); opacity:1; }
+  100%{ transform:translate(calc(-50% + var(--dx,20px)),calc(-50% + var(--dy,-40px))) rotate(var(--rot,180deg)) scale(.5); opacity:0; }
+}
+
+/* ---------- màn kết quả (thắng cả ván) ---------- */
+.summary-mid{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; }
+.starburst{ display:flex; gap:5px; margin-bottom:8px; }
+.starburst svg{ width:28px; height:28px; animation:starpop .6s cubic-bezier(.2,1.5,.4,1) both; }
+.starburst svg:nth-child(2){ animation-delay:.08s; width:36px; height:36px; }
+.starburst svg:nth-child(3){ animation-delay:.16s; }
+@keyframes starpop{ from{ transform:scale(0) rotate(-20deg); opacity:0;} to{ transform:scale(1) rotate(0deg); opacity:1;} }
+.summary-mid h2{ font-family:'Baloo 2', sans-serif; font-weight:800; font-size:1.5rem; color:var(--ink); margin:6px 0 4px; }
+.summary-mid p{ font-size:.92rem; color:var(--ink-soft); margin:0 0 18px; font-weight:600; }
+.summary-btns{ display:flex; flex-direction:column; gap:10px; width:100%; max-width:260px; }
+.fall{ position:absolute; top:-10px; border-radius:2px; opacity:.9; animation:confettifall linear infinite; }
+@keyframes confettifall{ 0%{ transform:translateY(-10px) rotate(0deg); opacity:1;} 100%{ transform:translateY(640px) rotate(260deg); opacity:0;} }
+
+@media (prefers-reduced-motion: reduce){
+  .soundbtn::after,.starburst svg,.fall,.starsrow svg,
+  .tileswing,.freetile.correct,.tileburst{ animation:none !important; }
+}

@@ -925,6 +925,56 @@ content/packs/, assets/      ← KHÔNG đổi — tổ chức theo CHỦ ĐỀ 
   `forest-bg.jpg` (cả ở icon ô chọn game lẫn trong màn chơi) load đúng
   URL tuyệt đối, không bị vỡ đường dẫn sau khi chuyển CSS ra file riêng.
 
+## Vòng 16 — Game #2 "Nông trại của bé" + tách CSS cơ chế chơi dùng chung
+
+Game thứ 2 sau Khu rừng kỳ bí, cùng cơ chế "nghe tên tiếng Anh, bấm đúng
+con vật" y hệt — dùng đúng khuôn `games/<slug>/` đã dựng ở Vòng 15. Vốn
+từ là 10 "Động vật nuôi" (`subcategory: "pet"`) **đã có sẵn** trong
+`content/packs/animals-v1.json` từ trước (không cần thêm dữ liệu) —
+`wordsInCat(WORDS, 'animal', 'pet')`.
+
+- `games/nong-trai-cua-be/farm.js` — bản sao có điều chỉnh của
+  `forest.js` (đổi `wild`→`pet`, tiger→dog, `forestphoto`→`farmphoto`,
+  `forest-tile`→`farm-tile`...), cùng factory `createFarmGame(ctx)` gọi
+  từ `app.js` y hệt cách gắn `forestGame`. `state` dùng chung thêm
+  `farmPool` (song song `forestPool`) — các field còn lại (`slots`,
+  `targetIdx`, `correct`, `answered`, `cardShownAt`) TÁI SỬ DỤNG đúng
+  field cũ vì chỉ 1 game chạy tại 1 thời điểm và mỗi game tự reset đủ
+  trước khi bắt đầu ván, không cần tách riêng theo game.
+- **Tách CSS cơ chế chơi dùng chung** (`engine/catch-game.css`, file
+  mới): tới lúc có 2 game dùng chung y hệt `.freeplay`/`.freetile`/
+  `.tileswing`/`.starsrow`/`.soundbtn`/`.tileburst`/màn kết quả
+  (`.summary-mid`/`.starburst`/`.fall`...), giữ nguyên trong
+  `forest.css` sẽ buộc `farm.css` phải chép lại y hệt (2 bản dễ lệch
+  nhau dần) — trích ra 1 file dùng chung, nạp 1 lần trong `index.html`.
+  `forest.css`/`farm.css` giờ chỉ còn phần THẬT SỰ riêng của từng game:
+  ảnh nền + icon ô chọn game (`.world-bg.xxxphoto`, `.gametile.xxx-tile`,
+  `.xxxtile-face`). Phần logic JS (pickTargetIndex/renderXxx/
+  handleXxxAnswer...) CHƯA trích chung — để riêng từng file cho dễ đọc,
+  chỉ nên trích khi có game thứ 3 dùng đúng cơ chế này (ghi lại thành
+  comment trong `farm.js` để nhớ).
+- Icon ô "Nông trại của bé" ở Trang chủ: nền crop nhỏ của
+  `assets/backgrounds/farm-bg.jpg` (`.gametile.farm-tile`, vị trí crop
+  tạm để `50% 56%/240%` giống Khu rừng kỳ bí, sẽ cần tinh chỉnh lại khi
+  có ảnh thật) + cả con chó (`assets/animals/dog.png`, có sẵn, không cần
+  ảnh mới) lắc lư nhẹ — đúng khuôn mẫu Vòng 9.
+- **Ảnh nền `farm-bg.jpg` CHƯA có** lúc code — người dùng sẽ tự tạo bằng
+  prompt ở "Bước 9" (`ANIMAL_ART_PIPELINE.md`) rồi thêm vào
+  `assets/backgrounds/farm-bg.jpg` sau, báo lại để tinh chỉnh vị trí
+  crop. Trong lúc chưa có ảnh: `.world-bg.farmphoto`/`.gametile.farm-tile`
+  hiện màu nền be nhạt dự phòng (`#F3ECD4`/`#EDE0BE`), không lỗi console,
+  không vỡ trang — đã kiểm chứng bằng Playwright (404 đúng như dự kiến
+  khi gọi thẳng `assets/backgrounds/farm-bg.jpg`, trang vẫn chạy đủ 1 ván
+  bình thường).
+- Đã kiểm thử: 25 unit test pass; Playwright full-regression cả 2 game
+  trong cùng 1 phiên (Khu rừng kỳ bí vẫn đúng ảnh nền sau khi tách CSS —
+  không bị ảnh hưởng bởi việc thêm game 2; Nông trại của bé hiện đúng 4
+  trong 10 con vật nuôi, chơi hết ván 10 câu, tới màn thắng, huy hiệu sao
+  cộng dồn đúng; Trang phụ huynh liệt kê đủ 10 con vật nuôi đã học); ảnh
+  chụp toàn trang có lúc "thiếu" ảnh do đúng lỗi thời điểm chụp đã gặp ở
+  Vòng 9 (không phải lỗi thật — xác nhận lại bằng chụp riêng phần tử +
+  đếm số node `<img>`/`<video>` thật trong DOM, cả 2 đều đúng).
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs

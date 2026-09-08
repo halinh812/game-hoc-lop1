@@ -1,0 +1,47 @@
+/* CSS RIÊNG của game "Nông trại của bé" (ảnh nền + icon ô chọn game) —
+   phần cơ chế chơi dùng chung với các game khác (freeplay/freetile/
+   starsrow/soundbtn/màn kết quả...) nằm ở engine/catch-game.css.
+   Nạp qua <link> trong index.html (games/nong-trai-cua-be/farm.css), nên
+   MỌI url() ảnh trong file này phải tính từ đường dẫn của CHÍNH FILE NÀY
+   (../../assets/...), không phải từ index.html — khác với JS (fetch()/
+   src=""... trong js luôn tính từ index.html vì đó là URL trang, không
+   phải URL module). */
+
+/* Ảnh nền tĩnh riêng của game này (thay cho nền vẽ CSS/SVG dùng chung —
+   xem worldBg() trong engine/ui-shared.js). Ảnh chưa có sẵn lúc viết file
+   này — người dùng tự tạo bằng prompt ở "Bước 9" trong
+   ANIMAL_ART_PIPELINE.md rồi lưu vào assets/backgrounds/farm-bg.jpg,
+   không cần sửa gì thêm ở đây. */
+.world-bg.farmphoto{ background:#F3ECD4 url('../../assets/backgrounds/farm-bg.jpg') center/cover no-repeat; }
+
+/* Ô "Nông trại của bé" trong lưới chọn trò chơi ở Trang chủ: nền là 1
+   khung crop nhỏ (không phải toàn ảnh) của chính ảnh nền trong game —
+   canh vào đúng đoạn đồng cỏ/chuồng trại ở giữa ảnh cho đẹp mắt. Vị trí
+   crop (50% 56%/240%) tạm lấy giống Khu rừng kỳ bí — cần chỉnh lại khi
+   có ảnh farm-bg.jpg thật để khớp đúng bố cục ảnh. */
+.gametile.farm-tile{
+  position:relative; overflow:hidden; border:1px solid var(--glass-border);
+  background:#EDE0BE url('../../assets/backgrounds/farm-bg.jpg') 50% 56%/240% no-repeat;
+}
+.gametile.farm-tile::before{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(50,38,15,0) 38%, rgba(40,28,10,.58) 100%);
+}
+.gametile.farm-tile .name{ position:relative; z-index:1; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.55); }
+/* Cả con chó (không crop mặt, không khung tròn/viền/nền trắng) — đúng
+   ảnh gốc assets/animals/dog.png hiển thị nguyên trong khung hình chữ
+   nhật, giống hệt cách con vật hiện trong màn chơi (chỉ có ảnh + bóng
+   đổ, không có khung/hộp bao quanh). Xoay qua lại nhẹ bằng đúng keyframe
+   tileSway dùng chung (định nghĩa trong engine/catch-game.css). */
+.farmtile-face{
+  position:relative; z-index:1; display:block; width:84px; height:84px;
+  animation:tileSway 2.6s ease-in-out infinite;
+}
+.farmtile-face img{
+  width:100%; height:100%; object-fit:contain;
+  filter:drop-shadow(0 4px 3px rgba(20,40,25,.3));
+}
+
+@media (prefers-reduced-motion: reduce){
+  .farmtile-face{ animation:none !important; }
+}
