@@ -30,10 +30,12 @@
    để dành nửa trên cho Bill đứng, không bị lưới đồ vật đè lên. Bản
    thân khối này cũng LÀ lưới 2×2 luôn (display:grid) — không cần JS
    tính vị trí như forest.js/farm.js vì bố cục cố định, không phải rải
-   ngẫu nhiên tránh chồng lấn. */
+   ngẫu nhiên tránh chồng lấn. Thu hẹp left/right (thay vì 0/0) để 4 ô
+   xích lại gần nhau, nằm gọn giữa khu sân trường (đoạn đường lát đá)
+   thay vì dạt ra sát 2 mép ngoài đè lên bụi cây/hoa 2 bên. */
 .billstage .freeplay{
-  position:absolute; left:0; right:0; top:48%; bottom:2%; flex:none; margin:0;
-  display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; place-items:center; gap:3vw 4vw;
+  position:absolute; left:16%; right:16%; top:48%; bottom:2%; flex:none; margin:0;
+  display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; place-items:center; gap:2vw 3vw;
 }
 
 .billmascotwrap{
