@@ -1409,3 +1409,22 @@ Theo yêu cầu người dùng, 2 chỉnh sửa giao diện nhỏ cho game #4:
 - Kiểm thử lại bằng Playwright: Cú không chồng lên nút home, vẫn đổi
   đúng trạng thái vui/buồn ở vị trí mới, nút xác nhận vẫn hoạt động
   đúng. 25 unit test vẫn pass.
+
+## Vòng 29 — "How Many?": Cú to x3 + xuống góc dưới-trái, khối items/hoa lên cao hơn
+
+Tiếp tục yêu cầu người dùng, chỉnh thêm giao diện game #4:
+
+- Cú thông thái đổi từ neo `top` (góc trên-trái, Vòng 28) sang neo
+  `bottom` (góc dưới-trái) trong `.owlwrap`, đồng thời phóng to x3
+  (84px → 252px) đúng yêu cầu.
+- Vì to hơn nhiều, box của Cú giờ CHE cả vùng nút hoa/nút xác nhận bên
+  dưới. Xử lý bằng `z-index:-1` (Cú luôn đứng SAU các phần tử khác
+  trong `.content` theo đúng thứ tự DOM) + `pointer-events:none` — Cú
+  chỉ mang tính trang trí, "ló ra" phía sau/xung quanh các nút hoa chứ
+  không che mất hay chặn bấm nút nào. Đã kiểm thử bằng Playwright: bấm
+  đúng 2 nút hoa bị Cú che nhiều nhất (hướng dương/cúc) vẫn nhận đúng
+  trạng thái "selected" và mở khoá nút xác nhận bình thường.
+- Khối ảnh đồ vật cần đếm (`.countarea`) và hàng nút hoa dịch lên cao
+  hơn 1 chút (giảm `padding-top` của `.countarea` từ 5vh xuống 2vh) để
+  chừa thêm không gian thị giác cho Cú lớn hơn ở phía dưới.
+- 25 unit test vẫn pass.

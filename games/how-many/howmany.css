@@ -10,9 +10,11 @@
 .world-bg.howmanyphoto{ background:#EFE7D6 url('../../assets/backgrounds/howmany-bg.jpg') center/cover no-repeat; }
 
 /* ---------- cụm ảnh đồ vật cần đếm ---------- */
+/* Đẩy lên cao hơn 1 chút (giảm padding-top) — chừa thêm khoảng trống
+   phía dưới cho Cú thông thái (giờ to hơn, đứng thấp bên trái). */
 .countarea{
   flex:1; display:flex; flex-wrap:wrap; align-content:center; justify-content:center;
-  gap:12px; padding:5vh 8vw 1vh;
+  gap:12px; padding:2vh 8vw 1vh;
 }
 .counticon{
   width:19vw; height:19vw; max-width:82px; max-height:82px;
@@ -27,7 +29,7 @@
    còn lại (flex-shrink mặc định) bất kể width khai báo bao nhiêu, nên
    muốn nút to hơn thật sự phải giải phóng thêm bề ngang ở đây, không chỉ
    tăng width/max-width của .flowerbtn. */
-.flowersrow{ display:flex; justify-content:center; align-items:flex-end; gap:1.2vw; padding:0 1.5vw 1.5vh; }
+.flowersrow{ display:flex; justify-content:center; align-items:flex-end; gap:1.2vw; padding:0 1.5vw 1vh; }
 /* To hơn (dễ bấm hơn) + cao hơn chiều rộng 1 chút theo yêu cầu — object-fit
    contain ở .flowerimg/.flowerfallback nên khung cao hơn không kéo méo
    hình hoa, chỉ có thêm khoảng trống dọc quanh hình. */
@@ -55,16 +57,22 @@
 .flowerbtn.wrong .flowerimg,
 .flowerbtn.wrong .flowerfallback{ filter:drop-shadow(0 0 3px #B24A43) drop-shadow(0 0 12px #B24A43); }
 
-/* ---------- Cú thông thái: nổi cố định ở góc trên-trái màn hình ---------- */
-/* .content (index.html) đã có position:relative + padding-top:100px, nên
-   đặt Cú absolute trong khoảng đệm trên đó (8px + 84px cao = 92px, vẫn
-   nằm gọn TRƯỚC khi topbar bắt đầu ở mốc 100px) — không chồng lên nút
-   home/hàng sao ở topbar. */
-.owlwrap{ position:absolute; top:8px; left:10px; width:84px; height:84px; z-index:1; }
+/* ---------- Cú thông thái: nổi cố định ở góc dưới-trái màn hình, to x3 ---------- */
+/* .content (index.html) có position:relative nên đặt Cú absolute theo nó.
+   Neo bằng "bottom" (thay vì "top" như trước) để đứng thấp xuống — kích
+   thước x3 so với trước (84px -> 252px) nên box của Cú CHE cả vùng nút
+   hoa/xác nhận bên dưới. Để không chặn bấm hoa: z-index ÂM (đứng SAU các
+   phần tử khác trong .content theo thứ tự DOM mặc định) + pointer-events
+   none, nên Cú chỉ "ló ra" phía sau/xung quanh các nút chứ không che mất
+   hay chặn bấm nút nào — thuần trang trí, không tương tác được. */
+.owlwrap{
+  position:absolute; left:2px; bottom:104px; width:252px; height:252px;
+  z-index:-1; pointer-events:none;
+}
 .owlwrap img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 5px 4px rgba(20,40,25,.28)); }
 .owlfallback{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-size:56px; line-height:1;
+  font-size:168px; line-height:1;
 }
 .owlfallback[hidden]{ display:none; }
 
