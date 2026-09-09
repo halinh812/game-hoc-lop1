@@ -34,6 +34,16 @@
     {"id":"hippo","type":"vocab","prompt_audio_text":"Hippo","answer":{"text_en":"Hippo","text_vi":"hà mã","image":"assets/animals/hippo.png"},"difficulty":1,"subcategory":"wild","subcategory_label_vi":"Động vật hoang dã"},
     {"id":"deer","type":"vocab","prompt_audio_text":"Deer","answer":{"text_en":"Deer","text_vi":"nai","image":"assets/animals/deer.png"},"difficulty":1,"subcategory":"wild","subcategory_label_vi":"Động vật hoang dã"},
     {"id":"fox","type":"vocab","prompt_audio_text":"Fox","answer":{"text_en":"Fox","text_vi":"cáo","image":"assets/animals/fox.png"},"difficulty":1,"subcategory":"wild","subcategory_label_vi":"Động vật hoang dã"},
-    {"id":"wolf","type":"vocab","prompt_audio_text":"Wolf","answer":{"text_en":"Wolf","text_vi":"sói","image":"assets/animals/wolf.png"},"difficulty":1,"subcategory":"wild","subcategory_label_vi":"Động vật hoang dã"}
+    {"id":"wolf","type":"vocab","prompt_audio_text":"Wolf","answer":{"text_en":"Wolf","text_vi":"sói","image":"assets/animals/wolf.png"},"difficulty":1,"subcategory":"wild","subcategory_label_vi":"Động vật hoang dã"},
+    {"id":"sheep","type":"vocab","prompt_audio_text":"Sheep","answer":{"text_en":"Sheep","text_vi":"cừu","image":"assets/animals/sheep.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"goose","type":"vocab","prompt_audio_text":"Goose","answer":{"text_en":"Goose","text_vi":"ngỗng","image":"assets/animals/goose.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"donkey","type":"vocab","prompt_audio_text":"Donkey","answer":{"text_en":"Donkey","text_vi":"con lừa","image":"assets/animals/donkey.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"pigeon","type":"vocab","prompt_audio_text":"Pigeon","answer":{"text_en":"Pigeon","text_vi":"bồ câu","image":"assets/animals/pigeon.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"parrot","type":"vocab","prompt_audio_text":"Parrot","answer":{"text_en":"Parrot","text_vi":"vẹt","image":"assets/animals/parrot.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"turkey","type":"vocab","prompt_audio_text":"Turkey","answer":{"text_en":"Turkey","text_vi":"gà tây","image":"assets/animals/turkey.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"hamster","type":"vocab","prompt_audio_text":"Hamster","answer":{"text_en":"Hamster","text_vi":"chuột Hamster","image":"assets/animals/hamster.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"guinea_pig","type":"vocab","prompt_audio_text":"Guinea Pig","answer":{"text_en":"Guinea Pig","text_vi":"chuôt lang","image":"assets/animals/guinea_pig.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"tortoise","type":"vocab","prompt_audio_text":"Tortoise","answer":{"text_en":"Tortoise","text_vi":"rùa","image":"assets/animals/tortoise.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"},
+    {"id":"quail","type":"vocab","prompt_audio_text":"Quail","answer":{"text_en":"Quail","text_vi":"chim cút","image":"assets/animals/quail.png"},"difficulty":1,"subcategory":"pet","subcategory_label_vi":"Động vật nuôi"}
   ]
 }
