@@ -62,7 +62,7 @@ var state = {
   forestPool: [],
   farmPool: [],
   billPool: [],
-  billMood: 'happy',
+  billMood: 'idle',
   slots: [],      // 4 từ đang hiển thị trên 4 hàng, giữ nguyên xuyên suốt
   targetIdx: 0    // slot nào đang là đáp án đúng của câu hỏi hiện tại
 };
