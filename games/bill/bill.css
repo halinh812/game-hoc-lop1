@@ -6,18 +6,16 @@
    (../../assets/...), không phải từ index.html — xem giải thích đầy đủ
    ở đầu games/nong-trai-cua-be/farm.css. */
 
-/* Ảnh nền sân trường CHƯA có lúc viết file này (người dùng tự tạo bằng
-   prompt ở Bước 14 trong ANIMAL_ART_PIPELINE.md rồi gửi qua Git, xem
-   Bước 11) — dùng tạm 1 gradient bầu trời dịu mắt thay chỗ, không cần
-   sửa gì thêm ở đây khi ảnh về (chỉ cần thêm background-image, xem cách
-   forest.css/farm.css đã làm với ảnh nền thật của chúng để làm mẫu).
-   Chừng nào chưa có assets/backgrounds/school-bg.jpg, url() dưới đây sẽ
-   lỗi tải ảnh nhưng vẫn hiện đúng màu nền gradient (khai theo thứ tự
-   background CSS: ảnh trước, màu/gradient sau làm dự phòng). */
-.world-bg.billphoto{
-  background:linear-gradient(180deg, #FDF3DC 0%, #CDEAFB 55%, #BEE7B0 100%)
-    url('../../assets/backgrounds/school-bg.jpg') center/cover no-repeat;
-}
+/* Ảnh nền sân trường trong game (thay cho nền vẽ CSS/SVG dùng chung —
+   xem worldBg() trong engine/ui-shared.js), theo đúng cách
+   forest.css/farm.css đã làm. LƯU Ý (lỗi đã gặp lúc chưa có ảnh thật):
+   background KHÔNG được viết "linear-gradient(...) url(...)" liền nhau
+   không dấu phẩy — 2 lớp ảnh nền (gradient + url) phải cách nhau bằng
+   dấu phẩy mới hợp lệ, nếu không CẢ khai báo bị trình duyệt bỏ qua hoàn
+   toàn (rơi về gradient mặc định của .world-bg ở index.html) mà không
+   báo lỗi gì — chỉ dùng 1 màu đặc (không phải gradient) làm nền dự
+   phòng phía sau url(), giống hệt farm.css/forest.css. */
+.world-bg.billphoto{ background:#FDF3DC url('../../assets/backgrounds/school-bg.jpg') center/cover no-repeat; }
 
 /* ---------- màn chơi: Bill + hàng đồ vật ---------- */
 .billstage{ position:relative; flex:1; margin:4px 0 0; }
@@ -45,6 +43,12 @@
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
   font-size:88px; line-height:1;
 }
+/* Thuộc tính "hidden" tự nó KHÔNG đủ ẩn phần tử này — vì .billfallback
+   ở trên đã tự đặt display:flex, đè lên đúng display:none mặc định của
+   trình duyệt cho [hidden] (cùng lỗi/cách sửa như .filterddPanel[hidden]
+   trong index.html). Thiếu dòng này thì icon dự phòng LUÔN hiện đè lên
+   trên ảnh Bill thật dù ảnh đã tải thành công. */
+.billfallback[hidden]{ display:none; }
 /* Icon nhỏ của món đồ vừa "bay" tới, đứng cạnh Bill cho tới khi câu tiếp
    theo bắt đầu (clearHeldItem() trong bill.js). */
 .billheld{
@@ -85,12 +89,12 @@
 }
 
 /* ---------- ô icon ở lưới chọn trò chơi (Trang chủ) ---------- */
-/* Nền tạm bằng gradient (chưa có ảnh sân trường thật, xem ghi chú ở
-   .world-bg.billphoto phía trên) — đổi sang crop nhỏ của school-bg.jpg
-   khi ảnh về, theo đúng cách forest-tile/farm-tile đã làm. */
+/* Nền là 1 khung crop nhỏ của chính ảnh nền school-bg.jpg trong game —
+   canh vào đoạn toà nhà trường + cột cờ (đẹp và rõ nét nhất khi thu
+   nhỏ), theo đúng cách forest-tile/farm-tile đã làm. */
 .gametile.bill-tile{
   position:relative; overflow:hidden; border:1px solid var(--glass-border);
-  background:linear-gradient(160deg, #FDF3DC 0%, #CDEAFB 60%, #BEE7B0 100%);
+  background:#FBE8C8 url('../../assets/backgrounds/school-bg.jpg') 50% 30%/220% no-repeat;
 }
 .gametile.bill-tile::before{
   content:''; position:absolute; inset:0;
@@ -103,6 +107,9 @@
 }
 .billtile-face img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 4px 3px rgba(20,40,25,.3)); }
 .billtile-fallback{ display:flex; align-items:center; justify-content:center; width:100%; height:100%; font-size:52px; }
+/* Cùng lý do với .billfallback[hidden] ở trên — [hidden] không tự đủ
+   ẩn phần tử đã có display:flex riêng. */
+.billtile-fallback[hidden]{ display:none; }
 
 @media (prefers-reduced-motion: reduce){
   .billtile-face,.billflyicon{ animation:none !important; }
