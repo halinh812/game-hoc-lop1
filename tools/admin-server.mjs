@@ -279,7 +279,19 @@ app.post('/api/items', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'v
       };
       pack.items.push(item);
     } else {
-      if (text_en) { item.answer.text_en = text_en; item.prompt_audio_text = text_en; }
+      if (text_en) {
+        // Đa số từ chỉ đọc đúng 1 từ (prompt_audio_text === text_en) nên
+        // trước giờ cứ sửa text_en là đồng bộ luôn prompt_audio_text theo.
+        // Nhưng 1 số từ (vd bộ "Đồ vật" của game #3 "Help Bill!") cố tình
+        // đặt prompt_audio_text là CẢ CÂU khác hẳn text_en (vd text_en=
+        // "book" nhưng prompt_audio_text="I want a book.") — chỉ đồng bộ
+        // khi 2 giá trị đang GIỐNG NHAU (chưa bị tuỳ chỉnh câu riêng),
+        // nếu không thì việc chỉ tải ảnh/sửa tên (không đụng gì tới câu
+        // đọc) sẽ vô tình xoá mất câu tuỳ chỉnh đó (lỗi thật đã gặp).
+        var hadCustomPrompt = item.prompt_audio_text && item.prompt_audio_text !== item.answer.text_en;
+        item.answer.text_en = text_en;
+        if (!hadCustomPrompt) item.prompt_audio_text = text_en;
+      }
       if (text_vi) item.answer.text_vi = text_vi;
       if (difficulty) item.difficulty = Number(difficulty) || item.difficulty;
     }
