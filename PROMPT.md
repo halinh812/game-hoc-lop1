@@ -928,11 +928,9 @@ bảng tính nhỏ. Gửi ảnh qua Git theo đúng quy trình ở Bước 11 �
 gửi thẳng vào `assets/backgrounds/`, còn lại (cần xoá nền) gửi qua
 `assets/_raw_incoming/`.
 
-**Cập nhật:** đã nhận và ghép xong 2/4 nhóm ảnh — 16.2 (Cú 3 trạng
-thái) và 16.3 (4 nút hoa), xem ghi chú "✅ Đã có ảnh thật" ở từng mục
-bên dưới. Còn thiếu 16.1 (nền lớp học) và 16.4 (nút xác nhận bảng
-tính) — game vẫn chạy đủ chức năng nhờ fallback (nền gradient CSS +
-emoji 🧮), chỉ cần gửi tiếp khi có ảnh.
+**Cập nhật:** đã nhận và ghép xong đủ 4/4 nhóm ảnh (16.1-16.4), xem ghi
+chú "✅ Đã có ảnh thật" ở từng mục bên dưới. Game #4 giờ dùng toàn bộ
+ảnh thật, không còn phụ thuộc fallback emoji/gradient nữa.
 
 ### 16.1 — Ảnh nền lớp học
 
@@ -972,6 +970,10 @@ off-center composition.
 
 Không cần xoá nền — giữ nguyên làm 1 ảnh nền đầy khung (JPG/PNG đều
 được). Lưu thành `assets/backgrounds/howmany-bg.jpg`.
+
+**✅ Đã có ảnh thật** — đã lưu vào `assets/backgrounds/howmany-bg.jpg`,
+đang chạy trong game (kể cả icon ô chọn game ở Trang chủ, crop nhỏ từ
+chính ảnh này).
 
 ### 16.2 — Nhân vật "Cú thông thái" (3 trạng thái + icon ô chọn game)
 
@@ -1126,3 +1128,6 @@ background scenery, text or watermark, cropped composition.
 
 Lưu thành `calculator.png`, gửi qua Git (`assets/_raw_incoming/`), tôi
 sẽ xoá nền + lưu vào `assets/howmany/`.
+
+**✅ Đã có ảnh thật** — đã xoá nền + lưu vào `assets/howmany/calculator.png`,
+đang chạy trong game.

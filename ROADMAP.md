@@ -1337,6 +1337,30 @@ xác nhận `calculator.png` — game vẫn chạy tốt nhờ fallback gradient
   viền xanh ô đúng), icon Cú ở Trang chủ hiển thị đúng ảnh thật không
   méo hình. 25 unit test vẫn pass.
 
+## Vòng 27 — Ghép nốt 2 ảnh cuối cho "How Many?": nền lớp học + nút xác nhận
+
+Người dùng gửi nốt 2 ảnh còn thiếu ở Bước 16 trong `PROMPT.md`:
+`calculator.jpeg` (nút xác nhận, qua `assets/_raw_incoming/`, cần xoá
+nền) và `howmany-bg.jpeg` (ảnh nền bảng đen lớp học, full-bleed, không
+cần xoá nền). Game #4 "How Many?" giờ dùng đủ 9/9 ảnh thật đã hẹn,
+không còn phần nào chạy bằng fallback emoji/gradient nữa.
+
+- `calculator.png`: xoá nền + chuẩn hoá 900×900 (ảnh gốc đã vuông
+  1024×1024) → `assets/howmany/calculator.png`.
+- `howmany-bg.jpg`: copy thẳng vào `assets/backgrounds/` (không xoá nền,
+  giống cách làm với `school-bg.jpg`/`farm-bg.jpg`).
+- Cập nhật `.gametile.howmany-tile` trong `games/how-many/howmany.css`:
+  đổi nền gradient tạm sang crop nhỏ thật của `howmany-bg.jpg` (canh vào
+  giữa bảng đen, nơi có nhiều số trang trí quanh viền), đúng quy ước
+  `background:<màu dự phòng> url(...) <vị trí>/<tỉ lệ> no-repeat;` đã
+  dùng cho forest-tile/farm-tile/bill-tile.
+- Kiểm thử lại toàn bộ bằng Playwright: cả 9 `<img>` của game (4 hoa +
+  3 trạng thái Cú + nền + nút xác nhận) đều tải thành công
+  (`naturalWidth` > 0, không còn ảnh nào lỗi/dùng fallback), luồng chọn
+  hoa → xác nhận vẫn đúng (viền vàng lúc chọn, xanh/đỏ đúng-sai lúc xác
+  nhận, Cú đổi đúng trạng thái vui/buồn), icon ô chọn game ở Trang chủ
+  hiển thị đúng crop ảnh nền thật. 25 unit test vẫn pass.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
