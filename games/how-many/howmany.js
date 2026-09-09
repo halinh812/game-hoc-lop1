@@ -154,9 +154,15 @@ export function createHowManyGame(ctx) {
       '<span class="owlfallback" id="owlFallback" hidden>' + fallback + '</span>';
   }
 
+  // Cú thông thái đứng riêng ở góc trên-trái màn hình (position:absolute
+  // trong CSS, xem .owlwrap) — tách khỏi bottombar để không còn đi cùng
+  // hàng với nút xác nhận.
+  function owlCornerHtml() {
+    return '<div class="owlwrap" id="owlWrap">' + owlMoodImg(state.howManyMood || 'idle') + '</div>';
+  }
+
   function bottomBarHtml() {
     return '<div class="bottombar">' +
-      '<div class="owlwrap" id="owlWrap">' + owlMoodImg(state.howManyMood || 'idle') + '</div>' +
       '<button type="button" class="confirmbtn" id="confirmBtn" disabled>' +
       '<img src="assets/howmany/calculator.png" alt="" class="confirmimg" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">' +
       '<span class="confirmfallback" hidden>🧮</span>' +
@@ -172,6 +178,7 @@ export function createHowManyGame(ctx) {
 
     root.innerHTML = worldBg('howmanyphoto') +
       '<div class="content">' +
+      owlCornerHtml() +
       '<div class="topbar">' +
       '<button class="iconbtn" id="homeBtn" aria-label="Về trang chủ">' + CLOSE_SVG + '</button>' +
       '<div class="starsrow" id="howManyStars" style="margin:0;">' + howManyStarsRow() + '</div>' +

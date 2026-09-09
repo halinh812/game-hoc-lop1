@@ -1388,3 +1388,24 @@ không còn phần nào chạy bằng fallback emoji/gradient nữa.
   định của người phát triển vì lúc đó chỉ là dữ liệu tự test, chưa có bé
   thật nào chơi. Từ v3 trở đi, mọi thay đổi cấu trúc tiếp theo bắt buộc
   phải viết migration để không lặp lại việc mất dữ liệu.
+
+## Vòng 28 — "How Many?": Cú chuyển lên góc trên-trái, nút hoa to/cao hơn
+
+Theo yêu cầu người dùng, 2 chỉnh sửa giao diện nhỏ cho game #4:
+
+- **Cú thông thái** rời khỏi `bottombar` (trước đứng cạnh nút xác nhận ở
+  dưới cùng), chuyển thành `position:absolute` nổi cố định ở góc trên-
+  trái màn chơi (`games/how-many/howmany.css` `.owlwrap`) — đặt trong
+  khoảng đệm trên của `.content` (padding-top:100px có sẵn từ
+  `index.html`) nên không chồng lên nút home/hàng sao ở `.topbar`. Nút
+  xác nhận (bảng tính) ở `bottombar` giờ đứng một mình, canh giữa.
+- **4 nút hoa** to hơn và cao hơn chiều rộng — phát hiện ra tăng riêng
+  `width`/`max-width` của `.flowerbtn` không đủ vì 4 nút trong 1 hàng
+  luôn bị flexbox co lại (`flex-shrink` mặc định) vừa khít khoảng trống
+  còn lại của `.flowersrow`, bất kể khai báo to bao nhiêu; phải giảm cả
+  `padding`/`gap` của `.flowersrow` để nhường thêm bề ngang thật sự thì
+  nút mới to ra được. Kết quả đo bằng Playwright: rộng ~76px → ~83px,
+  cao ~78px → ~121px (diện tích chạm tăng khoảng 75%).
+- Kiểm thử lại bằng Playwright: Cú không chồng lên nút home, vẫn đổi
+  đúng trạng thái vui/buồn ở vị trí mới, nút xác nhận vẫn hoạt động
+  đúng. 25 unit test vẫn pass.

@@ -22,10 +22,18 @@
 .counticon-emoji{ font-size:11vw; line-height:1; }
 
 /* ---------- hàng 4 nút hoa ("nghe thử") ---------- */
-.flowersrow{ display:flex; justify-content:center; align-items:flex-end; gap:2vw; padding:0 4vw 1.5vh; }
+/* Giảm padding/gap so với trước để nhường thêm chỗ ngang cho 4 nút to
+   hơn — 4 nút trong 1 hàng luôn bị flexbox co lại vừa đúng khoảng trống
+   còn lại (flex-shrink mặc định) bất kể width khai báo bao nhiêu, nên
+   muốn nút to hơn thật sự phải giải phóng thêm bề ngang ở đây, không chỉ
+   tăng width/max-width của .flowerbtn. */
+.flowersrow{ display:flex; justify-content:center; align-items:flex-end; gap:1.2vw; padding:0 1.5vw 1.5vh; }
+/* To hơn (dễ bấm hơn) + cao hơn chiều rộng 1 chút theo yêu cầu — object-fit
+   contain ở .flowerimg/.flowerfallback nên khung cao hơn không kéo méo
+   hình hoa, chỉ có thêm khoảng trống dọc quanh hình. */
 .flowerbtn{
   position:relative; border:none; background:none; padding:0; cursor:pointer;
-  width:20vw; height:20vw; max-width:84px; max-height:84px;
+  width:26vw; height:31vw; max-width:112px; max-height:134px;
   transition:transform .12s ease;
 }
 .flowerbtn:active{ transform:scale(.92); }
@@ -47,16 +55,21 @@
 .flowerbtn.wrong .flowerimg,
 .flowerbtn.wrong .flowerfallback{ filter:drop-shadow(0 0 3px #B24A43) drop-shadow(0 0 12px #B24A43); }
 
-/* ---------- thanh dưới cùng: Cú (trái) + nút xác nhận (phải) ---------- */
-.bottombar{ display:flex; align-items:flex-end; justify-content:space-between; padding:0 6vw 3vh; }
-.owlwrap{ position:relative; width:96px; height:96px; flex:none; }
+/* ---------- Cú thông thái: nổi cố định ở góc trên-trái màn hình ---------- */
+/* .content (index.html) đã có position:relative + padding-top:100px, nên
+   đặt Cú absolute trong khoảng đệm trên đó (8px + 84px cao = 92px, vẫn
+   nằm gọn TRƯỚC khi topbar bắt đầu ở mốc 100px) — không chồng lên nút
+   home/hàng sao ở topbar. */
+.owlwrap{ position:absolute; top:8px; left:10px; width:84px; height:84px; z-index:1; }
 .owlwrap img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 5px 4px rgba(20,40,25,.28)); }
 .owlfallback{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-size:64px; line-height:1;
+  font-size:56px; line-height:1;
 }
 .owlfallback[hidden]{ display:none; }
 
+/* ---------- thanh dưới cùng: chỉ còn nút xác nhận, canh giữa ---------- */
+.bottombar{ display:flex; align-items:center; justify-content:center; padding:0 6vw 3vh; }
 .confirmbtn{
   flex:none; width:88px; height:88px; border:none; border-radius:22px; cursor:pointer;
   background:var(--glass); box-shadow:0 6px 0 rgba(20,40,25,.18), 0 10px 16px rgba(20,40,25,.22);
