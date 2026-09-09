@@ -5,15 +5,15 @@
   "category_label_vi": "Đồ vật",
   "category_icon": "🎒",
   "items": [
-    {"id":"book","type":"vocab","prompt_audio_text":"book","answer":{"text_en":"book","text_vi":"quyển sách","image":"assets/objects/book.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
-    {"id":"pencil","type":"vocab","prompt_audio_text":"pencil","answer":{"text_en":"pencil","text_vi":"bút chì","image":"assets/objects/pencil.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
-    {"id":"ruler","type":"vocab","prompt_audio_text":"ruler","answer":{"text_en":"ruler","text_vi":"thước kẻ","image":"assets/objects/ruler.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
-    {"id":"bag","type":"vocab","prompt_audio_text":"bag","answer":{"text_en":"bag","text_vi":"cặp sách","image":"assets/objects/bag.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
-    {"id":"pen","type":"vocab","prompt_audio_text":"pen","answer":{"text_en":"pen","text_vi":"bút mực","image":"assets/objects/pen.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
-    {"id":"eraser","type":"vocab","prompt_audio_text":"eraser","answer":{"text_en":"eraser","text_vi":"cục tẩy","image":"assets/objects/eraser.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
-    {"id":"crayon","type":"vocab","prompt_audio_text":"crayon","answer":{"text_en":"crayon","text_vi":"bút sáp màu","image":"assets/objects/crayon.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
-    {"id":"notebook","type":"vocab","prompt_audio_text":"notebook","answer":{"text_en":"notebook","text_vi":"quyển vở","image":"assets/objects/notebook.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
-    {"id":"ball","type":"vocab","prompt_audio_text":"ball","answer":{"text_en":"ball","text_vi":"quả bóng","image":"assets/objects/ball.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
-    {"id":"hat","type":"vocab","prompt_audio_text":"hat","answer":{"text_en":"hat","text_vi":"mũ","image":"assets/objects/hat.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"}
+    {"id":"book","type":"vocab","prompt_audio_text":"I want a book.","answer":{"text_en":"book","text_vi":"quyển sách","image":"assets/objects/book.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"pencil","type":"vocab","prompt_audio_text":"I want a pencil.","answer":{"text_en":"pencil","text_vi":"bút chì","image":"assets/objects/pencil.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"ruler","type":"vocab","prompt_audio_text":"I want a ruler.","answer":{"text_en":"ruler","text_vi":"thước kẻ","image":"assets/objects/ruler.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"bag","type":"vocab","prompt_audio_text":"I want a bag.","answer":{"text_en":"bag","text_vi":"cặp sách","image":"assets/objects/bag.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"pen","type":"vocab","prompt_audio_text":"I want a pen.","answer":{"text_en":"pen","text_vi":"bút mực","image":"assets/objects/pen.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"eraser","type":"vocab","prompt_audio_text":"I want an eraser.","answer":{"text_en":"eraser","text_vi":"cục tẩy","image":"assets/objects/eraser.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"crayon","type":"vocab","prompt_audio_text":"I want a crayon.","answer":{"text_en":"crayon","text_vi":"bút sáp màu","image":"assets/objects/crayon.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"notebook","type":"vocab","prompt_audio_text":"I want a notebook.","answer":{"text_en":"notebook","text_vi":"quyển vở","image":"assets/objects/notebook.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"ball","type":"vocab","prompt_audio_text":"I want a ball.","answer":{"text_en":"ball","text_vi":"quả bóng","image":"assets/objects/ball.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"hat","type":"vocab","prompt_audio_text":"I want a hat.","answer":{"text_en":"hat","text_vi":"mũ","image":"assets/objects/hat.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"}
   ]
 }
