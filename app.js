@@ -25,6 +25,7 @@ import { starIcon, BACK_SVG, owlMascot, sleepyMascot, worldBg } from './engine/u
 import { createForestGame } from './games/khu-rung-ky-bi/forest.js';
 import { createFarmGame } from './games/nong-trai-cua-be/farm.js';
 import { createBillGame } from './games/bill/bill.js';
+import { createHowManyGame } from './games/how-many/howmany.js';
 
 var CONTENT_PACKS = [
   'content/packs/colors-v1.json',
@@ -39,7 +40,7 @@ var GAMES = [
   { id: 'forest', title: 'Mystic Jungle', emoji: '🦁', skill: 'listen', available: true },
   { id: 'farm', title: 'My Little Farm', emoji: '🐶', skill: 'listen', available: true },
   { id: 'bill', title: 'Help Bill!', emoji: '🎒', skill: 'listen', available: true },
-  { id: 'g4', title: 'Sắp ra mắt', available: false },
+  { id: 'howmany', title: 'How Many?', emoji: '🔢', skill: 'see', available: true },
   { id: 'g5', title: 'Sắp ra mắt', available: false },
   { id: 'g6', title: 'Sắp ra mắt', available: false },
   { id: 'g7', title: 'Sắp ra mắt', available: false },
@@ -99,6 +100,14 @@ var billGame = createBillGame({
   render: render,
   owlMascot: owlMascot
 });
+var howManyGame = createHowManyGame({
+  state: state,
+  getStore: function () { return store; },
+  getWords: function () { return WORDS; },
+  speak: speak,
+  render: render,
+  owlMascot: owlMascot
+});
 
 function render() {
   if (state.screen === 'loading') renderLoading();
@@ -111,6 +120,8 @@ function render() {
   else if (state.screen === 'farmSummary') farmGame.renderFarmSummary();
   else if (state.screen === 'bill') billGame.renderBill();
   else if (state.screen === 'billSummary') billGame.renderBillSummary();
+  else if (state.screen === 'howmany') howManyGame.renderHowMany();
+  else if (state.screen === 'howmanySummary') howManyGame.renderHowManySummary();
   else if (state.screen === 'parent') renderParent();
 }
 
@@ -202,6 +213,7 @@ function renderHome() {
       if (g.id === 'forest') return forestGame.gameTileHtml(g.title);
       if (g.id === 'farm') return farmGame.gameTileHtml(g.title);
       if (g.id === 'bill') return billGame.gameTileHtml(g.title);
+      if (g.id === 'howmany') return howManyGame.gameTileHtml(g.title);
       return '<button type="button" class="gametile" data-id="' + g.id + '">' +
         '<span class="emoji">' + g.emoji + '</span><span class="name">' + g.title + '</span></button>';
     }
@@ -236,6 +248,7 @@ function renderHome() {
     if (id === 'forest') forestGame.startForestGame();
     else if (id === 'farm') farmGame.startFarmGame();
     else if (id === 'bill') billGame.startBillGame();
+    else if (id === 'howmany') howManyGame.startHowManyGame();
   });
 }
 
