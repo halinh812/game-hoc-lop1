@@ -14,6 +14,16 @@
     {"id":"crayon","type":"vocab","prompt_audio_text":"crayon","answer":{"text_en":"crayon","text_vi":"bút sáp màu","image":"assets/objects/crayon.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
     {"id":"notebook","type":"vocab","prompt_audio_text":"notebook","answer":{"text_en":"notebook","text_vi":"quyển vở","image":"assets/objects/notebook.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
     {"id":"ball","type":"vocab","prompt_audio_text":"ball","answer":{"text_en":"ball","text_vi":"quả bóng","image":"assets/objects/ball.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
-    {"id":"hat","type":"vocab","prompt_audio_text":"hat","answer":{"text_en":"hat","text_vi":"mũ","image":"assets/objects/hat.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"}
+    {"id":"hat","type":"vocab","prompt_audio_text":"hat","answer":{"text_en":"hat","text_vi":"mũ","image":"assets/objects/hat.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"whiteboard","type":"vocab","prompt_audio_text":"Whiteboard","answer":{"text_en":"Whiteboard","text_vi":"bảng trắng","image":"assets/objects/whiteboard.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"chalk","type":"vocab","prompt_audio_text":"Chalk","answer":{"text_en":"Chalk","text_vi":"phấn","image":"assets/objects/chalk.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"pencil_case","type":"vocab","prompt_audio_text":"Pencil case","answer":{"text_en":"Pencil case","text_vi":"hộp bút","image":"assets/objects/pencil_case.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"scissors","type":"vocab","prompt_audio_text":"Scissors","answer":{"text_en":"Scissors","text_vi":"kéo","image":"assets/objects/scissors.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"glue_stick","type":"vocab","prompt_audio_text":"Glue stick","answer":{"text_en":"Glue stick","text_vi":"hồ dán","image":"assets/objects/glue_stick.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"water_bottle","type":"vocab","prompt_audio_text":"Water bottle","answer":{"text_en":"Water bottle","text_vi":"chai nước","image":"assets/objects/water_bottle.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"lunch_box","type":"vocab","prompt_audio_text":"Lunch box","answer":{"text_en":"Lunch box","text_vi":"hộp cơm trưa","image":"assets/objects/lunch_box.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"umbrella","type":"vocab","prompt_audio_text":"Umbrella","answer":{"text_en":"Umbrella","text_vi":"cái ô","image":"assets/objects/umbrella.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"red_scarf","type":"vocab","prompt_audio_text":"Red scarf","answer":{"text_en":"Red scarf","text_vi":"khăn đỏ","image":"assets/objects/red_scarf.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"},
+    {"id":"shoes","type":"vocab","prompt_audio_text":"Shoes","answer":{"text_en":"Shoes","text_vi":"giày","image":"assets/objects/shoes.png"},"difficulty":1,"subcategory":"school","subcategory_label_vi":"Đồ dùng ở trường"}
   ]
 }
