@@ -659,21 +659,34 @@ mạo từ "a"/"an" để tiện dạy luôn ngữ pháp cơ bản (chỉ "erase
 - [ ] Quả bóng (Ball) — *a ball*
 - [ ] Mũ (Hat) — *a hat*
 
+**Lưu ý quan trọng — tạo trong 1 cuộc trò chuyện MỚI, tách riêng khỏi
+cuộc đã tạo ảnh Bill**: nếu dán prompt đồ vật ngay trong cùng đoạn chat
+vừa tạo ảnh Bill (Bước 12), nhiều công cụ AI ảnh (kể cả Google Flow) sẽ
+"nhớ" ngữ cảnh nhân vật vừa tạo trước đó và tự chèn Bill vào ảnh đồ vật
+dù prompt không hề nhắc tới — đây chính là lỗi bạn gặp phải với ảnh bút
+chì. Mở 1 đoạn chat mới hoàn toàn (hoặc dùng nút "New chat"/"làm mới")
+trước khi bắt đầu tạo 10 đồ vật ở Bước này, không tái sử dụng đoạn chat
+đã tạo Bill hay bất kỳ con vật nào.
+
 ### Khung phong cách (dán trước, dùng chung cho MỌI đồ vật)
 
 ```
 Cute simplified flat-vector illustration of a single everyday school
-object for a children's learning game, soft cel-shading with gentle
-gradient highlights, smooth rounded friendly shapes with no sharp
-corners or edges, thin clean dark outline, bright saturated cheerful
-colors, a tiny bit of playful personality in the shape (but no eyes or
-face on the object itself), centered on a plain solid white (#FFFFFF)
-background, no shadow, no scenery, no other objects, no text, no
-watermark, no logo, square 1:1 composition, object fills about 70-80%
-of the frame, viewed from a friendly three-quarter angle.
-Avoid: realistic or photographic textures, 3D render look, clutter or
-multiple objects, added faces/eyes on the object, background scenery,
-text or watermark, cropped composition.
+object ONLY — no character, no person, no boy, no hands, no body parts
+anywhere in the image — for a children's learning game, soft
+cel-shading with gentle gradient highlights, smooth rounded friendly
+shapes with no sharp corners or edges, thin clean dark outline, bright
+saturated cheerful colors, a tiny bit of playful personality in the
+shape (but no eyes or face on the object itself), centered on a plain
+solid white (#FFFFFF) background, no shadow, no scenery, no other
+objects, no text, no watermark, no logo, square 1:1 composition, object
+fills about 70-80% of the frame, viewed from a friendly three-quarter
+angle. The single object floats/sits alone on the white background as
+the ONLY subject in the frame.
+Avoid: any person, character, boy, child, mascot, hand, arm, or body
+part of any kind, realistic or photographic textures, 3D render look,
+clutter or multiple objects, added faces/eyes on the object, background
+scenery, text or watermark, cropped composition.
 ```
 
 ### Prompt riêng cho từng đồ vật

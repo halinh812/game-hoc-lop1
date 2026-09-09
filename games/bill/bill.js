@@ -308,6 +308,10 @@ export function createBillGame(ctx) {
       tileEls[state.targetIdx].classList.add('correct');
       ctx.speak(targetWord.promptAudioText || targetWord.en);
       setBillMood('sad');
+      // Đồ ĐÚNG vẫn bay về cạnh Bill dù bé chọn sai (Bill buồn nhưng bé
+      // vẫn thấy rõ đáp án đúng là ô nào) — khác ô bé vừa bấm (đang có
+      // quầng đỏ "wrong"), bay từ đúng vị trí ô target trong 4 ô.
+      flyItemToMascot(tileEls[state.targetIdx], targetWord, function () { showHeldItem(targetWord); });
       setTimeout(function () { advanceBillRound(state.targetIdx); }, 3000);
     }
   }
