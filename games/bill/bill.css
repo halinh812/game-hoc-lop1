@@ -17,22 +17,28 @@
    phòng phía sau url(), giống hệt farm.css/forest.css. */
 .world-bg.billphoto{ background:#FDF3DC url('../../assets/backgrounds/school-bg.jpg') center/cover no-repeat; }
 
-/* ---------- màn chơi: Bill + hàng đồ vật ---------- */
+/* ---------- màn chơi: Bill + lưới đồ vật ---------- */
 .billstage{ position:relative; flex:1; margin:4px 0 0; }
 /* .freeplay (định nghĩa ở engine/catch-game.css) dựa vào "flex:1" của
    chính nó để lấy chiều cao — chỉ có tác dụng khi CHA TRỰC TIẾP là 1
    flex container. Ở forest.js/farm.js, .freeplay là con trực tiếp của
    .content (flex column) nên đúng. Ở đây .freeplay lại là CHÁU của
    .content (qua .billstage — chỉ position:relative, không phải flex),
-   nên flex:1 của nó vô tác dụng, chiều cao co về gần 0 → hàng đồ vật bị
-   đẩy lên sát mép trên thay vì nằm gần đáy. Ghi đè lại bằng
-   position:absolute; inset:0 để nó LUÔN phủ đúng kín .billstage, không
-   phụ thuộc flex context của cha. */
-.billstage .freeplay{ position:absolute; inset:0; flex:none; margin:0; }
+   nên flex:1 của nó vô tác dụng, chiều cao co về gần 0. Ghi đè lại bằng
+   toạ độ tuyệt đối rõ ràng (top/left/right/bottom) thay vì phụ thuộc
+   flex context của cha — đồng thời CHỈ chiếm nửa dưới khu chơi (top:48%)
+   để dành nửa trên cho Bill đứng, không bị lưới đồ vật đè lên. Bản
+   thân khối này cũng LÀ lưới 2×2 luôn (display:grid) — không cần JS
+   tính vị trí như forest.js/farm.js vì bố cục cố định, không phải rải
+   ngẫu nhiên tránh chồng lấn. */
+.billstage .freeplay{
+  position:absolute; left:0; right:0; top:48%; bottom:2%; flex:none; margin:0;
+  display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; place-items:center; gap:3vw 4vw;
+}
 
 .billmascotwrap{
-  position:absolute; top:4%; left:50%; transform:translateX(-50%);
-  width:150px; height:150px; z-index:2;
+  position:absolute; top:12%; left:50%; transform:translateX(-50%);
+  width:220px; height:220px; z-index:2;
 }
 .billmascot{ width:100%; height:100%; position:relative; }
 .billmascot img{
@@ -41,7 +47,7 @@
 }
 .billfallback{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-size:88px; line-height:1;
+  font-size:130px; line-height:1;
 }
 /* Thuộc tính "hidden" tự nó KHÔNG đủ ẩn phần tử này — vì .billfallback
    ở trên đã tự đặt display:flex, đè lên đúng display:none mặc định của
@@ -52,23 +58,23 @@
 /* Icon nhỏ của món đồ vừa "bay" tới, đứng cạnh Bill cho tới khi câu tiếp
    theo bắt đầu (clearHeldItem() trong bill.js). */
 .billheld{
-  position:absolute; right:-8px; bottom:2px; width:52px; height:52px;
+  position:absolute; right:-10px; bottom:4px; width:74px; height:74px;
   border-radius:50%; background:var(--glass); box-shadow:0 4px 10px rgba(20,40,25,.22);
   display:flex; align-items:center; justify-content:center;
   opacity:0; transform:scale(.4); transition:opacity .25s ease, transform .25s cubic-bezier(.34,1.56,.64,1);
 }
 .billheld.show{ opacity:1; transform:scale(1); }
 .billheld img{ width:76%; height:76%; object-fit:contain; }
-.billheld span{ font-size:28px; }
+.billheld span{ font-size:40px; }
 
-/* 4 ô đồ vật xếp hàng ngang gọn gàng gần đáy khu chơi (JS tính vị trí
-   chính xác, xem billPositionTile() trong bill.js) — thu nhỏ lại so với
-   kích thước mặc định của .freetile (dành cho con vật rải rác 1 mình 1
-   góc) để 4 ô vừa 1 hàng trên màn điện thoại. */
-.billstage .freetile{ width:20vw; height:20vw; max-width:78px; max-height:78px; }
+/* 4 ô đồ vật trong lưới 2×2 (khai báo display:grid ở .billstage .freeplay
+   phía trên) — ghi đè "position:absolute" mặc định của .freetile (dành
+   cho kiểu rải tự do ở 2 game kia) thành vị trí bình thường trong lưới.
+   To hơn hẳn bản 1 hàng ngang trước đó (78px → 132px). */
+.billstage .freetile{ position:static; width:30vw; height:30vw; max-width:132px; max-height:132px; }
 .billstage .tileemoji{
   width:100%; height:100%; display:flex; align-items:center; justify-content:center;
-  font-size:9vw; line-height:1; filter:drop-shadow(0 5px 3px rgba(20,40,25,.28));
+  font-size:13vw; line-height:1; filter:drop-shadow(0 5px 3px rgba(20,40,25,.28));
 }
 .billstage .freetile.wrong .tileemoji{ filter:drop-shadow(0 0 3px #B24A43) drop-shadow(0 0 10px #B24A43); }
 .billstage .freetile.correct .tileemoji{ filter:drop-shadow(0 0 3px var(--success)) drop-shadow(0 0 10px var(--success)); transform:scale(1.08); }

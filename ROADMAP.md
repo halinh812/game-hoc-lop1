@@ -1170,6 +1170,31 @@ tới khi có đủ ảnh thật:
   cơm/ô/khăn quàng đỏ/giày, dùng lại đúng khung phong cách đồ vật (đã
   sửa loại trừ nhân vật) ở Bước 13.
 
+## Vòng 22 — Phóng to Bill + đổi lưới đồ vật sang 2×2
+
+Theo yêu cầu người dùng: Bill quá nhỏ và dán sát mép trên (chưa giống
+"đứng giữa sân trường"), 4 ô đồ vật xếp 1 hàng ngang hơi nhỏ.
+
+- **Bill**: `.billmascotwrap` từ 150px → 220px, `top` từ 4% → 12% (thấp
+  xuống, đứng trên đoạn đường lát đá trước cổng trường thay vì lửng lơ
+  sát mép trên). Các phần tử ăn theo (icon dự phòng, icon đồ giữ cạnh
+  Bill) phóng to cùng tỉ lệ.
+- **Lưới đồ vật**: đổi từ rải theo hàng ngang (JS tính `left`/`top` thủ
+  công trong `billPositionTile()`) sang **CSS Grid 2×2 tĩnh**
+  (`display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr`)
+  — không cần JS tính vị trí nữa vì bố cục cố định (khác forest.js/
+  farm.js phải tính toạ độ vì rải NGẪU NHIÊN tránh chồng lấn). Xoá hẳn
+  `billPositionTile()`/`billPositionAllTiles()` trong `bill.js` (dead
+  code sau khi đổi sang Grid) — đơn giản hoá code thay vì giữ lại "phòng
+  khi cần". Ô đồ vật to hơn hẳn (78px → 132px). `#billItemsArea` chỉ
+  chiếm nửa DƯỚI khu chơi (`top:48%`) để dành nửa trên cho Bill đứng,
+  không đè lên nhau.
+- Kiểm thử bằng Playwright: đọc `getBoundingClientRect()` của cả 4 ô +
+  Bill, xác nhận đúng lưới 2×2 không chồng lấn, không đè lên Bill; chơi
+  lại toàn bộ luồng đúng/sai/thắng cuộc vẫn hoạt động bình thường (chỉ
+  đổi CSS bố cục, không đụng logic JS chấm điểm/chuyển câu). 25 unit
+  test vẫn pass.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
