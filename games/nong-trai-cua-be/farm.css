@@ -10,7 +10,7 @@
 /* Ảnh nền tĩnh riêng của game này (thay cho nền vẽ CSS/SVG dùng chung —
    xem worldBg() trong engine/ui-shared.js). Ảnh chưa có sẵn lúc viết file
    này — người dùng tự tạo bằng prompt ở "Bước 9" trong
-   ANIMAL_ART_PIPELINE.md rồi lưu vào assets/backgrounds/farm-bg.jpg,
+   PROMPT.md rồi lưu vào assets/backgrounds/farm-bg.jpg,
    không cần sửa gì thêm ở đây. */
 .world-bg.farmphoto{ background:#F3ECD4 url('../../assets/backgrounds/farm-bg.jpg') center/cover no-repeat; }
 

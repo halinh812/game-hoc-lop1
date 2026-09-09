@@ -1138,6 +1138,38 @@ tới khi có đủ ảnh thật:
   sai, ảnh nền thật qua computed style, cả 3 mood dùng đúng ảnh thật
   `naturalWidth` > 0, ô chọn game ở Trang chủ). 25 unit test vẫn pass.
 
+## Vòng 21 — Sửa thư mục ảnh "Đồ vật" bị thiếu + đổi tên ANIMAL_ART_PIPELINE.md sang PROMPT.md
+
+- **Sửa lỗi upload ảnh "Đồ vật" qua Trang phụ huynh**: `objects-v1.json`
+  (category `object`, thêm ở game #3) chưa được khai báo trong
+  `FOLDER_BY_CATEGORY` của `tools/admin-server.mjs` — upload sẽ báo lỗi
+  "Bộ từ không hợp lệ." dù dropdown "Bộ từ" vẫn hiện đúng "Đồ vật" (đọc
+  trực tiếp từ content pack, không qua danh sách này). Thêm
+  `object: 'objects'` — ảnh đồ vật giờ lưu vào thư mục riêng
+  `assets/objects/`, tách biệt khỏi `assets/animals/`, đúng quy ước
+  "1 category = 1 thư mục" đã có. Kiểm thử bằng 1 lượt upload thật qua
+  API (id tạm, dọn sạch sau khi xác nhận).
+- **Đổi tên `ANIMAL_ART_PIPELINE.md` → `PROMPT.md`**: phạm vi tài liệu
+  đã vượt xa "con vật" từ lâu (nhân vật Bill, đồ vật, ảnh nền theo từng
+  game) nên tên cũ không còn khớp. Đổi bằng `git mv` (giữ lịch sử file).
+  Thêm **Mục lục** clickable ở đầu file — mỗi mục "Bước N" đều có
+  `<a id="buoc-N"></a>` đặt ngay trước heading, Mục lục link tới
+  `#buoc-N`. Chọn cách này (thay vì trông chờ auto-slug từ chính văn
+  bản tiêu đề) vì tiêu đề có dấu gạch ngang dài "—" và dấu ngoặc kép —
+  thuật toán tạo slug tự động của từng công cụ (GitHub/VS Code/Typora)
+  xử lý các ký tự này không giống nhau, dễ ra link sai; đặt `id` tay,
+  đơn giản, cố định thì chạy đúng ở MỌI nơi hiển thị được HTML thô
+  trong markdown (GitHub, VS Code Preview, Typora, Obsidian...).
+  **Các đoạn tham chiếu cũ trong `ROADMAP.md` (lịch sử) CỐ TÌNH giữ
+  nguyên tên `ANIMAL_ART_PIPELINE.md`** — đúng tên file tại thời điểm
+  viết, không sửa lại (xem quy ước ghi ở đầu file). Đã cập nhật tên mới
+  ở mọi nơi khác đang tham chiếu (comment trong `bill.js`, `farm.css`,
+  `avatars.js`, `remove_white_bg.py`).
+- **Thêm Bước 15** vào `PROMPT.md`: 10 đồ vật ở trường đợt 2 (khác hẳn
+  10 món ở Bước 13) — bảng con/phấn/hộp bút/kéo/hồ dán/chai nước/hộp
+  cơm/ô/khăn quàng đỏ/giày, dùng lại đúng khung phong cách đồ vật (đã
+  sửa loại trừ nhân vật) ở Bước 13.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs

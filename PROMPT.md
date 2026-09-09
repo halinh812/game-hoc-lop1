@@ -1,8 +1,11 @@
-# Quy trình tạo ảnh con vật (AI-ảnh-ngoài)
+# Prompt tạo ảnh cho game (AI-ảnh-ngoài)
 
-Quyết định Phase 0: nhân vật con vật sẽ tạo bằng công cụ AI ảnh bên ngoài
-(không phải SVG tự code) — xem lý do trong `ROADMAP.md`. Tài liệu này là
-quy trình lặp lại cho từng con vật mới.
+Quyết định Phase 0: nhân vật/đồ vật/ảnh nền trong game sẽ tạo bằng công
+cụ AI ảnh bên ngoài (không phải SVG tự code) — xem lý do trong
+`ROADMAP.md`. Tài liệu này là quy trình lặp lại cho mỗi ảnh mới, không
+riêng con vật (đã mở rộng sang nhân vật, đồ vật, ảnh nền theo từng game
+mới) — đổi tên từ `ANIMAL_ART_PIPELINE.md` sang `PROMPT.md` cho đúng
+phạm vi hiện tại.
 
 **Đổi phong cách (sau phản hồi "chưa đẹp, chưa sinh động"):** bản đầu
 dùng phong cách "semi-realistic" (giống ảnh chụp thật) — nhìn không khớp
@@ -13,6 +16,25 @@ tỉ lệ đầu to, tô màu vector mềm mại) theo đúng ảnh mẫu ngư�
 game nữa (xem Bước 4) nên KHÔNG cần mô tả dáng đi/bước chân như trước —
 chỉ cần 1 dáng đứng/ngồi đơn giản, thoải mái.
 
+## Mục lục
+
+- [Bước 1 — Bạn tạo ảnh](#buoc-1)
+- [Bước 2 — Gửi ảnh cho tôi](#buoc-2)
+- [Bước 3 — Tôi xử lý (tự động)](#buoc-3)
+- [Bước 4 — Chuyển động trong game (đã đổi lại sau nhiều vòng thử)](#buoc-4)
+- [Bước 5 — Danh sách 10 con vật MVP (Sở thú)](#buoc-5)
+- [Bước 6 — Danh sách 10 "Động vật nuôi" (nhóm con thứ 2 trong "Con vật")](#buoc-6)
+- [Bước 7 — Ảnh nền "khu rừng" (thay cho nền vẽ bằng code hiện tại)](#buoc-7)
+- [Bước 8 — Thêm 10 con "Động vật hoang dã" (đợt 2) cho Khu rừng kỳ bí](#buoc-8)
+- [Bước 9 — Ảnh nền "nông trại" cho game #2 "Nông trại của bé"](#buoc-9)
+- [Bước 10 — Thêm 10 con "Động vật nuôi" (đợt 2) cho Nông trại của bé](#buoc-10)
+- [Bước 11 — Gửi ảnh qua Git thay vì dán vào khung chat (đỡ tốn token)](#buoc-11)
+- [Bước 12 — Nhân vật "Bill" cho game #3](#buoc-12)
+- [Bước 13 — 10 đồ vật ở trường cho game #3](#buoc-13)
+- [Bước 14 — Ảnh nền "sân trường" cho game #3](#buoc-14)
+- [Bước 15 — Thêm 10 đồ vật ở trường (đợt 2) cho game #3](#buoc-15)
+
+<a id="buoc-1"></a>
 ## Bước 1 — Bạn tạo ảnh
 
 Copy đoạn "Khung phong cách" bên dưới + đoạn prompt riêng của con vật cần
@@ -56,10 +78,12 @@ nhất** — ưu tiên ảnh có nền trắng sạch, mắt to đúng phong cá
 không bị cắt cụt chân/đuôi/tai, và **hợp phong cách với các con đã có**
 (so sánh nhanh với ảnh cũ nếu đang thay dần từng con một).
 
+<a id="buoc-2"></a>
 ## Bước 2 — Gửi ảnh cho tôi
 
 Tải ảnh về (PNG), gửi trực tiếp vào cuộc trò chuyện này.
 
+<a id="buoc-3"></a>
 ## Bước 3 — Tôi xử lý (tự động)
 
 1. Chạy `tools/remove_white_bg.py` (đã có sẵn trong repo, dùng kỹ thuật
@@ -71,6 +95,7 @@ Tải ảnh về (PNG), gửi trực tiếp vào cuộc trò chuyện này.
 4. Ghép vào bản demo "sân chơi" để bạn xem thử cảm giác chuyển động thật
    trong game
 
+<a id="buoc-4"></a>
 ## Bước 4 — Chuyển động trong game (đã đổi lại sau nhiều vòng thử)
 
 Đã thử qua 4 kiểu chuyển động khác nhau (chạy tự do, núp bụi cây, 4 hàng
@@ -82,6 +107,7 @@ vẫn có sức sống hơn hẳn ảnh đứng im 100%. Khi bấm đúng: ảnh
 (nếu có) tiếp tục lặp, kèm hiệu ứng nảy + hạt "ăn mừng" bắn ra + tiếng
 chuông ting.
 
+<a id="buoc-5"></a>
 ## Bước 5 — Danh sách 10 con vật MVP (Sở thú)
 
 Chọn theo 3 tiêu chí: quen thuộc với trẻ lớp 1, dáng vẻ khác biệt rõ (để
@@ -160,6 +186,7 @@ Sau 10 con này, thêm con mới chỉ cần lặp lại đúng công thức: Kh
 cách (không đổi) + 1 đoạn mô tả riêng theo mẫu trên (loài + màu/hoạ tiết
 đặc trưng + dáng đứng/ngồi đơn giản, không cần mô tả dáng đi).
 
+<a id="buoc-6"></a>
 ## Bước 6 — Danh sách 10 "Động vật nuôi" (nhóm con thứ 2 trong "Con vật")
 
 Nhóm vật nuôi/nông trại quen thuộc với trẻ Việt Nam — **đã đưa vào
@@ -255,6 +282,7 @@ the chest, long upright ears, round fluffy tail, gentle curious
 expression, soft white fur with pink inner ears.
 ```
 
+<a id="buoc-7"></a>
 ## Bước 7 — Ảnh nền "khu rừng" (thay cho nền vẽ bằng code hiện tại)
 
 Nền hiện tại (`--sky-top/--sky-mid/--sky-bottom` gradient + dải "canopy"
@@ -305,6 +333,7 @@ con vật khó nhìn khi đặt chồng lên.
 Khác với ảnh con vật (Bước 1-6), ảnh nền này **không cần xoá nền/nền
 trong suốt** — giữ nguyên làm 1 ảnh nền đầy khung (JPG/PNG đều được).
 
+<a id="buoc-8"></a>
 ## Bước 8 — Thêm 10 con "Động vật hoang dã" (đợt 2) cho Khu rừng kỳ bí
 
 Mở rộng vốn từ cho trò chơi "Khu rừng kỳ bí" (hiện chỉ lấy nhóm con
@@ -401,6 +430,7 @@ Lưu file PNG tải về theo đúng tên tiếng Anh không dấu, chữ thư�
 Trang phụ huynh (nút "+" → Bộ từ "Con vật" → Nhóm từ "Động vật hoang
 dã" → "➕ Thêm từ mới"), để đỡ phải gõ lại tay.
 
+<a id="buoc-9"></a>
 ## Bước 9 — Ảnh nền "nông trại" cho game #2 "Nông trại của bé"
 
 Giống hệt Bước 7 (ảnh nền Khu rừng kỳ bí) nhưng đổi bối cảnh sang nông
@@ -451,6 +481,7 @@ icon ô chọn game (`.gametile.farm-tile`) đã tinh chỉnh khớp bố cục 
 thật (`55% 58% / 220%` — canh vào đoạn đường mòn uốn lượn + cây hai
 bên).
 
+<a id="buoc-10"></a>
 ## Bước 10 — Thêm 10 con "Động vật nuôi" (đợt 2) cho Nông trại của bé
 
 Mở rộng vốn từ cho trò chơi "Nông trại của bé" (nhóm con
@@ -546,6 +577,7 @@ Lưu file PNG tải về theo đúng tên tiếng Anh không dấu, chữ thư�
 Trang phụ huynh (nút "+" → Bộ từ "Con vật" → Nhóm từ "Động vật nuôi" →
 "➕ Thêm từ mới"), để đỡ phải gõ lại tay.
 
+<a id="buoc-11"></a>
 ## Bước 11 — Gửi ảnh qua Git thay vì dán vào khung chat (đỡ tốn token)
 
 Từ game 3 trở đi, dùng cách này thay cho Bước 2 (dán ảnh trực tiếp vào
@@ -574,6 +606,7 @@ tính làm hàng trăm game (rất nhiều ảnh về sau).
 vị trí cuối cùng luôn (vd `assets/backgrounds/school-bg.jpg`), không
 qua `_raw_incoming/`, đúng như đã làm với `forest-bg.jpg`/`farm-bg.jpg`.
 
+<a id="buoc-12"></a>
 ## Bước 12 — Nhân vật "Bill" cho game #3
 
 Bill là bạn nhỏ sẽ đứng ở giữa sân trường và "xin" bé chọn đúng đồ vật
@@ -646,6 +679,7 @@ Lưu thành `bill-sad.png`.
 người dùng tạo qua AI rồi gửi qua Git theo đúng quy trình ở Bước 11, đã
 xoá nền + tối ưu (900×900) và dùng thật trong game.
 
+<a id="buoc-13"></a>
 ## Bước 13 — 10 đồ vật ở trường cho game #3
 
 Vốn từ cho game #3 — đồ dùng quen thuộc ở trường/sân trường, đa dạng
@@ -747,6 +781,7 @@ Lưu file PNG theo đúng tên tiếng Anh không dấu, chữ thường: `book.
 `crayon.png`, `notebook.png`, `ball.png`, `hat.png` — gửi qua Git theo
 đúng quy trình ở Bước 11.
 
+<a id="buoc-14"></a>
 ## Bước 14 — Ảnh nền "sân trường" cho game #3
 
 Giống hệt Bước 7/9 (ảnh nền Khu rừng kỳ bí/Nông trại) nhưng đổi bối
@@ -796,3 +831,87 @@ Không cần xoá nền/nền trong suốt (giống Bước 7/9) — giữ nguy�
 đúng quy trình ở Bước 11, dùng thật trong game (`.world-bg.billphoto`
 trong `games/bill/bill.css`) và làm nền crop cho icon ô chọn game ở
 Trang chủ (`.gametile.bill-tile`).
+
+<a id="buoc-15"></a>
+## Bước 15 — Thêm 10 đồ vật ở trường (đợt 2) cho game #3
+
+Mở rộng vốn từ cho trò chơi "Help Bill!" (nhóm con `subcategory:
+"school"` trong category `object` — xem Bước 13) — chọn 10 đồ vật tiếp
+theo khác hẳn dáng vẻ với 10 món đã có (Bước 13: book/pencil/ruler/bag/
+pen/eraser/crayon/notebook/ball/hat), vẫn gần gũi với bé ở trường/lớp
+học lớp 1.
+
+Quy trình giống hệt Bước 13: dùng đúng "Khung phong cách" đồ vật ở
+Bước 13 (đã sửa để loại trừ nhân vật — nhớ tạo ở **1 cuộc trò chuyện
+AI MỚI**, không dùng lại đoạn chat đã tạo Bill/đồ vật đợt 1, xem lý do
+ở Bước 13) + 1 đoạn prompt riêng bên dưới, tỉ lệ khung hình **1:1
+(vuông)**.
+
+- [ ] Bảng con (Whiteboard) — *a whiteboard*
+- [ ] Phấn (Chalk) — *a piece of chalk*
+- [ ] Hộp bút (Pencil case) — *a pencil case*
+- [ ] Kéo (Scissors) — *scissors* (danh từ luôn số nhiều, không cần "a")
+- [ ] Hồ dán (Glue stick) — *a glue stick*
+- [ ] Chai nước (Water bottle) — *a water bottle*
+- [ ] Hộp cơm (Lunch box) — *a lunch box*
+- [ ] Ô/Dù (Umbrella) — *an umbrella*
+- [ ] Khăn quàng đỏ (Red scarf) — *a red scarf*
+- [ ] Giày (Shoes) — *shoes* (danh từ luôn số nhiều, không cần "a")
+
+### Prompt riêng cho từng đồ vật
+
+```
+Bảng con (Whiteboard):
+A small rectangular whiteboard/slate for writing, flat white surface
+with a simple frame border in a cheerful color, one bottom corner
+resting on the ground while slightly leaning back.
+
+Phấn (Chalk):
+A single stick of chalk lying diagonally, smooth cylindrical white
+body with slightly rounded ends, a small soft puff of white chalk dust
+near one tip.
+
+Hộp bút (Pencil case):
+A soft rounded zippered pencil case lying flat, cheerful two-tone
+color blocking with a visible zipper pull tab on top.
+
+Kéo (Scissors):
+A pair of child-safe scissors with rounded blunt tips, two curved
+plastic finger-loop handles in bright cheerful colors, blades closed
+together.
+
+Hồ dán (Glue stick):
+An upright glue stick with its cap removed and resting beside it, a
+cylindrical tube body in a bright color with a simple label wrap
+around the middle.
+
+Chai nước (Water bottle):
+A rounded plastic water bottle standing upright, a colorful screw-on
+cap on top, a simple carrying loop, translucent body with a light blue
+tint.
+
+Hộp cơm (Lunch box):
+A rounded rectangular lunch box standing upright with a simple
+clip-latch lid, cheerful two-tone color blocking on the body and lid.
+
+Ô/Dù (Umbrella):
+A small closed children's umbrella standing upright, a curved handle
+at the bottom, a pointed tip at top, folded fabric in a bright
+cheerful color with a strap wrapped around the middle.
+
+Khăn quàng đỏ (Red scarf):
+A folded red triangular scarf (Vietnamese young pioneer scarf) draped
+in a soft loose loop, smooth silky fabric texture with gently rounded
+folds.
+
+Giày (Shoes):
+A pair of small children's sneakers standing side by side, rounded toe
+shape, white soles, colorful upper fabric with simple shoelaces.
+```
+
+Lưu file PNG theo đúng tên tiếng Anh không dấu, chữ thường:
+`whiteboard.png`, `chalk.png`, `pencil_case.png`, `scissors.png`,
+`glue_stick.png`, `water_bottle.png`, `lunch_box.png`, `umbrella.png`,
+`red_scarf.png`, `shoes.png` — gửi qua Git theo đúng quy trình ở
+Bước 11 (thư mục `assets/_raw_incoming/`), tôi sẽ tự xoá nền + lưu vào
+`assets/objects/`.

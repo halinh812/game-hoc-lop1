@@ -5,7 +5,7 @@ Usage:
     python3 tools/remove_white_bg.py input.png output.png
 
 Assumes the source image was generated on a plain white (#FFFFFF)
-background, per the prompts in ANIMAL_ART_PIPELINE.md.
+background, per the prompts in PROMPT.md.
 
 Uses a flood fill from the four corners instead of a global color
 threshold: a global threshold would also punch holes through any

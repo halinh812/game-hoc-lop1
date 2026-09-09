@@ -11,7 +11,7 @@
 // Ảnh nhân vật (assets/characters/bill-idle.png/bill-happy.png/
 // bill-sad.png) và ảnh đồ vật (assets/objects/*.png) CHƯA có lúc viết
 // file này — người dùng tự tạo bằng các prompt ở Bước 12-14 trong
-// ANIMAL_ART_PIPELINE.md rồi gửi qua Git (xem Bước 11) — không cần sửa
+// PROMPT.md rồi gửi qua Git (xem Bước 11) — không cần sửa
 // gì thêm ở đây khi ảnh về: <img> tự động dùng ảnh thật, nếu ảnh chưa
 // tồn tại thì tự rơi về icon/emoji cảm xúc tạm (xem
 // billMascotHtml()/billTileMedia()).
@@ -112,7 +112,7 @@ export function createBillGame(ctx) {
   }
 
   // Nhân vật Bill — 3 trạng thái cảm xúc (chờ đợi/vui/buồn, xem Bước 12
-  // trong ANIMAL_ART_PIPELINE.md): "idle" là ảnh mặc định lúc chưa bấm
+  // trong PROMPT.md): "idle" là ảnh mặc định lúc chưa bấm
   // gì (vừa nghe xong câu hỏi), "happy" lúc chọn đúng, "sad" lúc chọn
   // sai. Ảnh thật có thể chưa tồn tại nên <img> có thể lỗi tải — bắt lỗi
   // đó để tự chuyển sang emoji tương ứng thay vì hiện ảnh vỡ.
@@ -370,7 +370,7 @@ export function createBillGame(ctx) {
 
   // Markup ô icon của game này trong lưới chọn trò chơi ở Trang chủ —
   // nền tạm bằng gradient (chưa có assets/backgrounds/school-bg.jpg, xem
-  // Bước 14 trong ANIMAL_ART_PIPELINE.md) + mặt Bill (lắc lư nhẹ), có
+  // Bước 14 trong PROMPT.md) + mặt Bill (lắc lư nhẹ), có
   // fallback emoji nếu ảnh Bill chưa tồn tại.
   function gameTileHtml(title) {
     return '<button type="button" class="gametile bill-tile" data-id="bill">' +
