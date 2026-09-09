@@ -8,12 +8,13 @@
 // Engine và phần CSS dùng chung ở engine/catch-game.css (thanh sao, nút
 // nghe lại, màn thắng cuộc) — chỉ viết riêng phần mascot + hiệu ứng bay.
 //
-// Ảnh nhân vật (assets/characters/bill-happy.png/bill-sad.png) và ảnh
-// đồ vật (assets/objects/*.png) CHƯA có lúc viết file này — người dùng
-// tự tạo bằng các prompt ở Bước 12-14 trong ANIMAL_ART_PIPELINE.md rồi
-// gửi qua Git (xem Bước 11) — không cần sửa gì thêm ở đây khi ảnh về:
-// <img> tự động dùng ảnh thật, nếu ảnh chưa tồn tại thì tự rơi về icon/
-// emoji cảm xúc tạm (xem billMascotHtml()/billTileMedia()).
+// Ảnh nhân vật (assets/characters/bill-idle.png/bill-happy.png/
+// bill-sad.png) và ảnh đồ vật (assets/objects/*.png) CHƯA có lúc viết
+// file này — người dùng tự tạo bằng các prompt ở Bước 12-14 trong
+// ANIMAL_ART_PIPELINE.md rồi gửi qua Git (xem Bước 11) — không cần sửa
+// gì thêm ở đây khi ảnh về: <img> tự động dùng ảnh thật, nếu ảnh chưa
+// tồn tại thì tự rơi về icon/emoji cảm xúc tạm (xem
+// billMascotHtml()/billTileMedia()).
 //
 // Không tự lấy state/store/WORDS từ app.js (tránh import vòng) — xem
 // giải thích chi tiết hơn ở đầu games/khu-rung-ky-bi/forest.js.
@@ -80,7 +81,7 @@ export function createBillGame(ctx) {
     state.targetIdx = pickTargetIndex(state.slots);
     state.correct = 0;
     state.answered = false;
-    state.billMood = 'happy';
+    state.billMood = 'idle';
     state.screen = 'bill';
     ctx.render();
   }
@@ -110,13 +111,17 @@ export function createBillGame(ctx) {
     ctx.speak(w.promptAudioText || ('I want a ' + w.en + '.'));
   }
 
-  // Nhân vật Bill — 2 trạng thái cảm xúc (vui/buồn, xem Bước 12 trong
-  // ANIMAL_ART_PIPELINE.md). Ảnh thật chưa có nên <img> có thể lỗi tải —
-  // bắt lỗi đó để tự chuyển sang emoji tương ứng thay vì hiện ảnh vỡ.
+  // Nhân vật Bill — 3 trạng thái cảm xúc (chờ đợi/vui/buồn, xem Bước 12
+  // trong ANIMAL_ART_PIPELINE.md): "idle" là ảnh mặc định lúc chưa bấm
+  // gì (vừa nghe xong câu hỏi), "happy" lúc chọn đúng, "sad" lúc chọn
+  // sai. Ảnh thật có thể chưa tồn tại nên <img> có thể lỗi tải — bắt lỗi
+  // đó để tự chuyển sang emoji tương ứng thay vì hiện ảnh vỡ.
+  var BILL_MOOD_IMG = { idle: 'bill-idle.png', happy: 'bill-happy.png', sad: 'bill-sad.png' };
+  var BILL_MOOD_FALLBACK = { idle: '🙂', happy: '😊', sad: '😢' };
   function billMascotHtml(mood) {
-    var src = mood === 'sad' ? 'assets/characters/bill-sad.png' : 'assets/characters/bill-happy.png';
-    var fallback = mood === 'sad' ? '😢' : '😊';
-    return '<img src="' + src + '" alt="Bill" id="billMascotImg">' +
+    var file = BILL_MOOD_IMG[mood] || BILL_MOOD_IMG.idle;
+    var fallback = BILL_MOOD_FALLBACK[mood] || BILL_MOOD_FALLBACK.idle;
+    return '<img src="assets/characters/' + file + '" alt="Bill" id="billMascotImg">' +
       '<span class="billfallback" id="billFallback" hidden>' + fallback + '</span>';
   }
 
@@ -247,7 +252,7 @@ export function createBillGame(ctx) {
       '</div>' +
       '<div class="billstage" id="billStage">' +
       '<div class="billmascotwrap" id="billMascotWrap">' +
-      '<div class="billmascot" id="billMascot">' + billMascotHtml(state.billMood || 'happy') + '</div>' +
+      '<div class="billmascot" id="billMascot">' + billMascotHtml(state.billMood || 'idle') + '</div>' +
       '<div class="billheld" id="billHeld"></div>' +
       '</div>' +
       '<div class="freeplay" id="billItemsArea">' + tiles + '</div>' +
@@ -303,6 +308,10 @@ export function createBillGame(ctx) {
       tileEls[state.targetIdx].classList.add('correct');
       ctx.speak(targetWord.promptAudioText || targetWord.en);
       setBillMood('sad');
+      // Đồ ĐÚNG vẫn bay về cạnh Bill dù bé chọn sai (Bill buồn nhưng bé
+      // vẫn thấy rõ đáp án đúng là ô nào) — khác ô bé vừa bấm (đang có
+      // quầng đỏ "wrong"), bay từ đúng vị trí ô target trong 4 ô.
+      flyItemToMascot(tileEls[state.targetIdx], targetWord, function () { showHeldItem(targetWord); });
       setTimeout(function () { advanceBillRound(state.targetIdx); }, 3000);
     }
   }
@@ -320,7 +329,7 @@ export function createBillGame(ctx) {
 
     document.getElementById('billStars').innerHTML = billStarsRow();
     clearHeldItem();
-    setBillMood('happy');
+    setBillMood('idle');
 
     speakBillTarget();
   }
@@ -366,7 +375,7 @@ export function createBillGame(ctx) {
   function gameTileHtml(title) {
     return '<button type="button" class="gametile bill-tile" data-id="bill">' +
       '<span class="billtile-face" id="billTileFace">' +
-      '<img src="assets/characters/bill-happy.png" alt="" id="billTileImg">' +
+      '<img src="assets/characters/bill-idle.png" alt="" id="billTileImg">' +
       '<span class="billtile-fallback" id="billTileFallback" hidden>🧒</span>' +
       '</span>' +
       '<span class="name">' + title + '</span></button>';

@@ -577,14 +577,15 @@ qua `_raw_incoming/`, đúng như đã làm với `forest-bg.jpg`/`farm-bg.jpg`.
 ## Bước 12 — Nhân vật "Bill" cho game #3
 
 Bill là bạn nhỏ sẽ đứng ở giữa sân trường và "xin" bé chọn đúng đồ vật
-(nghe câu "I want a book" → bấm đúng đồ). Cần 2 trạng thái cảm xúc:
-**vui** (chọn đúng, đồ bay về bên cạnh) và **buồn** (chọn sai, tay
-không). Ảnh mẫu bạn gửi chỉ để tham khảo diện mạo nhân vật (tóc đỏ cam,
-da sáng, áo phông xanh dương cổ bẻ, quần soóc xanh navy, giày thể thao
-trắng) — ảnh thật sẽ tạo mới theo phong cách chibi đồng bộ với cả app
-(giống khung phong cách ở Bước 1, chỉ đổi từ "con vật" sang "bạn nhỏ").
+(nghe câu "I want a book" → bấm đúng đồ). Cần 3 trạng thái cảm xúc:
+**chờ đợi** (mặc định — lúc chưa bấm gì, vừa nghe xong câu hỏi), **vui**
+(chọn đúng, đồ bay về bên cạnh) và **buồn** (chọn sai, tay không). Ảnh
+mẫu bạn gửi chỉ để tham khảo diện mạo nhân vật (tóc đỏ cam, da sáng, áo
+phông xanh dương cổ bẻ, quần soóc xanh navy, giày thể thao trắng) — ảnh
+thật sẽ tạo mới theo phong cách chibi đồng bộ với cả app (giống khung
+phong cách ở Bước 1, chỉ đổi từ "con vật" sang "bạn nhỏ").
 
-### Khung phong cách (dán trước, dùng chung cho cả 2 trạng thái)
+### Khung phong cách (dán trước, dùng chung cho cả 3 trạng thái)
 
 ```
 Cute chibi-style young boy character illustration for a children's
@@ -605,6 +606,18 @@ Avoid: realistic or photographic proportions, photographic texture,
 walking pose, background scenery, multiple characters in frame,
 cropped body parts, text or watermark.
 ```
+
+### Prompt riêng: Bill chờ đợi (ảnh mặc định)
+
+```
+The boy standing calmly in a relaxed neutral pose, both hands empty,
+one hand resting lightly near his hip and the other hanging loosely at
+his side, head tilted slightly to one side as if curiously waiting and
+wondering, a soft closed-mouth smile (not a big grin, not sad), calm
+patient and expectant expression.
+```
+
+Lưu thành `bill-idle.png`.
 
 ### Prompt riêng: Bill vui (tay không, chuẩn bị nhận đồ / đang mừng)
 
@@ -646,21 +659,34 @@ mạo từ "a"/"an" để tiện dạy luôn ngữ pháp cơ bản (chỉ "erase
 - [ ] Quả bóng (Ball) — *a ball*
 - [ ] Mũ (Hat) — *a hat*
 
+**Lưu ý quan trọng — tạo trong 1 cuộc trò chuyện MỚI, tách riêng khỏi
+cuộc đã tạo ảnh Bill**: nếu dán prompt đồ vật ngay trong cùng đoạn chat
+vừa tạo ảnh Bill (Bước 12), nhiều công cụ AI ảnh (kể cả Google Flow) sẽ
+"nhớ" ngữ cảnh nhân vật vừa tạo trước đó và tự chèn Bill vào ảnh đồ vật
+dù prompt không hề nhắc tới — đây chính là lỗi bạn gặp phải với ảnh bút
+chì. Mở 1 đoạn chat mới hoàn toàn (hoặc dùng nút "New chat"/"làm mới")
+trước khi bắt đầu tạo 10 đồ vật ở Bước này, không tái sử dụng đoạn chat
+đã tạo Bill hay bất kỳ con vật nào.
+
 ### Khung phong cách (dán trước, dùng chung cho MỌI đồ vật)
 
 ```
 Cute simplified flat-vector illustration of a single everyday school
-object for a children's learning game, soft cel-shading with gentle
-gradient highlights, smooth rounded friendly shapes with no sharp
-corners or edges, thin clean dark outline, bright saturated cheerful
-colors, a tiny bit of playful personality in the shape (but no eyes or
-face on the object itself), centered on a plain solid white (#FFFFFF)
-background, no shadow, no scenery, no other objects, no text, no
-watermark, no logo, square 1:1 composition, object fills about 70-80%
-of the frame, viewed from a friendly three-quarter angle.
-Avoid: realistic or photographic textures, 3D render look, clutter or
-multiple objects, added faces/eyes on the object, background scenery,
-text or watermark, cropped composition.
+object ONLY — no character, no person, no boy, no hands, no body parts
+anywhere in the image — for a children's learning game, soft
+cel-shading with gentle gradient highlights, smooth rounded friendly
+shapes with no sharp corners or edges, thin clean dark outline, bright
+saturated cheerful colors, a tiny bit of playful personality in the
+shape (but no eyes or face on the object itself), centered on a plain
+solid white (#FFFFFF) background, no shadow, no scenery, no other
+objects, no text, no watermark, no logo, square 1:1 composition, object
+fills about 70-80% of the frame, viewed from a friendly three-quarter
+angle. The single object floats/sits alone on the white background as
+the ONLY subject in the frame.
+Avoid: any person, character, boy, child, mascot, hand, arm, or body
+part of any kind, realistic or photographic textures, 3D render look,
+clutter or multiple objects, added faces/eyes on the object, background
+scenery, text or watermark, cropped composition.
 ```
 
 ### Prompt riêng cho từng đồ vật
