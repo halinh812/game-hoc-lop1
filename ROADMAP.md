@@ -1271,6 +1271,38 @@ cũng không có nút "Nghe lại" (không có gì để nghe lại).
   trong Trang phụ huynh (đối chiếu trực tiếp với `localStorage`). 25
   unit test vẫn pass.
 
+## Vòng 25 — Làm lại cơ chế "How Many?": nghe thử → xác nhận, thêm Cú thông thái
+
+Theo yêu cầu người dùng, đổi hẳn cách chơi của game #4 (khác cơ chế
+"bấm 1 phát là xong" của cả 3 game Nghe lẫn bản đầu của "Nhìn"):
+
+- **4 nút hoa** (sunflower/daisy/rose/tulip, thay hẳn 4 khối vuông màu)
+  giờ chỉ đóng vai trò **nghe thử** — bấm hoa nào đọc đúng câu của hoa
+  đó (`ctx.speak()`), đánh dấu "đang chọn" (viền vàng nổi bật) nhưng
+  KHÔNG chốt đáp án — bé bấm hoa khác để nghe lại câu khác, đổi ý bao
+  nhiêu lần tuỳ ý.
+- **Nút "bảng tính"** (mới, bên phải màn hình) mới thật sự XÁC NHẬN hoa
+  đang chọn là đáp án cuối — bị khoá (`disabled`) cho tới khi đã chọn 1
+  hoa, tránh bé bấm xác nhận khi chưa nghe gì. Toàn bộ logic chấm điểm/
+  hiệu ứng đúng-sai/chuyển câu (trước đây nằm trong lúc bấm hoa) giờ
+  chuyển hết vào lúc bấm nút này.
+- **Nhân vật "Cú thông thái"** (mới, bên trái màn hình) — 3 trạng thái
+  chờ đợi/vui/buồn giống hệt cơ chế Bill (Bước 12 trong `PROMPT.md`),
+  chỉ đổi lúc XÁC NHẬN (không đổi lúc chỉ đang nghe thử qua các hoa).
+  Ảnh chờ đợi cũng dùng làm icon ô chọn game ở Trang chủ (giống cách
+  Bill dùng `bill-idle.png` làm icon).
+- Chưa có ảnh thật nào (nền lớp học/Cú 3 trạng thái/4 hoa/nút bảng
+  tính) — đã viết đủ prompt ở Bước 16 trong `PROMPT.md`, mọi `<img>`
+  đều có fallback emoji đúng nghĩa (🌻🌼🌹🌷 cho hoa, 🦉 cho Cú, 🧮 cho
+  nút xác nhận) nên game chạy đủ chức năng ngay hôm nay.
+- Ảnh đồ vật cần đếm cũng phóng to hơn theo yêu cầu (64px → 82px).
+- Đã kiểm thử toàn bộ bằng Playwright: xác nhận nút xác nhận bị khoá
+  đúng lúc, bấm hoa CHƯA chấm điểm (không có class correct/wrong nào
+  xuất hiện), đổi ý sang hoa khác hoạt động đúng (chuyển đúng hoa được
+  đánh dấu "đang chọn"), bấm xác nhận mới thật sự chấm điểm + đổi mood
+  Cú đúng lúc (happy/sad), hiện đúng ô đúng khi trả lời sai. 25 unit
+  test vẫn pass.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs

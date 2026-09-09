@@ -1,47 +1,96 @@
-/* CSS RIÊNG của game "How Many?" — khác 3 game kia (không có ảnh nền
-   riêng, không có nhân vật/bối cảnh cụ thể — dùng lại nền vẽ CSS/SVG mặc
-   định worldBg() không tham số, đúng màn hình khác của app), nên file
-   này KHÔNG có url() ảnh nào, không cần lo đường dẫn tương đối như
-   forest.css/farm.css/bill.css. */
+/* CSS RIÊNG của game "How Many?" — nạp qua <link> trong index.html
+   (games/how-many/howmany.css), nên MỌI url() ảnh trong file này phải
+   tính từ đường dẫn của CHÍNH FILE NÀY (../../assets/...), không phải từ
+   index.html — xem giải thích đầy đủ ở đầu games/nong-trai-cua-be/farm.css. */
+
+/* Ảnh nền lớp học (Bước 16.1 trong PROMPT.md). LƯU Ý (lỗi thật đã gặp ở
+   bill.css): background KHÔNG được viết "linear-gradient(...) url(...)"
+   liền nhau không dấu phẩy — chỉ 1 màu đặc (không phải gradient) làm nền
+   dự phòng phía sau url(), giống hệt farm.css/forest.css/bill.css. */
+.world-bg.howmanyphoto{ background:#EFE7D6 url('../../assets/backgrounds/howmany-bg.jpg') center/cover no-repeat; }
 
 /* ---------- cụm ảnh đồ vật cần đếm ---------- */
 .countarea{
   flex:1; display:flex; flex-wrap:wrap; align-content:center; justify-content:center;
-  gap:10px; padding:6vh 8vw 2vh;
+  gap:12px; padding:5vh 8vw 1vh;
 }
 .counticon{
-  width:15vw; height:15vw; max-width:64px; max-height:64px;
+  width:19vw; height:19vw; max-width:82px; max-height:82px;
   display:flex; align-items:center; justify-content:center;
 }
 .counticon img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 4px 3px rgba(20,40,25,.28)); }
-.counticon-emoji{ font-size:9vw; line-height:1; }
+.counticon-emoji{ font-size:11vw; line-height:1; }
 
-/* ---------- 4 núm bấm màu ---------- */
-.knobsgrid{
-  display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:16px;
-  width:min(76vw, 300px); margin:0 auto 4vh; aspect-ratio:1/1;
+/* ---------- hàng 4 nút hoa ("nghe thử") ---------- */
+.flowersrow{ display:flex; justify-content:center; align-items:flex-end; gap:2vw; padding:0 4vw 1.5vh; }
+.flowerbtn{
+  position:relative; border:none; background:none; padding:0; cursor:pointer;
+  width:20vw; height:20vw; max-width:84px; max-height:84px;
+  transition:transform .12s ease;
 }
-.knobbtn{
-  --knob:#E4633F;
-  position:relative; border:none; border-radius:28px; cursor:pointer;
-  background:linear-gradient(160deg, color-mix(in srgb, var(--knob) 88%, white 12%), var(--knob));
-  box-shadow:0 6px 0 color-mix(in srgb, var(--knob) 60%, black 15%), 0 10px 18px rgba(20,40,25,.25);
-  transition:transform .08s ease, box-shadow .08s ease;
+.flowerbtn:active{ transform:scale(.92); }
+.flowerimg{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 5px 4px rgba(20,40,25,.25)); }
+.flowerfallback{
+  display:flex; align-items:center; justify-content:center; width:100%; height:100%;
+  font-size:13vw; line-height:1; filter:drop-shadow(0 5px 4px rgba(20,40,25,.25));
 }
-.knobbtn::after{
-  /* Vòng tròn "loa" đơn giản ở giữa núm — không chữ/số, đúng quy định
-     không hiển thị chữ trên màn chơi cho trẻ. */
-  content:''; position:absolute; inset:0; margin:auto; width:34%; height:34%;
-  border-radius:50%; background:rgba(255,255,255,.55);
-  box-shadow:0 0 0 8px rgba(255,255,255,.18);
+/* [hidden] không tự đủ ẩn phần tử đã có display:flex riêng (cùng lỗi/
+   cách sửa đã dùng cho .billfallback[hidden] trong games/bill/bill.css). */
+.flowerfallback[hidden]{ display:none; }
+/* Đang được CHỌN (vừa bấm để nghe thử, CHƯA xác nhận) — nổi bật lên
+   nhưng dùng màu trung tính (không phải đúng/sai) vì chưa chốt đáp án. */
+.flowerbtn.selected{ transform:scale(1.14) translateY(-4px); }
+.flowerbtn.selected .flowerimg,
+.flowerbtn.selected .flowerfallback{ filter:drop-shadow(0 0 3px var(--gold)) drop-shadow(0 0 10px var(--gold)); }
+.flowerbtn.correct .flowerimg,
+.flowerbtn.correct .flowerfallback{ filter:drop-shadow(0 0 3px var(--success)) drop-shadow(0 0 12px var(--success)); transform:scale(1.05); }
+.flowerbtn.wrong .flowerimg,
+.flowerbtn.wrong .flowerfallback{ filter:drop-shadow(0 0 3px #B24A43) drop-shadow(0 0 12px #B24A43); }
+
+/* ---------- thanh dưới cùng: Cú (trái) + nút xác nhận (phải) ---------- */
+.bottombar{ display:flex; align-items:flex-end; justify-content:space-between; padding:0 6vw 3vh; }
+.owlwrap{ position:relative; width:96px; height:96px; flex:none; }
+.owlwrap img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 5px 4px rgba(20,40,25,.28)); }
+.owlfallback{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:64px; line-height:1;
 }
-.knobbtn:active{
-  transform:translateY(4px);
-  box-shadow:0 2px 0 color-mix(in srgb, var(--knob) 60%, black 15%), 0 4px 10px rgba(20,40,25,.2);
+.owlfallback[hidden]{ display:none; }
+
+.confirmbtn{
+  flex:none; width:88px; height:88px; border:none; border-radius:22px; cursor:pointer;
+  background:var(--glass); box-shadow:0 6px 0 rgba(20,40,25,.18), 0 10px 16px rgba(20,40,25,.22);
+  display:flex; align-items:center; justify-content:center; padding:10px;
+  transition:transform .1s ease, opacity .2s ease, box-shadow .1s ease;
 }
-.knobbtn.correct{
-  box-shadow:0 6px 0 color-mix(in srgb, var(--knob) 60%, black 15%), 0 0 0 4px var(--success), 0 10px 22px rgba(20,40,25,.3);
+.confirmbtn:active:not(:disabled){ transform:translateY(3px); box-shadow:0 2px 0 rgba(20,40,25,.18), 0 4px 8px rgba(20,40,25,.18); }
+.confirmbtn:disabled{ opacity:.45; cursor:not-allowed; }
+.confirmimg{ width:100%; height:100%; object-fit:contain; }
+.confirmfallback{ font-size:46px; line-height:1; }
+.confirmfallback[hidden]{ display:none; }
+
+/* ---------- ô icon ở lưới chọn trò chơi (Trang chủ) ---------- */
+/* Nền tạm bằng gradient (chưa có ảnh lớp học thật, xem Bước 16 trong
+   PROMPT.md) — đổi sang crop nhỏ của howmany-bg.jpg khi ảnh về, theo
+   đúng cách forest-tile/farm-tile/bill-tile đã làm. */
+.gametile.howmany-tile{
+  position:relative; overflow:hidden; border:1px solid var(--glass-border);
+  background:linear-gradient(160deg, #EFE7D6 0%, #DCEFC6 60%, #C9E4B8 100%);
 }
-.knobbtn.wrong{
-  box-shadow:0 6px 0 color-mix(in srgb, var(--knob) 60%, black 15%), 0 0 0 4px #B24A43, 0 10px 22px rgba(20,40,25,.3);
+.gametile.howmany-tile::before{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(50,38,15,0) 45%, rgba(40,28,10,.45) 100%);
+}
+.gametile.howmany-tile .name{ position:relative; z-index:1; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.55); }
+.howmanytile-face{
+  position:relative; z-index:1; display:block; width:78px; height:78px;
+  animation:tileSway 2.6s ease-in-out infinite;
+}
+.howmanytile-face img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 4px 3px rgba(20,40,25,.3)); }
+.howmanytile-fallback{ display:flex; align-items:center; justify-content:center; width:100%; height:100%; font-size:52px; }
+.howmanytile-fallback[hidden]{ display:none; }
+
+@media (prefers-reduced-motion: reduce){
+  .howmanytile-face,.flowerbtn{ animation:none !important; }
+  .confirmbtn,.flowerbtn{ transition:none !important; }
 }
