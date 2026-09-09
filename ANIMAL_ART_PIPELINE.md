@@ -545,3 +545,219 @@ Lưu file PNG tải về theo đúng tên tiếng Anh không dấu, chữ thư�
 `quail.png`) — trùng đúng mã (id)/`text_en` sẽ dùng khi thêm từ qua
 Trang phụ huynh (nút "+" → Bộ từ "Con vật" → Nhóm từ "Động vật nuôi" →
 "➕ Thêm từ mới"), để đỡ phải gõ lại tay.
+
+## Bước 11 — Gửi ảnh qua Git thay vì dán vào khung chat (đỡ tốn token)
+
+Từ game 3 trở đi, dùng cách này thay cho Bước 2 (dán ảnh trực tiếp vào
+khung chat) mỗi khi cần gửi ảnh **cần xoá nền** (nhân vật/đồ vật, không
+áp dụng cho ảnh nền — xem lý do bên dưới): dán ảnh vào chat tốn khá
+nhiều "token" (chi phí xử lý) để tôi "nhìn" thấy ảnh, trong khi qua Git
+tôi chỉ cần đọc file trên đĩa — rẻ hơn nhiều, đặc biệt hữu ích khi bạn
+tính làm hàng trăm game (rất nhiều ảnh về sau).
+
+**Cách làm** (đúng quy trình git bạn đã quen — add/commit/push):
+
+1. Tải ảnh PNG về **y nguyên** (còn nền trắng, chưa xoá nền) — không cần
+   xử lý gì thêm ở máy bạn.
+2. Đặt tên file **trùng đúng tên đích cuối cùng** ghi trong prompt bên
+   dưới mỗi con/đồ vật (vd `bill-happy.png`) và lưu vào thư mục tạm
+   `assets/_raw_incoming/` (tạo thư mục này nếu chưa có).
+3. `git add assets/_raw_incoming/... && git commit -m "..." && git push`
+   lên đúng nhánh đang làm việc.
+4. Nhắn tôi 1 câu ngắn kiểu "đã đẩy xong ảnh Bill vui/buồn" — tôi sẽ tự
+   `git pull`, chạy `tools/remove_white_bg.py` + tối ưu + lưu đúng vị
+   trí cuối cùng (vd `assets/characters/bill-happy.png`), xoá file tạm
+   trong `_raw_incoming/` sau khi xử lý xong — không cần dán ảnh vào
+   chat nữa.
+
+**Riêng ảnh nền** (không cần xoá nền, xem Bước 7/9): lưu thẳng vào đúng
+vị trí cuối cùng luôn (vd `assets/backgrounds/school-bg.jpg`), không
+qua `_raw_incoming/`, đúng như đã làm với `forest-bg.jpg`/`farm-bg.jpg`.
+
+## Bước 12 — Nhân vật "Bill" cho game #3
+
+Bill là bạn nhỏ sẽ đứng ở giữa sân trường và "xin" bé chọn đúng đồ vật
+(nghe câu "I want a book" → bấm đúng đồ). Cần 2 trạng thái cảm xúc:
+**vui** (chọn đúng, đồ bay về bên cạnh) và **buồn** (chọn sai, tay
+không). Ảnh mẫu bạn gửi chỉ để tham khảo diện mạo nhân vật (tóc đỏ cam,
+da sáng, áo phông xanh dương cổ bẻ, quần soóc xanh navy, giày thể thao
+trắng) — ảnh thật sẽ tạo mới theo phong cách chibi đồng bộ với cả app
+(giống khung phong cách ở Bước 1, chỉ đổi từ "con vật" sang "bạn nhỏ").
+
+### Khung phong cách (dán trước, dùng chung cho cả 2 trạng thái)
+
+```
+Cute chibi-style young boy character illustration for a children's
+mobile learning game, flat vector cartoon art style with soft
+cel-shading and gentle gradient highlights, oversized round head with a
+much smaller compact body (chibi/kid proportions), extremely large
+glossy round eyes with a bright white catchlight sparkle, short
+tousled ginger/orange-red hair, fair skin with rosy cheeks, wearing a
+sky-blue polo shirt with a small collar and navy blue shorts, white
+sneakers with a colored stripe, smooth rounded shapes with no sharp
+edges, thin clean dark outline around the whole character, saturated
+warm and cheerful color palette, standing pose facing slightly to the
+side, centered on a plain solid white (#FFFFFF) background, no ground
+shadow, no scenery, no other characters, no text, no watermark, no
+logo, square 1:1 composition, character fills about 75-85% of the
+frame.
+Avoid: realistic or photographic proportions, photographic texture,
+walking pose, background scenery, multiple characters in frame,
+cropped body parts, text or watermark.
+```
+
+### Prompt riêng: Bill vui (tay không, chuẩn bị nhận đồ / đang mừng)
+
+```
+The boy standing calmly with both arms slightly open and empty hands
+at his sides, big bright sparkling eyes, wide cheerful open-mouth
+smile, rosy cheeks, an eager excited happy expression as if about to
+receive something.
+```
+
+Lưu thành `bill-happy.png`.
+
+### Prompt riêng: Bill buồn (tay không, không có đồ)
+
+```
+The boy standing with shoulders slightly slumped, both hands empty and
+held together in front of him, big sparkling eyes now looking slightly
+downcast with a small furrowed brow, a gentle pouty frown, a subtle
+single small teardrop at the corner of one eye, a disappointed but
+still cute and sympathetic (not scary/crying hard) expression.
+```
+
+Lưu thành `bill-sad.png`.
+
+## Bước 13 — 10 đồ vật ở trường cho game #3
+
+Vốn từ cho game #3 — đồ dùng quen thuộc ở trường/sân trường, đa dạng
+mạo từ "a"/"an" để tiện dạy luôn ngữ pháp cơ bản (chỉ "eraser" dùng
+"an", còn lại dùng "a").
+
+- [ ] Sách (Book) — *a book*
+- [ ] Bút chì (Pencil) — *a pencil*
+- [ ] Thước kẻ (Ruler) — *a ruler*
+- [ ] Cặp sách (Bag) — *a bag*
+- [ ] Bút mực (Pen) — *a pen*
+- [ ] Cục tẩy (Eraser) — *an eraser*
+- [ ] Bút sáp màu (Crayon) — *a crayon*
+- [ ] Quyển vở (Notebook) — *a notebook*
+- [ ] Quả bóng (Ball) — *a ball*
+- [ ] Mũ (Hat) — *a hat*
+
+### Khung phong cách (dán trước, dùng chung cho MỌI đồ vật)
+
+```
+Cute simplified flat-vector illustration of a single everyday school
+object for a children's learning game, soft cel-shading with gentle
+gradient highlights, smooth rounded friendly shapes with no sharp
+corners or edges, thin clean dark outline, bright saturated cheerful
+colors, a tiny bit of playful personality in the shape (but no eyes or
+face on the object itself), centered on a plain solid white (#FFFFFF)
+background, no shadow, no scenery, no other objects, no text, no
+watermark, no logo, square 1:1 composition, object fills about 70-80%
+of the frame, viewed from a friendly three-quarter angle.
+Avoid: realistic or photographic textures, 3D render look, clutter or
+multiple objects, added faces/eyes on the object, background scenery,
+text or watermark, cropped composition.
+```
+
+### Prompt riêng cho từng đồ vật
+
+```
+Sách (Book):
+A closed children's storybook lying flat, thick colorful hardcover
+with a simple friendly star or rainbow doodle on the front cover,
+rounded corners, warm orange-red cover color with a cream page edge.
+
+Bút chì (Pencil):
+A classic wooden pencil lying diagonally, yellow painted body with a
+sharpened grey tip, small pink eraser cap and a thin metal band at the
+end.
+
+Thước kẻ (Ruler):
+A flat wooden or plastic ruler lying diagonally, light wood-tan color
+with simple dark tick marks and numbers along the edge, rounded ends.
+
+Cặp sách (Bag):
+A plump rounded children's school backpack, two shoulder straps, one
+front pocket, a small top handle, bright cheerful blue and orange
+color blocking.
+
+Bút mực (Pen):
+A simple rounded ballpoint pen lying diagonally, glossy bright blue
+barrel with a silver clip and matching blue cap.
+
+Cục tẩy (Eraser):
+A small rectangular eraser with softly rounded corners, two-tone pink
+and white coloring, a simple printed brand-style stripe across the
+middle.
+
+Bút sáp màu (Crayon):
+A single fat rounded crayon standing upright, bright warm red-orange
+color with a slightly darker paper wrapper label wrapped around the
+middle.
+
+Quyển vở (Notebook):
+A closed spiral-bound notebook lying flat, light blue cover with
+visible metal spiral binding along the left edge, rounded corners.
+
+Quả bóng (Ball):
+A round classic soccer-style ball with simple bold black-and-white
+pentagon pattern, a soft cheerful highlight sparkle on the upper-left.
+
+Mũ (Hat):
+A simple rounded children's baseball cap viewed from the side, bright
+cheerful red color with a small curved brim and a tiny button on top.
+```
+
+Lưu file PNG theo đúng tên tiếng Anh không dấu, chữ thường: `book.png`,
+`pencil.png`, `ruler.png`, `bag.png`, `pen.png`, `eraser.png`,
+`crayon.png`, `notebook.png`, `ball.png`, `hat.png` — gửi qua Git theo
+đúng quy trình ở Bước 11.
+
+## Bước 14 — Ảnh nền "sân trường" cho game #3
+
+Giống hệt Bước 7/9 (ảnh nền Khu rừng kỳ bí/Nông trại) nhưng đổi bối
+cảnh sang sân trường — dùng cho CSS của game #3, file lưu tại
+`assets/backgrounds/school-bg.jpg` (gửi thẳng vào đúng vị trí này qua
+git, không qua `_raw_incoming/` — xem lý do ở Bước 11).
+
+**Cách dùng:** copy nguyên đoạn prompt bên dưới, dán vào Google Flow
+(hoặc ImageFX/Bing Image Creator...), chọn tỉ lệ khung hình **dọc
+(portrait) 9:16**. Tạo vài phiên bản, chọn ảnh ưng ý nhất — ưu tiên ảnh
+có **khoảng trống rõ ràng ở giữa/phía dưới khung hình** (nơi Bill và
+các món đồ trong game sẽ hiển thị đè lên trên), tránh ảnh quá rậm rạp
+ngay giữa khung.
+
+```
+Vibrant, cheerful flat-vector cartoon illustration of a bright
+elementary school playground/schoolyard, background art for a
+children's mobile learning game, in the same cute soft cel-shaded
+style as a chibi character illustration (smooth rounded shapes, no
+sharp or scary edges, thin clean outlines on major shapes, warm
+saturated colors, gentle gradient lighting). A warm cream-to-soft-blue
+sky gradient at the top with a few fluffy white clouds and a warm
+glowing sun. In the middle distance, a friendly two-story school
+building with large windows and a small flagpole with a colorful flag
+beside it, a section of low playground fence, and a couple of leafy
+trees. A light grey paved courtyard path leads from the school
+building toward the bottom of the frame, with a simple hopscotch
+pattern painted on the pavement to one side. Lush green grass patches
+and a few flower bushes frame the left and right edges of the image,
+leaving the center and lower-middle area of the frame open as empty
+paved courtyard ground (this open space is reserved for a character
+and game objects that will be placed on top later, so keep it visually
+calm and uncluttered, not the busiest part of the image). Bright,
+inviting, playful mood. Portrait orientation, 9:16 aspect ratio,
+full-bleed edge-to-edge illustration filling the entire frame.
+Absolutely no people, no children, no characters, no text, no letters,
+no logo, no watermark anywhere in the image.
+Avoid: photographic or realistic rendering, 3D render look, dark or
+scary mood, cluttered or busy composition, any human or animal
+character, any text or watermark, cropped or off-center composition.
+```
+
+Không cần xoá nền/nền trong suốt (giống Bước 7/9) — giữ nguyên làm 1
+ảnh nền đầy khung (JPG/PNG đều được).

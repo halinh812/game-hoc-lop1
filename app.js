@@ -24,19 +24,21 @@ import { getAvatars, avatarSvg } from './engine/avatars.js';
 import { starIcon, BACK_SVG, owlMascot, sleepyMascot, worldBg } from './engine/ui-shared.js';
 import { createForestGame } from './games/khu-rung-ky-bi/forest.js';
 import { createFarmGame } from './games/nong-trai-cua-be/farm.js';
+import { createBillGame } from './games/bill/bill.js';
 
 var CONTENT_PACKS = [
   'content/packs/colors-v1.json',
   'content/packs/animals-v1.json',
   'content/packs/numbers-v1.json',
   'content/packs/fruits-v1.json',
-  'content/packs/family-v1.json'
+  'content/packs/family-v1.json',
+  'content/packs/objects-v1.json'
 ];
 
 var GAMES = [
   { id: 'forest', title: 'Mystic Jungle', emoji: '🦁', skill: 'listen', available: true },
   { id: 'farm', title: 'My Little Farm', emoji: '🐶', skill: 'listen', available: true },
-  { id: 'g3', title: 'Sắp ra mắt', available: false },
+  { id: 'bill', title: 'Help Bill!', emoji: '🎒', skill: 'listen', available: true },
   { id: 'g4', title: 'Sắp ra mắt', available: false },
   { id: 'g5', title: 'Sắp ra mắt', available: false },
   { id: 'g6', title: 'Sắp ra mắt', available: false },
@@ -59,6 +61,8 @@ var state = {
   cardShownAt: 0,
   forestPool: [],
   farmPool: [],
+  billPool: [],
+  billMood: 'happy',
   slots: [],      // 4 từ đang hiển thị trên 4 hàng, giữ nguyên xuyên suốt
   targetIdx: 0    // slot nào đang là đáp án đúng của câu hỏi hiện tại
 };
@@ -87,6 +91,14 @@ var farmGame = createFarmGame({
   render: render,
   owlMascot: owlMascot
 });
+var billGame = createBillGame({
+  state: state,
+  getStore: function () { return store; },
+  getWords: function () { return WORDS; },
+  speak: speak,
+  render: render,
+  owlMascot: owlMascot
+});
 
 function render() {
   if (state.screen === 'loading') renderLoading();
@@ -97,6 +109,8 @@ function render() {
   else if (state.screen === 'forestSummary') forestGame.renderForestSummary();
   else if (state.screen === 'farm') farmGame.renderFarm();
   else if (state.screen === 'farmSummary') farmGame.renderFarmSummary();
+  else if (state.screen === 'bill') billGame.renderBill();
+  else if (state.screen === 'billSummary') billGame.renderBillSummary();
   else if (state.screen === 'parent') renderParent();
 }
 
@@ -187,6 +201,7 @@ function renderHome() {
       // nào, không biết chi tiết markup từng game.
       if (g.id === 'forest') return forestGame.gameTileHtml(g.title);
       if (g.id === 'farm') return farmGame.gameTileHtml(g.title);
+      if (g.id === 'bill') return billGame.gameTileHtml(g.title);
       return '<button type="button" class="gametile" data-id="' + g.id + '">' +
         '<span class="emoji">' + g.emoji + '</span><span class="name">' + g.title + '</span></button>';
     }
@@ -220,6 +235,7 @@ function renderHome() {
     var id = tile.getAttribute('data-id');
     if (id === 'forest') forestGame.startForestGame();
     else if (id === 'farm') farmGame.startFarmGame();
+    else if (id === 'bill') billGame.startBillGame();
   });
 }
 
