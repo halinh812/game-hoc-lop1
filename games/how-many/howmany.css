@@ -70,12 +70,12 @@
 .confirmfallback[hidden]{ display:none; }
 
 /* ---------- ô icon ở lưới chọn trò chơi (Trang chủ) ---------- */
-/* Nền tạm bằng gradient (chưa có ảnh lớp học thật, xem Bước 16 trong
-   PROMPT.md) — đổi sang crop nhỏ của howmany-bg.jpg khi ảnh về, theo
-   đúng cách forest-tile/farm-tile/bill-tile đã làm. */
+/* Nền là 1 khung crop nhỏ của chính ảnh nền howmany-bg.jpg trong game —
+   canh vào giữa tấm bảng đen (nơi có nhiều số trang trí xung quanh),
+   theo đúng cách forest-tile/farm-tile/bill-tile đã làm. */
 .gametile.howmany-tile{
   position:relative; overflow:hidden; border:1px solid var(--glass-border);
-  background:linear-gradient(160deg, #EFE7D6 0%, #DCEFC6 60%, #C9E4B8 100%);
+  background:#F3E4C4 url('../../assets/backgrounds/howmany-bg.jpg') 50% 22%/230% no-repeat;
 }
 .gametile.howmany-tile::before{
   content:''; position:absolute; inset:0;
