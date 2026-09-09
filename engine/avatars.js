@@ -1,7 +1,7 @@
 // Bộ 20 avatar "ngộ nghĩnh" cho bé chọn ở màn hồ sơ.
 //
 // Cố tình KHÔNG dùng phong cách tả thực như bộ ảnh AI Sở thú (xem
-// ANIMAL_ART_PIPELINE.md) — vẽ SVG bằng tay chỉ thất bại ở việc tả thực
+// PROMPT.md) — vẽ SVG bằng tay chỉ thất bại ở việc tả thực
 // (đã thử và bỏ ở Phase 0). Icon mascot đơn giản, khối tròn, mắt to là
 // đúng sở trường của SVG tự vẽ, nên dùng ở đây thay vì tốn công tạo ảnh AI
 // chỉ cho mục đích chọn đại diện.
