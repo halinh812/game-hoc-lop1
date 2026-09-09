@@ -2,7 +2,7 @@
 // đồ vật (chỉ luyện kỹ năng "Nghe" của Learning Engine). Khác 2 game
 // trước (Khu rừng kỳ bí/Nông trại — bấm đúng CON VẬT đang lắc lư rải rác
 // trong khu chơi): ở đây có nhân vật Bill đứng cố định, 4 món đồ xếp
-// thành 1 hàng ngay ngắn bên dưới — chọn đúng thì đồ "bay" về cạnh Bill
+// lưới 2×2 bên dưới — chọn đúng thì đồ "bay" về cạnh Bill
 // (Bill vui), chọn sai thì đồ đúng sáng lên còn Bill buồn. Vẫn tái dùng
 // gần như nguyên vẹn cơ chế chấm điểm/chọn câu hỏi tiếp theo từ Learning
 // Engine và phần CSS dùng chung ở engine/catch-game.css (thanh sao, nút
@@ -215,27 +215,6 @@ export function createBillGame(ctx) {
     if (heldEl) { heldEl.innerHTML = ''; heldEl.classList.remove('show'); }
   }
 
-  // 4 ô đồ vật xếp thành 1 hàng ngay ngắn gần đáy khu chơi (khác cách
-  // rải ngẫu nhiên theo góc phần tư của forest.js/farm.js — ở đây đồ vật
-  // không phải "đi tìm", chỉ cần bày gọn gàng để bé dễ so sánh/chọn).
-  function billPositionTile(tileEl, idx) {
-    var container = document.getElementById('billItemsArea');
-    if (!container) return;
-    var cw = container.clientWidth;
-    var ch = container.clientHeight;
-    var slotW = cw / 4;
-    var tw = tileEl.offsetWidth;
-    var th = tileEl.offsetHeight;
-    var cx = slotW * idx + slotW / 2;
-    tileEl.style.left = (cx - tw / 2) + 'px';
-    tileEl.style.top = (ch - th - 10) + 'px';
-  }
-
-  function billPositionAllTiles() {
-    var tileEls = document.getElementById('billItemsArea').querySelectorAll('.freetile');
-    Array.prototype.forEach.call(tileEls, function (tileEl, i) { billPositionTile(tileEl, i); });
-  }
-
   function renderBill() {
     state.cardShownAt = Date.now();
 
@@ -272,7 +251,6 @@ export function createBillGame(ctx) {
         handleBillAnswer(parseInt(tileEl.getAttribute('data-idx'), 10));
       });
     });
-    billPositionAllTiles();
   }
 
   function handleBillAnswer(idx) {
@@ -325,7 +303,6 @@ export function createBillGame(ctx) {
     var tileEls = document.getElementById('billItemsArea').querySelectorAll('.freetile');
     Array.prototype.forEach.call(tileEls, function (el) { el.classList.remove('wrong', 'correct'); });
     tileEls[replaceIdx].innerHTML = billTileMedia(state.slots[replaceIdx]);
-    billPositionTile(tileEls[replaceIdx], replaceIdx);
 
     document.getElementById('billStars').innerHTML = billStarsRow();
     clearHeldItem();
