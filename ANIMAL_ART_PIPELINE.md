@@ -642,6 +642,10 @@ still cute and sympathetic (not scary/crying hard) expression.
 
 Lưu thành `bill-sad.png`.
 
+**Cả 3 ảnh (`bill-idle.png`/`bill-happy.png`/`bill-sad.png`) đã có** —
+người dùng tạo qua AI rồi gửi qua Git theo đúng quy trình ở Bước 11, đã
+xoá nền + tối ưu (900×900) và dùng thật trong game.
+
 ## Bước 13 — 10 đồ vật ở trường cho game #3
 
 Vốn từ cho game #3 — đồ dùng quen thuộc ở trường/sân trường, đa dạng
@@ -787,3 +791,8 @@ character, any text or watermark, cropped or off-center composition.
 
 Không cần xoá nền/nền trong suốt (giống Bước 7/9) — giữ nguyên làm 1
 ảnh nền đầy khung (JPG/PNG đều được).
+
+**Ảnh `assets/backgrounds/school-bg.jpg` đã có** — gửi qua Git theo
+đúng quy trình ở Bước 11, dùng thật trong game (`.world-bg.billphoto`
+trong `games/bill/bill.css`) và làm nền crop cho icon ô chọn game ở
+Trang chủ (`.gametile.bill-tile`).

@@ -1093,6 +1093,51 @@ trước ở 2 điểm:
   Trang chủ (ô "Help Bill!" hiện đúng, fallback emoji khi chưa có ảnh),
   xem Trang phụ huynh không lỗi với category mới. 25 unit test vẫn pass.
 
+## Vòng 20 — Hoàn thiện game #3: thêm mood "chờ đợi", đồ đúng bay khi sai, ảnh thật
+
+Vài vòng chỉnh sửa liên tiếp sau khi build xong khung game #3 (Vòng 19),
+tới khi có đủ ảnh thật:
+
+- **Thêm mood thứ 3 "idle" (chờ đợi)**: trước đó Bill chỉ có vui/buồn,
+  dùng tạm "vui" làm mặc định — không hợp lý lúc chưa trả lời. Thêm
+  `bill-idle.png` làm ảnh mặc định lúc vào màn chơi/đầu mỗi câu mới,
+  "happy"/"sad" giờ chỉ còn là phản ứng tức thời sau khi trả lời.
+- **Sửa cơ chế cho khớp mô tả người dùng**: lúc chọn SAI, đồ vật ĐÚNG
+  cũng phải "bay" về cạnh Bill giống hệt lúc chọn đúng (chỉ khác Bill
+  buồn thay vì vui) — trước đó chỉ có quầng sáng đánh dấu, chưa bay.
+- **Sửa prompt đồ vật bị dính nhân vật Bill**: người dùng báo ảnh bút
+  chì tạo ra có cả Bill đứng cạnh dù prompt không hề nhắc tới — nguyên
+  nhân là công cụ AI ảnh giữ ngữ cảnh cuộc trò chuyện vừa tạo Bill
+  trước đó. Sửa `ANIMAL_ART_PIPELINE.md`: bắt buộc tạo đồ vật ở 1 cuộc
+  trò chuyện MỚI, khung phong cách nói rõ "no character/no person/no
+  hands" cả trong mô tả chính lẫn Avoid.
+- **Đủ ảnh thật, wire vào game**: người dùng gửi 3 ảnh Bill (idle/happy/
+  sad) + ảnh nền sân trường qua thư mục tạm `assets/_raw_incoming/`
+  (quy trình Git đỡ tốn token ở Bước 11) — xoá nền bằng
+  `tools/remove_white_bg.py`, resize về 900×900 (khớp cỡ các asset
+  khác), ảnh nền giữ nguyên lưu vào `assets/backgrounds/school-bg.jpg`.
+- **2 lỗi CSS thật phát hiện lúc wire ảnh vào** (cả 2 đều "âm thầm" —
+  không báo lỗi console, chỉ sai lặng lẽ, phải kiểm bằng Playwright +
+  computed style mới thấy):
+  1. `.world-bg.billphoto{ background:linear-gradient(...) url(...) ...; }`
+     — 2 lớp ảnh nền (gradient + url) viết liền nhau KHÔNG dấu phẩy là
+     cú pháp CSS không hợp lệ, khiến browser bỏ qua CẢ khai báo, rơi về
+     gradient mặc định của `.world-bg` — ảnh nền thật không bao giờ
+     hiện dù đường dẫn đúng. Sửa theo đúng cú pháp forest.css/farm.css
+     đã dùng: chỉ 1 màu đặc (không phải gradient) làm nền dự phòng phía
+     sau `url()`.
+  2. `.billfallback`/`.billtile-fallback` tự đặt `display:flex` nên đè
+     lên đúng `display:none` mặc định của thuộc tính `hidden` — icon dự
+     phòng LUÔN hiện đè lên ảnh Bill thật dù ảnh đã tải thành công.
+     Cùng loại lỗi (và cách sửa) với `.filterddPanel[hidden]`/
+     `.cmOverlay[hidden]` đã có sẵn trong `index.html` — bài học: bất
+     kỳ phần tử nào dùng thuộc tính `hidden` mà tự đặt `display` riêng
+     đều PHẢI có thêm rule `.class[hidden]{ display:none; }` mới ẩn
+     đúng, nếu không im lặng sai.
+- Đã kiểm thử lại toàn bộ bằng Playwright sau mỗi thay đổi (bay khi
+  sai, ảnh nền thật qua computed style, cả 3 mood dùng đúng ảnh thật
+  `naturalWidth` > 0, ô chọn game ở Trang chủ). 25 unit test vẫn pass.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
