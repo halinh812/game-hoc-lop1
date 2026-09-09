@@ -577,14 +577,15 @@ qua `_raw_incoming/`, đúng như đã làm với `forest-bg.jpg`/`farm-bg.jpg`.
 ## Bước 12 — Nhân vật "Bill" cho game #3
 
 Bill là bạn nhỏ sẽ đứng ở giữa sân trường và "xin" bé chọn đúng đồ vật
-(nghe câu "I want a book" → bấm đúng đồ). Cần 2 trạng thái cảm xúc:
-**vui** (chọn đúng, đồ bay về bên cạnh) và **buồn** (chọn sai, tay
-không). Ảnh mẫu bạn gửi chỉ để tham khảo diện mạo nhân vật (tóc đỏ cam,
-da sáng, áo phông xanh dương cổ bẻ, quần soóc xanh navy, giày thể thao
-trắng) — ảnh thật sẽ tạo mới theo phong cách chibi đồng bộ với cả app
-(giống khung phong cách ở Bước 1, chỉ đổi từ "con vật" sang "bạn nhỏ").
+(nghe câu "I want a book" → bấm đúng đồ). Cần 3 trạng thái cảm xúc:
+**chờ đợi** (mặc định — lúc chưa bấm gì, vừa nghe xong câu hỏi), **vui**
+(chọn đúng, đồ bay về bên cạnh) và **buồn** (chọn sai, tay không). Ảnh
+mẫu bạn gửi chỉ để tham khảo diện mạo nhân vật (tóc đỏ cam, da sáng, áo
+phông xanh dương cổ bẻ, quần soóc xanh navy, giày thể thao trắng) — ảnh
+thật sẽ tạo mới theo phong cách chibi đồng bộ với cả app (giống khung
+phong cách ở Bước 1, chỉ đổi từ "con vật" sang "bạn nhỏ").
 
-### Khung phong cách (dán trước, dùng chung cho cả 2 trạng thái)
+### Khung phong cách (dán trước, dùng chung cho cả 3 trạng thái)
 
 ```
 Cute chibi-style young boy character illustration for a children's
@@ -605,6 +606,18 @@ Avoid: realistic or photographic proportions, photographic texture,
 walking pose, background scenery, multiple characters in frame,
 cropped body parts, text or watermark.
 ```
+
+### Prompt riêng: Bill chờ đợi (ảnh mặc định)
+
+```
+The boy standing calmly in a relaxed neutral pose, both hands empty,
+one hand resting lightly near his hip and the other hanging loosely at
+his side, head tilted slightly to one side as if curiously waiting and
+wondering, a soft closed-mouth smile (not a big grin, not sad), calm
+patient and expectant expression.
+```
+
+Lưu thành `bill-idle.png`.
 
 ### Prompt riêng: Bill vui (tay không, chuẩn bị nhận đồ / đang mừng)
 
