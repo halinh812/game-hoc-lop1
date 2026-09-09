@@ -34,8 +34,8 @@ var CONTENT_PACKS = [
 ];
 
 var GAMES = [
-  { id: 'forest', title: 'Khu rừng kỳ bí', emoji: '🦁', skill: 'listen', available: true },
-  { id: 'farm', title: 'Nông trại của bé', emoji: '🐶', skill: 'listen', available: true },
+  { id: 'forest', title: 'Mystic Jungle', emoji: '🦁', skill: 'listen', available: true },
+  { id: 'farm', title: 'My Little Farm', emoji: '🐶', skill: 'listen', available: true },
   { id: 'g3', title: 'Sắp ra mắt', available: false },
   { id: 'g4', title: 'Sắp ra mắt', available: false },
   { id: 'g5', title: 'Sắp ra mắt', available: false },
