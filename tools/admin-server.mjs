@@ -35,7 +35,8 @@ const FOLDER_BY_CATEGORY = {
   color: 'colors',
   number: 'numbers',
   family: 'family',
-  fruit: 'fruits'
+  fruit: 'fruits',
+  object: 'objects'
 };
 
 const SAFE_ID = /^[a-z0-9_-]+$/;
