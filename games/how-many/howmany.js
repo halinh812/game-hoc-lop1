@@ -154,9 +154,9 @@ export function createHowManyGame(ctx) {
       '<span class="owlfallback" id="owlFallback" hidden>' + fallback + '</span>';
   }
 
-  // Cú thông thái đứng riêng ở góc trên-trái màn hình (position:absolute
-  // trong CSS, xem .owlwrap) — tách khỏi bottombar để không còn đi cùng
-  // hàng với nút xác nhận.
+  // Cú thông thái đứng riêng ở góc dưới-trái màn hình, to x3 so với ban
+  // đầu (position:absolute trong CSS, xem .owlwrap) — tách khỏi bottombar
+  // để không còn đi cùng hàng với nút xác nhận.
   function owlCornerHtml() {
     return '<div class="owlwrap" id="owlWrap">' + owlMoodImg(state.howManyMood || 'idle') + '</div>';
   }
