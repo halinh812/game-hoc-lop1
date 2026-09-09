@@ -75,7 +75,7 @@ export function createHowManyGame(ctx) {
 
   function phraseFor(value, objWord) {
     var noun = value === 1 ? objWord.singular : objWord.plural;
-    return 'I have ' + NUMBER_WORDS[value - 1] + ' ' + noun + '.';
+    return NUMBER_WORDS[value - 1] + ' ' + noun;
   }
 
   function pickObjectWord() {
