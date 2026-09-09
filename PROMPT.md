@@ -34,6 +34,7 @@ chỉ cần 1 dáng đứng/ngồi đơn giản, thoải mái.
 - [Bước 14 — Ảnh nền "sân trường" cho game #3](#buoc-14)
 - [Bước 15 — Thêm 10 đồ vật ở trường (đợt 2) cho game #3](#buoc-15)
 - [Bước 16 — Bộ ảnh cho game #4 "How Many?"](#buoc-16)
+- [Bước 17 — 10 ảnh con số 1-10 dễ thương, thay cho đếm hình lặp lại](#buoc-17)
 
 <a id="buoc-1"></a>
 ## Bước 1 — Bạn tạo ảnh
@@ -1131,3 +1132,76 @@ sẽ xoá nền + lưu vào `assets/howmany/`.
 
 **✅ Đã có ảnh thật** — đã xoá nền + lưu vào `assets/howmany/calculator.png`,
 đang chạy trong game.
+
+<a id="buoc-17"></a>
+## Bước 17 — 10 ảnh con số 1-10 dễ thương, thay cho đếm hình lặp lại
+
+Đổi cách chơi game #4 "How Many?": thay vì hiển thị N hình đồ vật lặp
+lại (vd 3 cái bình nước) để bé tự đếm, giờ hiển thị THẲNG 1 ảnh con số
+(vd hình số "3") ở giữa khung — bé không cần đếm nữa, chỉ cần NHÌN mặt
+số rồi bấm đúng nút hoa đọc đúng số đó. Cần 10 ảnh, mỗi ảnh 1 chữ số từ
+1 đến 10 (số "10" viết bằng 2 ký tự "1" và "0" đứng cạnh nhau trong
+cùng 1 khung ảnh, không tách 2 ảnh riêng).
+
+### Khung phong cách (dán trước, dùng chung cho cả 10 số)
+
+```
+Cute simplified flat-vector illustration of a single bubbly numeral
+digit, designed as a big friendly number card icon for a children's
+learning game, soft cel-shading with gentle gradient highlights, thick
+chunky rounded "bubble font" digit shape with soft rounded corners and
+no sharp points, thin clean dark outline, a small soft highlight
+sparkle in the upper-left of the digit, a tiny playful star or dot
+decoration floating beside the digit (small, not overlapping or
+obscuring the digit shape), centered on a plain solid white (#FFFFFF)
+background, no shadow, no scenery, no other digits, no extra readable
+text, no watermark, no logo, square 1:1 composition, the digit fills
+about 75-85% of the frame height. No face, no eyes, no character
+features on the digit itself — it is a number shape, not a character.
+Avoid: thin or serif typography, realistic or photographic textures,
+3D render look, added face/eyes on the digit, multiple digits other
+than the one specified, background scenery, text or watermark, cropped
+composition.
+```
+
+### Prompt riêng cho từng số (đổi màu để bé dễ phân biệt)
+
+```
+Số 1 (One):
+The bubble-font numeral "1", bright coral-red color.
+
+Số 2 (Two):
+The bubble-font numeral "2", bright orange color.
+
+Số 3 (Three):
+The bubble-font numeral "3", bright golden-yellow color.
+
+Số 4 (Four):
+The bubble-font numeral "4", bright grass-green color.
+
+Số 5 (Five):
+The bubble-font numeral "5", bright teal color.
+
+Số 6 (Six):
+The bubble-font numeral "6", bright sky-blue color.
+
+Số 7 (Seven):
+The bubble-font numeral "7", bright periwinkle-purple color.
+
+Số 8 (Eight):
+The bubble-font numeral "8", bright pink-magenta color.
+
+Số 9 (Nine):
+The bubble-font numeral "9", bright warm brown color.
+
+Số 10 (Ten):
+The two bubble-font numerals "1" and "0" standing side by side as one
+single tight group (same size, small gap between them, both part of
+the same frame), bright golden color with tiny sparkle accents.
+```
+
+Lưu 10 file PNG theo đúng tên: `num-1.png`, `num-2.png`, ... `num-10.png`
+— gửi qua Git theo đúng quy trình ở Bước 11 (thư mục
+`assets/_raw_incoming/`), tôi sẽ xoá nền + lưu vào
+`assets/howmany/numbers/` (thư mục con mới, tách riêng khỏi 4 ảnh hoa/
+nút xác nhận đã có sẵn trong `assets/howmany/`).
