@@ -142,7 +142,7 @@ export function createHowManyGame(ctx) {
     return round.options.map(function (o, i) {
       var f = o.flower;
       var inner = '<img src="assets/howmany/' + f.id + '.png" alt="" class="flowerimg" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">' +
-        '<span class="flowerfallback">' + f.emoji + '</span>';
+        '<span class="flowerfallback" hidden>' + f.emoji + '</span>';
       return '<button type="button" class="flowerbtn" data-idx="' + i + '">' + inner + '</button>';
     }).join('');
   }
@@ -159,7 +159,7 @@ export function createHowManyGame(ctx) {
       '<div class="owlwrap" id="owlWrap">' + owlMoodImg(state.howManyMood || 'idle') + '</div>' +
       '<button type="button" class="confirmbtn" id="confirmBtn" disabled>' +
       '<img src="assets/howmany/calculator.png" alt="" class="confirmimg" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">' +
-      '<span class="confirmfallback">🧮</span>' +
+      '<span class="confirmfallback" hidden>🧮</span>' +
       '</button>' +
       '</div>';
   }

@@ -1303,6 +1303,40 @@ Theo yêu cầu người dùng, đổi hẳn cách chơi của game #4 (khác c�
   Cú đúng lúc (happy/sad), hiện đúng ô đúng khi trả lời sai. 25 unit
   test vẫn pass.
 
+## Vòng 26 — Ghép ảnh thật cho "How Many?" (Cú + 4 hoa) + sửa lỗi hiện trùng ảnh/emoji
+
+Người dùng gửi qua Git (`assets/_raw_incoming/`) 7/9 ảnh đã hẹn ở Bước 16
+trong `PROMPT.md`: `owl-idle`, `owl-happy`, `owl-sad`, `sunflower`,
+`daisy`, `rose`, `tulip` (còn thiếu nền lớp học `howmany-bg.jpg` và nút
+xác nhận `calculator.png` — game vẫn chạy tốt nhờ fallback gradient/emoji
+🧮 sẵn có, sẽ ghép nốt khi có).
+
+- Xoá nền (`tools/remove_white_bg.py`) + chuẩn hoá về canvas vuông
+  900×900 giống quy ước ảnh Bill/đồ vật. Riêng `owl-idle.jpeg` gốc là
+  ảnh dọc (768×1376, không vuông) — nếu resize ép về 900×900 sẽ bị kéo
+  méo hình Cú, nên phải dán vào khung vuông (pad transparent theo cạnh
+  dài hơn) rồi mới resize, thay vì resize thẳng như 6 ảnh còn lại (vốn
+  đã vuông 1024×1024 sẵn).
+- Chuyển vào `assets/characters/` (3 ảnh Cú) và thư mục mới
+  `assets/howmany/` (4 ảnh hoa), xoá ảnh gốc khỏi `assets/_raw_incoming/`.
+- **Lỗi thật phát hiện khi kiểm thử bằng Playwright**: 4 nút hoa và nút
+  xác nhận hiện ĐÈ CHỒNG (2 tầng) hình ảnh thật lên trên emoji dự phòng
+  thay vì chỉ hiện 1 trong 2 — do `<span class="flowerfallback">` và
+  `<span class="confirmfallback">` trong `games/how-many/howmany.js`
+  thiếu thuộc tính `hidden` mặc định (khác với `owlfallback` và
+  `howmanytile-fallback` đã có sẵn `hidden` đúng từ đầu). Lỗi này vô
+  hình từ lúc viết ở Vòng 25 vì khi đó ảnh thật chưa tồn tại nên `<img>`
+  luôn lỗi (404) → `onerror` luôn ẩn `<img>`/hiện fallback đúng ý, che
+  mất việc fallback vốn dĩ hiển thị sẵn không điều kiện. Chỉ lộ ra hôm
+  nay khi ảnh hoa/Cú tải thành công thật. Sửa: thêm `hidden` mặc định
+  cho cả 2 span, đúng theo mẫu 2 fallback kia — giờ fallback chỉ hiện
+  khi `<img>` thật sự lỗi.
+- Kiểm thử lại bằng Playwright sau khi sửa: chụp ảnh xác nhận không còn
+  cảnh trùng lặp, bấm chọn hoa → viền vàng đúng hoa, bấm xác nhận → Cú
+  đổi đúng trạng thái buồn khi chọn sai (kèm hiệu ứng viền đỏ ô đã chọn/
+  viền xanh ô đúng), icon Cú ở Trang chủ hiển thị đúng ảnh thật không
+  méo hình. 25 unit test vẫn pass.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
