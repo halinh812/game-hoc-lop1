@@ -1195,6 +1195,33 @@ Theo yêu cầu người dùng: Bill quá nhỏ và dán sát mép trên (chưa 
   đổi CSS bố cục, không đụng logic JS chấm điểm/chuyển câu). 25 unit
   test vẫn pass.
 
+## Vòng 23 — Thu hẹp lưới đồ vật + sửa câu Bill nói bị đè mất khi upload ảnh
+
+- **Thu hẹp lưới 2×2**: theo yêu cầu người dùng, lưới đồ vật ở Vòng 22
+  trải hết chiều ngang màn hình khiến 2 cột dạt sát mép ngoài, đè lên
+  bụi cây/hoa trong ảnh nền. Thu hẹp `#billItemsArea` (`left`/`right`
+  từ 0 → 16%) + giảm `gap`, 4 ô co cụm lại gần nhau, nằm ngay dưới Bill
+  giữa đoạn đường sân trường thay vì trải hết bề ngang.
+- **Sửa lỗi Bill chỉ đọc 1 từ thay vì cả câu**: người dùng báo Bill nói
+  "quyển sách"/"book" thay vì "I want a book." — nguyên nhân: lúc upload
+  ảnh cho 10 từ đã có qua Trang phụ huynh, `tools/admin-server.mjs` (mỗi
+  lần sửa 1 từ đã tồn tại) luôn đồng bộ `prompt_audio_text = text_en`,
+  không phân biệt được bộ từ "Đồ vật" của game #3 cố tình đặt
+  `prompt_audio_text` là CẢ CÂU khác hẳn `text_en` — chỉ tải ảnh lên
+  (không đụng gì câu đọc) cũng vô tình xoá mất câu tuỳ chỉnh. Sửa: chỉ
+  tự đồng bộ khi 2 giá trị ĐANG GIỐNG NHAU trước đó (nghĩa là chưa từng
+  bị tuỳ chỉnh) — giữ nguyên hành vi cũ cho các bộ từ khác (animal/
+  color/number/fruit/family). Khôi phục lại đúng `prompt_audio_text`
+  cho cả 20 từ trong `objects-v1.json` (10 từ đợt 1 bị đè mất do lỗi
+  trên + 10 từ đợt 2 người dùng vừa thêm mới qua Trang phụ huynh, vốn dĩ
+  CHƯA BAO GIỜ có câu riêng vì form Trang phụ huynh không có ô nhập câu
+  audio tuỳ chỉnh — chỉ có ô "Tiếng Anh"/"Tiếng Việt").
+- Đã kiểm thử: mô phỏng đúng thao tác gây lỗi (upload lại ảnh cho
+  "book" qua API) xác nhận không còn bị đè; capture
+  `SpeechSynthesisUtterance` thật trong trình duyệt qua nhiều vòng chơi
+  (31 câu) xác nhận 100% đọc đúng cả câu "I want ..." cho cả 20 từ,
+  không còn từ đơn lẻ nào. 25 unit test vẫn pass.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
