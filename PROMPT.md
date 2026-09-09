@@ -1205,3 +1205,8 @@ Lưu 10 file PNG theo đúng tên: `num-1.png`, `num-2.png`, ... `num-10.png`
 `assets/_raw_incoming/`), tôi sẽ xoá nền + lưu vào
 `assets/howmany/numbers/` (thư mục con mới, tách riêng khỏi 4 ảnh hoa/
 nút xác nhận đã có sẵn trong `assets/howmany/`).
+
+**✅ Đã có ảnh thật** — cả 10 file đã xoá nền + lưu vào
+`assets/howmany/numbers/`, đang chạy trong game (đã thay hẳn cụm N
+hình đồ vật lặp lại cũ bằng 1 ảnh con số duy nhất, xem Vòng 30 trong
+ROADMAP.md).
