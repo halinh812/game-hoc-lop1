@@ -1,0 +1,110 @@
+/* CSS RIÊNG của game "Help Bill!" — phần cơ chế chấm điểm/thanh sao/nút
+   nghe lại/màn kết quả dùng chung với các game khác nằm ở
+   engine/catch-game.css (xem .starsrow/.soundbtn/.freetile/.summary-*).
+   Nạp qua <link> trong index.html (games/bill/bill.css), nên MỌI url()
+   ảnh trong file này phải tính từ đường dẫn của CHÍNH FILE NÀY
+   (../../assets/...), không phải từ index.html — xem giải thích đầy đủ
+   ở đầu games/nong-trai-cua-be/farm.css. */
+
+/* Ảnh nền sân trường CHƯA có lúc viết file này (người dùng tự tạo bằng
+   prompt ở Bước 14 trong ANIMAL_ART_PIPELINE.md rồi gửi qua Git, xem
+   Bước 11) — dùng tạm 1 gradient bầu trời dịu mắt thay chỗ, không cần
+   sửa gì thêm ở đây khi ảnh về (chỉ cần thêm background-image, xem cách
+   forest.css/farm.css đã làm với ảnh nền thật của chúng để làm mẫu).
+   Chừng nào chưa có assets/backgrounds/school-bg.jpg, url() dưới đây sẽ
+   lỗi tải ảnh nhưng vẫn hiện đúng màu nền gradient (khai theo thứ tự
+   background CSS: ảnh trước, màu/gradient sau làm dự phòng). */
+.world-bg.billphoto{
+  background:linear-gradient(180deg, #FDF3DC 0%, #CDEAFB 55%, #BEE7B0 100%)
+    url('../../assets/backgrounds/school-bg.jpg') center/cover no-repeat;
+}
+
+/* ---------- màn chơi: Bill + hàng đồ vật ---------- */
+.billstage{ position:relative; flex:1; margin:4px 0 0; }
+/* .freeplay (định nghĩa ở engine/catch-game.css) dựa vào "flex:1" của
+   chính nó để lấy chiều cao — chỉ có tác dụng khi CHA TRỰC TIẾP là 1
+   flex container. Ở forest.js/farm.js, .freeplay là con trực tiếp của
+   .content (flex column) nên đúng. Ở đây .freeplay lại là CHÁU của
+   .content (qua .billstage — chỉ position:relative, không phải flex),
+   nên flex:1 của nó vô tác dụng, chiều cao co về gần 0 → hàng đồ vật bị
+   đẩy lên sát mép trên thay vì nằm gần đáy. Ghi đè lại bằng
+   position:absolute; inset:0 để nó LUÔN phủ đúng kín .billstage, không
+   phụ thuộc flex context của cha. */
+.billstage .freeplay{ position:absolute; inset:0; flex:none; margin:0; }
+
+.billmascotwrap{
+  position:absolute; top:4%; left:50%; transform:translateX(-50%);
+  width:150px; height:150px; z-index:2;
+}
+.billmascot{ width:100%; height:100%; position:relative; }
+.billmascot img{
+  width:100%; height:100%; object-fit:contain;
+  filter:drop-shadow(0 6px 5px rgba(20,40,25,.28));
+}
+.billfallback{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:88px; line-height:1;
+}
+/* Icon nhỏ của món đồ vừa "bay" tới, đứng cạnh Bill cho tới khi câu tiếp
+   theo bắt đầu (clearHeldItem() trong bill.js). */
+.billheld{
+  position:absolute; right:-8px; bottom:2px; width:52px; height:52px;
+  border-radius:50%; background:var(--glass); box-shadow:0 4px 10px rgba(20,40,25,.22);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transform:scale(.4); transition:opacity .25s ease, transform .25s cubic-bezier(.34,1.56,.64,1);
+}
+.billheld.show{ opacity:1; transform:scale(1); }
+.billheld img{ width:76%; height:76%; object-fit:contain; }
+.billheld span{ font-size:28px; }
+
+/* 4 ô đồ vật xếp hàng ngang gọn gàng gần đáy khu chơi (JS tính vị trí
+   chính xác, xem billPositionTile() trong bill.js) — thu nhỏ lại so với
+   kích thước mặc định của .freetile (dành cho con vật rải rác 1 mình 1
+   góc) để 4 ô vừa 1 hàng trên màn điện thoại. */
+.billstage .freetile{ width:20vw; height:20vw; max-width:78px; max-height:78px; }
+.billstage .tileemoji{
+  width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+  font-size:9vw; line-height:1; filter:drop-shadow(0 5px 3px rgba(20,40,25,.28));
+}
+.billstage .freetile.wrong .tileemoji{ filter:drop-shadow(0 0 3px #B24A43) drop-shadow(0 0 10px #B24A43); }
+.billstage .freetile.correct .tileemoji{ filter:drop-shadow(0 0 3px var(--success)) drop-shadow(0 0 10px var(--success)); transform:scale(1.08); }
+
+/* Món đồ "bay" từ ô của nó về cạnh Bill lúc bấm đúng — cùng kỹ thuật
+   --dx/--dy với hạt "ăn mừng" (.tileburst trong engine/catch-game.css),
+   chỉ khác là bay hẳn tới 1 điểm đích (cạnh Bill) thay vì bay toé ra rồi
+   tan biến tại chỗ. */
+.billflyicon{
+  position:absolute; width:56px; height:56px; margin:-28px 0 0 -28px;
+  pointer-events:none; z-index:3; animation:billFly .62s cubic-bezier(.3,.6,.4,1) forwards;
+}
+.billflyicon img{ width:100%; height:100%; object-fit:contain; }
+.billflyicon span{ display:flex; align-items:center; justify-content:center; width:100%; height:100%; font-size:34px; }
+@keyframes billFly{
+  0%{ transform:translate(0,0) scale(1); opacity:1; }
+  100%{ transform:translate(var(--dx,0),var(--dy,0)) scale(.4); opacity:.9; }
+}
+
+/* ---------- ô icon ở lưới chọn trò chơi (Trang chủ) ---------- */
+/* Nền tạm bằng gradient (chưa có ảnh sân trường thật, xem ghi chú ở
+   .world-bg.billphoto phía trên) — đổi sang crop nhỏ của school-bg.jpg
+   khi ảnh về, theo đúng cách forest-tile/farm-tile đã làm. */
+.gametile.bill-tile{
+  position:relative; overflow:hidden; border:1px solid var(--glass-border);
+  background:linear-gradient(160deg, #FDF3DC 0%, #CDEAFB 60%, #BEE7B0 100%);
+}
+.gametile.bill-tile::before{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(50,38,15,0) 45%, rgba(40,28,10,.45) 100%);
+}
+.gametile.bill-tile .name{ position:relative; z-index:1; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.55); }
+.billtile-face{
+  position:relative; z-index:1; display:block; width:78px; height:78px;
+  animation:tileSway 2.6s ease-in-out infinite;
+}
+.billtile-face img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 4px 3px rgba(20,40,25,.3)); }
+.billtile-fallback{ display:flex; align-items:center; justify-content:center; width:100%; height:100%; font-size:52px; }
+
+@media (prefers-reduced-motion: reduce){
+  .billtile-face,.billflyicon{ animation:none !important; }
+  .billheld{ transition:none !important; }
+}

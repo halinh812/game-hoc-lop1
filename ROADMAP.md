@@ -1037,6 +1037,62 @@ nằm ở tầng phát âm thanh trình duyệt, không phải game logic.
   trình duyệt khác trên cùng máy để so sánh trước khi cân nhắc giọng trả
   phí.
 
+## Vòng 19 — Đổi tên 2 game sang tiếng Anh + Game #3 "Help Bill!"
+
+**Đổi tên hiển thị**: "Khu rừng kỳ bí" → **Mystic Jungle**, "Nông trại
+của bé" → **My Little Farm** (chỉ đổi `title` trong `GAMES` ở `app.js`
+— slug thư mục `games/khu-rung-ky-bi/`/`games/nong-trai-cua-be/` giữ
+nguyên, không liên quan tới tên hiển thị).
+
+**Game #3 "Help Bill!"** (`games/bill/`) — cơ chế mới, khác 2 game
+trước ở 2 điểm:
+
+- Câu hỏi là **cả câu** ("I want a book") thay vì 1 từ đơn — không cần
+  sửa engine, vì schema content pack đã có sẵn field
+  `prompt_audio_text` tách biệt với `answer.text_en` (dùng để lưu tiến
+  độ/hiển thị) dành riêng cho việc này.
+- Giao diện: nhân vật Bill đứng cố định (không lắc lư rải rác như con
+  vật), 4 món đồ xếp thành 1 hàng ngay ngắn gần đáy màn hình. Bấm đúng:
+  đồ "bay" từ ô của nó về cạnh Bill (tính toạ độ bằng
+  `getBoundingClientRect()`, animate qua `--dx/--dy` — cùng kỹ thuật với
+  hạt "ăn mừng" `.tileburst` đã có, chỉ khác là bay tới 1 điểm đích cụ
+  thể thay vì bay toé ra rồi tan biến tại chỗ) rồi đứng yên cạnh Bill,
+  Bill đổi ảnh sang vui. Bấm sai: ô đúng sáng lên, Bill đổi ảnh sang
+  buồn.
+- Vẫn tái dùng gần như nguyên vẹn phần dùng chung ở
+  `engine/catch-game.css` (`.starsrow`/`.soundbtn`/`.freetile`/màn kết
+  quả) — chỉ viết CSS/JS riêng cho phần mascot + hiệu ứng bay + xếp 4 ô
+  thành 1 hàng thay vì rải theo góc phần tư (`.billstage .freetile` ghi
+  đè kích thước, `billPositionTile()` tính vị trí theo cột thay vì góc).
+- **Lỗi gặp phải lúc build**: `.freeplay` (định nghĩa ở
+  `engine/catch-game.css`) dựa vào `flex:1` của chính nó để lấy chiều
+  cao — chỉ có tác dụng khi CHA TRỰC TIẾP là 1 flex container. Ở
+  forest.js/farm.js, `.freeplay` là con trực tiếp của `.content` (flex
+  column) nên đúng. Ở bill.js, `.freeplay` lại là CHÁU của `.content`
+  (qua `.billstage` — chỉ `position:relative`, không phải flex), nên
+  `flex:1` vô tác dụng, chiều cao co gần về 0 → hàng đồ vật bị đẩy lên
+  sát mép trên đè vào topbar thay vì nằm gần đáy. Phát hiện bằng
+  Playwright (chụp ảnh thấy rõ 4 ô đồ vật đè lên nút back), sửa bằng
+  cách ghi đè `.billstage .freeplay{ position:absolute; inset:0; }` để
+  nó luôn phủ đúng kín `.billstage`, không phụ thuộc flex context của
+  cha — bài học cho game sau nếu lại lồng thêm 1 cấp wrapper mới.
+- **Vốn từ mới**: `content/packs/objects-v1.json` (category `object`,
+  subcategory `school` — 10 đồ dùng: book/pencil/ruler/bag/pen/eraser/
+  crayon/notebook/ball/hat, có cả ví dụ "a"/"an"). Ảnh AI (nhân vật Bill
+  vui/buồn + 10 đồ vật + ảnh nền sân trường) CHƯA có lúc build — mỗi từ
+  đều có sẵn `answer.emoji` làm dự phòng nên game chạy được đầy đủ ngay
+  hôm nay, không cần chờ ảnh; `<img>` các nơi đều có bắt sự kiện `error`
+  (nghe ở pha capture trên `window`, vì `error` trên `<img>` không nổi
+  bọt) để tự rơi về emoji nếu ảnh chưa tồn tại. Prompt tạo ảnh + quy
+  trình gửi ảnh mới (qua Git thay vì dán vào chat, đỡ tốn token — áp
+  dụng từ nay cho mọi game sau) nằm ở Bước 11-14 trong
+  `ANIMAL_ART_PIPELINE.md`.
+- Kiểm thử bằng Playwright: chơi hết 1 ván (bấm đúng lẫn sai, xác nhận
+  đúng class `correct`/`wrong`, hiệu ứng bay + icon đứng cạnh Bill sau
+  khi bay, đổi mood đúng lúc), chơi tới màn thắng cuộc (10 sao), xem
+  Trang chủ (ô "Help Bill!" hiện đúng, fallback emoji khi chưa có ảnh),
+  xem Trang phụ huynh không lỗi với category mới. 25 unit test vẫn pass.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
