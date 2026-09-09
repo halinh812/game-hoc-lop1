@@ -1,5 +1,6 @@
 // Game "How Many?" — luyện kỹ năng "Nhìn" (skill=see, KHÔNG phải "Nghe"
-// như 3 game trước). Bé tự NHÌN và ĐẾM số lượng đồ vật hiện trên màn,
+// như 3 game trước). Bé NHÌN 1 ảnh con số to hiện giữa màn (KHÔNG phải
+// đếm hình đồ vật lặp lại như bản đầu — xem Vòng 30 trong ROADMAP.md),
 // sau đó bấm THỬ từng "nút hoa" để NGHE câu số lượng của nút đó (bấm hoa
 // KHÔNG chốt đáp án ngay — được đổi ý, bấm hoa khác để nghe lại câu
 // khác), rồi bấm vào nút "bảng tính" (bên phải) để XÁC NHẬN đúng hoa vừa
@@ -10,13 +11,12 @@
 //
 // Từ vựng được CHẤM ĐIỂM (skill=see) là SỐ ĐẾM (content/packs/
 // numbers-v1.json, id "one".."ten") — đồ vật (content/packs/objects-v1.json)
-// chỉ đóng vai trò ảnh minh hoạ để đếm, đổi ngẫu nhiên mỗi câu, KHÔNG
-// được chấm điểm riêng.
+// chỉ góp danh từ cho câu nói của 4 nút hoa (vd "three rulers"), đổi
+// ngẫu nhiên mỗi câu, KHÔNG hiện ảnh và KHÔNG được chấm điểm riêng.
 //
 // Ảnh riêng của game này (ảnh nền lớp học, cú 3 trạng thái, 4 nút hoa,
-// nút bảng tính) CHƯA có lúc viết file này — xem prompt ở Bước 16 trong
-// PROMPT.md. Mọi <img> đều có fallback emoji nếu ảnh chưa tồn tại, nên
-// game chạy được đầy đủ ngay hôm nay.
+// nút bảng tính, 10 ảnh con số) đã có đủ — xem Bước 16/17 trong
+// PROMPT.md. Mọi <img> vẫn giữ fallback emoji/số phòng khi ảnh lỗi.
 //
 // Không tự lấy state/store/WORDS từ app.js (tránh import vòng) — xem giải
 // thích chi tiết hơn ở đầu games/khu-rung-ky-bi/forest.js.
@@ -84,7 +84,7 @@ export function createHowManyGame(ctx) {
     });
     if (!pool.length) return null;
     var w = pool[Math.floor(Math.random() * pool.length)];
-    return { id: w.id, image: w.image, emoji: w.emoji, singular: w.en, plural: PLURALS[w.id] };
+    return { singular: w.en, plural: PLURALS[w.id] };
   }
 
   function buildRoundData() {
@@ -126,16 +126,15 @@ export function createHowManyGame(ctx) {
     return row;
   }
 
-  // Cụm ảnh đồ vật lặp lại đúng số lượng cần đếm — đứng yên hoàn toàn
-  // (không lắc lư như con vật ở 3 game kia) để không gây rối mắt lúc bé
-  // đang cố đếm cho chính xác.
+  // 1 ảnh con số to hiện giữa màn — bé NHÌN mặt số thay vì đếm hình đồ
+  // vật lặp lại (đổi theo yêu cầu người dùng, xem Vòng 30 trong
+  // ROADMAP.md). Fallback là chính chữ số (vd "3") nếu ảnh chưa/không
+  // tải được.
   function countAreaHtml() {
-    var media = round.objWord.image
-      ? function () { return '<img src="' + round.objWord.image + '" alt="">'; }
-      : function () { return '<span class="counticon-emoji">' + (round.objWord.emoji || '❓') + '</span>'; };
-    var items = '';
-    for (var i = 0; i < round.targetValue; i++) items += '<span class="counticon">' + media() + '</span>';
-    return '<div class="countarea">' + items + '</div>';
+    return '<div class="countarea"><div class="numbercard">' +
+      '<img src="assets/howmany/numbers/num-' + round.targetValue + '.png" alt="" class="numberimg" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">' +
+      '<span class="numberfallback" hidden>' + round.targetValue + '</span>' +
+      '</div></div>';
   }
 
   function flowersHtml() {

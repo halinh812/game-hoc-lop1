@@ -1361,6 +1361,35 @@ không còn phần nào chạy bằng fallback emoji/gradient nữa.
   nhận, Cú đổi đúng trạng thái vui/buồn), icon ô chọn game ở Trang chủ
   hiển thị đúng crop ảnh nền thật. 25 unit test vẫn pass.
 
+## Vòng 30 — "How Many?": đổi cụm N hình đồ vật (đếm) sang 1 ảnh con số (nhìn)
+
+Theo yêu cầu người dùng, đổi hẳn cách hiển thị câu hỏi của game #4:
+trước đây hiện N hình đồ vật lặp lại (vd 3 cái bình nước) để bé tự
+đếm; giờ hiện THẲNG 1 ảnh con số to (10 ảnh con số dễ thương do người
+dùng tạo, prompt ở Bước 17 trong `PROMPT.md`) — bé nhìn mặt số, không
+cần đếm nữa. Vẫn giữ đúng skill "Nhìn" (see), chỉ đổi CÁCH hỏi.
+
+- Xử lý 10 ảnh `num-1.jpeg`..`num-10.jpeg` gửi qua
+  `assets/_raw_incoming/`: xoá nền, chuẩn hoá 900×900 (ảnh gốc đã vuông
+  1024×1024, không cần pad khung) → thư mục mới
+  `assets/howmany/numbers/`.
+- `countAreaHtml()` trong `games/how-many/howmany.js` đổi từ vòng lặp
+  render N `<span class="counticon">` sang render 1
+  `<div class="numbercard">` duy nhất, ảnh nguồn
+  `assets/howmany/numbers/num-{targetValue}.png`, fallback là chính
+  chữ số (vd "7") nếu ảnh lỗi — thay cho fallback emoji đồ vật cũ.
+- Đồ vật (`objects-v1.json`) vẫn giữ vai trò góp danh từ cho câu nói
+  của 4 nút hoa (vd "three rulers") — chỉ bỏ phần HIỂN THỊ ảnh đồ vật,
+  không bỏ đồ vật khỏi luồng chơi. Dọn `pickObjectWord()` theo đó: bỏ
+  2 trường `image`/`emoji` không còn ai dùng, chỉ giữ `singular`/`plural`.
+  Xoá luôn 2 class CSS `.counticon`/`.counticon-emoji` không còn dùng,
+  thay bằng `.numbercard`/`.numberimg`/`.numberfallback`.
+- Kiểm thử lại bằng Playwright: ảnh con số tải đúng cho nhiều lượt
+  chơi liên tiếp (num-1 .. num-10 đều load được, `naturalWidth` > 0),
+  fallback chữ số hiện đúng khi giả lập ảnh lỗi, câu nói 4 nút hoa vẫn
+  đúng cú pháp "số + danh từ" (vd "ten bags") không đổi. 25 unit test
+  vẫn pass.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
