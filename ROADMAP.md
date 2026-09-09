@@ -1222,6 +1222,55 @@ Theo yêu cầu người dùng: Bill quá nhỏ và dán sát mép trên (chưa 
   (31 câu) xác nhận 100% đọc đúng cả câu "I want ..." cho cả 20 từ,
   không còn từ đơn lẻ nào. 25 unit test vẫn pass.
 
+## Vòng 24 — Game #4 "How Many?" (game đầu tiên luyện kỹ năng "Nhìn")
+
+Game đầu tiên KHÔNG thuộc kỹ năng "Nghe" — chuyển sang "Nhìn" (`see`).
+Khác hẳn cơ chế 3 game trước (nghe prompt → nhìn tìm đúng ảnh), ở đây
+đảo ngược: **nhìn/tự đếm số lượng đồ vật hiện trên màn → bấm 1 trong 4
+"núm" màu, mỗi núm khi bấm mới đọc lên 1 câu số lượng khác nhau** (vd
+"I have three pens."), bấm đúng núm khớp số lượng đang thấy thì thắng.
+Không có prompt nào đọc SẴN lúc vào câu (khác 3 game kia) — nên màn này
+cũng không có nút "Nghe lại" (không có gì để nghe lại).
+
+- **Từ vựng được chấm điểm là SỐ ĐẾM** (`content/packs/numbers-v1.json`,
+  id "one".."ten", đã có sẵn từ đầu dự án, không cần tạo mới) — đúng
+  yêu cầu "từ mới học là số đếm". Đồ vật (`content/packs/objects-v1.json`,
+  đã có sẵn từ game #3) chỉ đóng vai trò ảnh minh hoạ để đếm, đổi ngẫu
+  nhiên mỗi câu, KHÔNG được chấm điểm riêng — **0 ảnh mới cần tạo**,
+  dùng lại 100% asset đã có.
+- Chỉ chọn 17/20 đồ vật ĐẾM ĐƯỢC tự nhiên bằng tiếng Anh (có số nhiều
+  hợp lý, ảnh lặp lại nhiều lần không gây hiểu lầm) — cố tình loại
+  "scissors"/"shoes" (đã là danh từ số nhiều/ảnh vẽ sẵn 1 đôi) và
+  "chalk" (không đếm được, không có "chalks" chuẩn). Danh sách lọc này
+  chỉ nằm cục bộ trong `games/how-many/howmany.js`, không đụng gì tới
+  `objects-v1.json`.
+- Vì mỗi câu không cần giữ DOM cũ (không có ảnh động/video như con vật
+  ở 2 game trước cần tránh giật hình), toàn màn RENDER LẠI MỚI hoàn
+  toàn mỗi câu — không có hàm `advanceXRound()` vá DOM riêng như forest/
+  farm/bill, đơn giản hơn hẳn. Dữ liệu câu hiện tại giữ ở biến cục bộ
+  (closure) trong factory thay vì gắn vào `state` dùng chung, vì không
+  cần chia sẻ ra ngoài (khác `state.slots` của 3 game kia phải sống
+  xuyên suốt để vá DOM từng phần).
+- 4 núm bấm 4 màu khác nhau (đỏ cam/xanh lá/vàng/xanh dương), không chữ/
+  số trên núm (đúng quy định không hiển thị chữ trên màn chơi cho trẻ)
+  — bấm núm nào đọc đúng câu của núm đó (dù đúng hay sai), bấm sai thì
+  thêm 1 nhịp sau đó mới đọc câu đúng để tránh chồng 2 câu đè nhau.
+- Trong lúc kiểm thử phát hiện 1 hiện tượng tưởng là lỗi nhưng thật ra
+  ĐÚNG THIẾT KẾ: bấm cùng 1 núm liên tục nhiều câu thấy Trang phụ huynh
+  chỉ ghi nhận đúng 1-2 từ số — không phải lỗi hiển thị, mà là do
+  **spaced repetition đã hoạt động đúng**: từ vừa trả lời SAI được xếp
+  lịch ôn lại gần như ngay lập tức (`buildRound()` ưu tiên từ "đến hạn"
+  trước), nên hỏi đi hỏi lại đúng từ đó tới khi trả lời đúng mới chuyển
+  từ khác — xác nhận bằng cách đọc thẳng `localStorage` so với bảng
+  Trang phụ huynh, khớp nhau 100% ở mọi lúc.
+- Đã kiểm thử toàn bộ bằng Playwright: hiện đúng số lượng ảnh theo giá
+  trị số cần đếm, không có prompt tự động phát trước (mảng rỗng lúc vào
+  câu), bấm đúng/sai đều đọc đúng câu + đúng ngữ pháp số ít/số nhiều
+  ("one red scarf" / "nine rulers" / "ten rulers"), core đúng highlight
+  xanh/đỏ, chơi hết ván tới màn thắng cuộc, dữ liệu lưu đúng cột "Nhìn"
+  trong Trang phụ huynh (đối chiếu trực tiếp với `localStorage`). 25
+  unit test vẫn pass.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
