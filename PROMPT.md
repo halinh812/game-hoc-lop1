@@ -33,6 +33,7 @@ chỉ cần 1 dáng đứng/ngồi đơn giản, thoải mái.
 - [Bước 13 — 10 đồ vật ở trường cho game #3](#buoc-13)
 - [Bước 14 — Ảnh nền "sân trường" cho game #3](#buoc-14)
 - [Bước 15 — Thêm 10 đồ vật ở trường (đợt 2) cho game #3](#buoc-15)
+- [Bước 16 — Bộ ảnh cho game #4 "How Many?"](#buoc-16)
 
 <a id="buoc-1"></a>
 ## Bước 1 — Bạn tạo ảnh
@@ -915,3 +916,201 @@ Lưu file PNG theo đúng tên tiếng Anh không dấu, chữ thường:
 `red_scarf.png`, `shoes.png` — gửi qua Git theo đúng quy trình ở
 Bước 11 (thư mục `assets/_raw_incoming/`), tôi sẽ tự xoá nền + lưu vào
 `assets/objects/`.
+
+<a id="buoc-16"></a>
+## Bước 16 — Bộ ảnh cho game #4 "How Many?"
+
+Game #4 hiện chưa có ảnh riêng nào (đang chạy tạm bằng emoji + nền vẽ
+CSS mặc định). Cần 4 nhóm ảnh: (1) ảnh nền lớp học, (2) nhân vật "Cú
+thông thái" 3 trạng thái cảm xúc (dùng làm cả icon ô chọn game ở Trang
+chủ), (3) 4 nút bấm hình hoa để bé "nghe thử", (4) 1 nút xác nhận hình
+bảng tính nhỏ. Gửi ảnh qua Git theo đúng quy trình ở Bước 11 — ảnh nền
+gửi thẳng vào `assets/backgrounds/`, còn lại (cần xoá nền) gửi qua
+`assets/_raw_incoming/`.
+
+### 16.1 — Ảnh nền lớp học
+
+Giống cách làm ở Bước 7/9/14 (ảnh nền theo game) nhưng đổi bối cảnh
+sang **tấm bảng đen trong lớp học**, viền ngoài bảng có trang trí các
+số 1-10 vẽ tay dễ thương (phấn màu) — hợp với chủ đề "đếm số" của
+game. Tỉ lệ khung hình **dọc (portrait) 9:16**, ưu tiên ảnh có khoảng
+trống rõ ràng ở giữa/phía dưới khung hình (nơi các đồ vật cần đếm + nút
+bấm sẽ hiển thị đè lên trên).
+
+```
+Vibrant, cheerful flat-vector cartoon illustration of a cozy classroom
+blackboard scene, background art for a children's mobile learning game,
+in the same cute soft cel-shaded style as a chibi character illustration
+(smooth rounded shapes, no sharp or scary edges, thin clean outlines on
+major shapes, warm saturated colors, gentle gradient lighting). A large
+dark green chalkboard fills most of the frame, mounted in a warm
+wooden frame, with a thin chalk tray at the bottom holding a few
+colorful chalk sticks. Around the border of the chalkboard, cute hand-
+drawn colorful chalk doodles of the numbers 1 through 10 are scattered
+playfully (different chalk colors like white, yellow, pink, light
+blue), along with a few simple chalk doodles of stars and swirls. The
+center of the chalkboard is left mostly empty and clean (this open
+space is reserved for game objects and buttons that will be placed on
+top later, so keep it visually calm and uncluttered). Soft warm
+classroom light glows from the top corners. Bright, inviting, playful
+mood. Portrait orientation, 9:16 aspect ratio, full-bleed edge-to-edge
+illustration filling the entire frame. Absolutely no people, no
+children, no characters, no readable words or letters (only playful
+numeral doodles 1-10 and simple shapes), no logo, no watermark
+anywhere in the image.
+Avoid: photographic or realistic rendering, 3D render look, dark or
+scary mood, cluttered or busy composition, any human or animal
+character, real readable text/sentences, watermark, cropped or
+off-center composition.
+```
+
+Không cần xoá nền — giữ nguyên làm 1 ảnh nền đầy khung (JPG/PNG đều
+được). Lưu thành `assets/backgrounds/howmany-bg.jpg`.
+
+### 16.2 — Nhân vật "Cú thông thái" (3 trạng thái + icon ô chọn game)
+
+Cú đứng bên trái màn chơi, phản ứng theo đúng kết quả bé chọn — 3
+trạng thái giống hệt cơ chế đã làm cho Bill ở Bước 12 (chờ đợi/vui/
+buồn), chỉ đổi từ "bạn nhỏ" sang "chú cú". Ảnh **chờ đợi** (`owl-idle.png`)
+cũng dùng luôn làm icon thu nhỏ ở ô chọn game "How Many?" trên Trang
+chủ — không cần tạo thêm ảnh riêng cho icon.
+
+#### Khung phong cách (dán trước, dùng chung cho cả 3 trạng thái)
+
+```
+Cute chibi-style baby owl character illustration for a children's
+mobile learning game, flat vector cartoon art style with soft
+cel-shading and gentle gradient highlights, oversized round head with a
+much smaller compact plump round body (chibi/baby proportions),
+extremely large glossy round eyes with a bright white catchlight
+sparkle, small rounded beak, small round wing-tufts instead of arms,
+tiny feet, wearing a small round pair of scholarly glasses and a
+miniature graduation cap or mortarboard tilted slightly to one side (to
+look "wise/studious"), soft warm brown and cream feather coloring with
+a lighter cream chest, smooth rounded shapes with no sharp edges, thin
+clean dark outline around the whole character, saturated warm and
+cheerful color palette, simple relaxed standing pose facing slightly to
+the side, centered on a plain solid white (#FFFFFF) background, no
+ground shadow, no scenery, no other characters, no text, no watermark,
+no logo, square 1:1 composition, character fills about 75-85% of the
+frame.
+Avoid: realistic or photographic proportions, photographic texture,
+scary or fierce owl look, background scenery, multiple characters in
+frame, cropped body parts, text or watermark.
+```
+
+#### Prompt riêng: Cú chờ đợi (ảnh mặc định — cũng dùng làm icon Trang chủ)
+
+```
+The owl standing calmly in a relaxed neutral pose, both wing-tufts
+resting at its sides, head tilted slightly to one side as if curiously
+listening, a soft closed-beak content expression, calm patient and
+attentive look — like a teacher waiting for an answer.
+```
+
+Lưu thành `owl-idle.png`.
+
+#### Prompt riêng: Cú vui (bé trả lời đúng)
+
+```
+The owl standing with both wing-tufts raised slightly up and open, big
+bright sparkling eyes, the graduation cap tilted a touch more from
+excitement, a cheerful open-beak happy expression, rosy cheek blush
+marks, as if proudly cheering.
+```
+
+Lưu thành `owl-happy.png`.
+
+#### Prompt riêng: Cú buồn (bé trả lời sai)
+
+```
+The owl standing with wing-tufts drooping slightly and held together in
+front, big sparkling eyes now looking slightly downcast with a small
+furrowed brow, the glasses slipped a touch down the beak, a gentle
+disappointed but still cute and sympathetic (not scary) expression.
+```
+
+Lưu thành `owl-sad.png`.
+
+Lưu cả 3 ảnh vào `assets/_raw_incoming/` với đúng 3 tên trên, gửi qua
+Git — tôi sẽ xoá nền + tối ưu + lưu vào `assets/characters/`.
+
+### 16.3 — 4 nút bấm hình hoa ("nghe thử")
+
+4 nút bấm để bé bấm nghe từng câu số lượng khác nhau — thay cho 4 khối
+vuông màu hiện tại, đổi sang **hình 1 bông hoa** (không phải khung
+vuông/tròn chứa hình hoa — chính bản thân bông hoa LÀ cái nút, nền
+trong suốt để hiện đúng hình dạng hoa khi ghép vào game). Mỗi nút 1
+loại hoa khác nhau để bé dễ phân biệt: hướng dương, cúc, hồng, tulip.
+
+#### Khung phong cách (dán trước, dùng chung cho cả 4 loại hoa)
+
+```
+Cute simplified flat-vector illustration of a single cheerful cartoon
+flower, designed as a tappable button icon for a children's game, soft
+cel-shading with gentle gradient highlights, smooth rounded friendly
+petal shapes with no sharp points, thin clean dark outline, bright
+saturated cheerful colors, a short simple stem with 1-2 small rounded
+leaves at the base, viewed straight-on/front-facing like a face-on
+flower icon, centered on a plain solid white (#FFFFFF) background, no
+shadow, no scenery, no other flowers, no text, no watermark, no logo,
+square 1:1 composition, flower fills about 80-88% of the frame.
+Avoid: realistic or photographic textures, 3D render look, side view or
+angled view, clutter or multiple flowers, added face/eyes on the
+flower, background scenery, text or watermark, cropped composition.
+```
+
+#### Prompt riêng cho từng loại hoa
+
+```
+Hoa hướng dương (Sunflower):
+A cheerful sunflower with a plump round dark brown center disc and a
+ring of bold rounded golden-yellow petals radiating evenly outward.
+
+Hoa cúc (Daisy):
+A cheerful daisy with a small round bright yellow center disc and a
+ring of slim rounded pure white petals radiating evenly outward.
+
+Hoa hồng (Rose):
+A cheerful stylized rose viewed from the front, rounded overlapping
+swirl of soft coral-pink petals forming a simple rosette shape (no
+sharp thorny stem details, keep it soft and rounded).
+
+Hoa tulip (Tulip):
+A cheerful tulip viewed from the front, a simple rounded cup-shaped
+bloom of 3-4 overlapping soft purple-violet petals with smooth rounded
+tips.
+```
+
+Lưu 4 file: `sunflower.png`, `daisy.png`, `rose.png`, `tulip.png` —
+gửi qua Git (`assets/_raw_incoming/`), tôi sẽ xoá nền + lưu vào
+`assets/howmany/` (thư mục ảnh riêng cho các nút/UI của game này, khác
+`assets/objects/` vốn dành cho từ vựng).
+
+### 16.4 — Nút xác nhận hình bảng tính nhỏ
+
+Sau khi bấm hoa nghe thử, bé bấm nút này để XÁC NHẬN lựa chọn — hình 1
+bảng tính/máy tính nhỏ màu trắng, có ký hiệu 4 phép toán (+ − × ÷)
+trang trí trên mặt (chỉ để trang trí cho đẹp/gợi liên tưởng "tính
+toán", không cần đúng chức năng máy tính thật).
+
+```
+Cute simplified flat-vector illustration of a small white calculator/
+tablet device, designed as a tappable button icon for a children's
+game, soft cel-shading with gentle gradient highlights, smooth rounded
+rectangular body with softly rounded corners, a small light blue-grey
+rounded rectangle screen area near the top, below it four large
+soft rounded colorful buttons arranged in a small row or grid showing
+simple plus, minus, multiply, and divide symbols (+ − × ÷), one
+symbol per button in a different cheerful color, thin clean dark
+outline, bright cheerful color palette, viewed straight-on/front-
+facing, centered on a plain solid white (#FFFFFF) background, no
+shadow, no scenery, no other objects, no extra text, no watermark, no
+logo, square 1:1 composition, device fills about 78-85% of the frame.
+Avoid: realistic or photographic textures, 3D render look, side/angled
+view, clutter, extra readable text beyond the 4 math symbols,
+background scenery, text or watermark, cropped composition.
+```
+
+Lưu thành `calculator.png`, gửi qua Git (`assets/_raw_incoming/`), tôi
+sẽ xoá nền + lưu vào `assets/howmany/`.

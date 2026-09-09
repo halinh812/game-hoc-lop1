@@ -1,20 +1,22 @@
 // Game "How Many?" — luyện kỹ năng "Nhìn" (skill=see, KHÔNG phải "Nghe"
-// như 3 game trước). Khác hẳn về luồng: không có câu nào được đọc SẴN lúc
-// vào câu hỏi — bé phải tự NHÌN và ĐẾM số lượng đồ vật hiện trên màn hình,
-// rồi bấm vào 1 trong 4 "núm" màu — mỗi núm khi bấm mới đọc lên 1 câu số
-// lượng khác nhau (vd "I have three pens."), bấm đúng núm khớp với số
-// lượng đang nhìn thấy thì thắng. Vì không có prompt nào đọc trước, màn
-// này KHÔNG có nút "Nghe lại" như 3 game kia (không có gì để nghe lại).
+// như 3 game trước). Bé tự NHÌN và ĐẾM số lượng đồ vật hiện trên màn,
+// sau đó bấm THỬ từng "nút hoa" để NGHE câu số lượng của nút đó (bấm hoa
+// KHÔNG chốt đáp án ngay — được đổi ý, bấm hoa khác để nghe lại câu
+// khác), rồi bấm vào nút "bảng tính" (bên phải) để XÁC NHẬN đúng hoa vừa
+// chọn là câu trả lời cuối cùng. Nhân vật Cú thông thái đứng bên trái,
+// đổi cảm xúc chờ đợi/vui/buồn theo đúng lúc XÁC NHẬN (không đổi lúc chỉ
+// đang nghe thử). Không có prompt nào đọc SẴN lúc vào câu (khác 3 game
+// kia) nên màn này cũng không có nút "Nghe lại" riêng.
 //
 // Từ vựng được CHẤM ĐIỂM (skill=see) là SỐ ĐẾM (content/packs/
-// numbers-v1.json, id "one".."ten") — đúng như yêu cầu "từ mới học là số
-// đếm". Đồ vật (content/packs/objects-v1.json) chỉ đóng vai trò ảnh minh
-// hoạ để đếm, đổi ngẫu nhiên mỗi câu, KHÔNG được chấm điểm riêng.
+// numbers-v1.json, id "one".."ten") — đồ vật (content/packs/objects-v1.json)
+// chỉ đóng vai trò ảnh minh hoạ để đếm, đổi ngẫu nhiên mỗi câu, KHÔNG
+// được chấm điểm riêng.
 //
-// Vì mỗi câu không cần giữ lại DOM cũ (không có video/ảnh động cần tránh
-// giật hình như forest.js/farm.js), toàn màn được RENDER LẠI MỚI hoàn
-// toàn mỗi câu (không có hàm advanceXRound() vá DOM riêng như 3 game kia)
-// — đơn giản hơn hẳn vì không cần giữ trạng thái slot cũ.
+// Ảnh riêng của game này (ảnh nền lớp học, cú 3 trạng thái, 4 nút hoa,
+// nút bảng tính) CHƯA có lúc viết file này — xem prompt ở Bước 16 trong
+// PROMPT.md. Mọi <img> đều có fallback emoji nếu ảnh chưa tồn tại, nên
+// game chạy được đầy đủ ngay hôm nay.
 //
 // Không tự lấy state/store/WORDS từ app.js (tránh import vòng) — xem giải
 // thích chi tiết hơn ở đầu games/khu-rung-ky-bi/forest.js.
@@ -46,9 +48,16 @@ var PLURALS = {
   lunch_box: 'lunch boxes', umbrella: 'umbrellas', red_scarf: 'red scarves'
 };
 
-// 4 màu núm bấm khác nhau, rõ ràng, không trùng bất kỳ màu trạng thái nào
-// khác đang dùng trong app (đúng/sai/vàng sao...) để không gây hiểu lầm.
-var KNOB_COLORS = ['#E4633F', '#2F8F5B', '#F4A93B', '#4F8FE0'];
+// 4 "nút hoa" cố định theo vị trí (không đổi qua từng câu, để bé quen vị
+// trí từng loại hoa) — chỉ GIÁ TRỊ/câu gán vào từng vị trí mới xáo trộn
+// mỗi câu (xem buildRoundData()). Ảnh hoa CHƯA có (xem Bước 16 trong
+// PROMPT.md) nên có fallback đúng emoji hoa tương ứng.
+var FLOWERS = [
+  { id: 'sunflower', emoji: '🌻' },
+  { id: 'daisy', emoji: '🌼' },
+  { id: 'rose', emoji: '🌹' },
+  { id: 'tulip', emoji: '🌷' }
+];
 
 export function createHowManyGame(ctx) {
   var root = document.getElementById('root');
@@ -92,16 +101,17 @@ export function createHowManyGame(ctx) {
     }
     var values = shuffle([targetValue].concat(distractors));
     var options = values.map(function (v, i) {
-      return { value: v, phrase: phraseFor(v, objWord), color: KNOB_COLORS[i % KNOB_COLORS.length] };
+      return { value: v, phrase: phraseFor(v, objWord), flower: FLOWERS[i % FLOWERS.length] };
     });
     var correctIdx = options.reduce(function (found, o, i) { return o.value === targetValue ? i : found; }, -1);
 
-    return { targetWord: targetWord, targetValue: targetValue, objWord: objWord, options: options, correctIdx: correctIdx };
+    return { targetWord: targetWord, targetValue: targetValue, objWord: objWord, options: options, correctIdx: correctIdx, selectedIdx: null };
   }
 
   function startHowManyGame() {
     state.correct = 0;
     state.answered = false;
+    state.howManyMood = 'idle';
     state.screen = 'howmany';
     ctx.render();
   }
@@ -128,18 +138,39 @@ export function createHowManyGame(ctx) {
     return '<div class="countarea">' + items + '</div>';
   }
 
-  function knobsHtml() {
+  function flowersHtml() {
     return round.options.map(function (o, i) {
-      return '<button type="button" class="knobbtn" data-idx="' + i + '" style="--knob:' + o.color + '"></button>';
+      var f = o.flower;
+      var inner = '<img src="assets/howmany/' + f.id + '.png" alt="" class="flowerimg" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">' +
+        '<span class="flowerfallback">' + f.emoji + '</span>';
+      return '<button type="button" class="flowerbtn" data-idx="' + i + '">' + inner + '</button>';
     }).join('');
+  }
+
+  function owlMoodImg(mood) {
+    var file = mood === 'happy' ? 'owl-happy.png' : mood === 'sad' ? 'owl-sad.png' : 'owl-idle.png';
+    var fallback = mood === 'happy' ? '🦉' : mood === 'sad' ? '🦉' : '🦉';
+    return '<img src="assets/characters/' + file + '" alt="" id="owlImg" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">' +
+      '<span class="owlfallback" id="owlFallback" hidden>' + fallback + '</span>';
+  }
+
+  function bottomBarHtml() {
+    return '<div class="bottombar">' +
+      '<div class="owlwrap" id="owlWrap">' + owlMoodImg(state.howManyMood || 'idle') + '</div>' +
+      '<button type="button" class="confirmbtn" id="confirmBtn" disabled>' +
+      '<img src="assets/howmany/calculator.png" alt="" class="confirmimg" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">' +
+      '<span class="confirmfallback">🧮</span>' +
+      '</button>' +
+      '</div>';
   }
 
   function renderHowMany() {
     round = buildRoundData();
     state.cardShownAt = Date.now();
     state.answered = false;
+    state.howManyMood = 'idle';
 
-    root.innerHTML = worldBg() +
+    root.innerHTML = worldBg('howmanyphoto') +
       '<div class="content">' +
       '<div class="topbar">' +
       '<button class="iconbtn" id="homeBtn" aria-label="Về trang chủ">' + CLOSE_SVG + '</button>' +
@@ -147,17 +178,34 @@ export function createHowManyGame(ctx) {
       '<span style="width:38px;"></span>' +
       '</div>' +
       countAreaHtml() +
-      '<div class="knobsgrid" id="knobsGrid">' + knobsHtml() + '</div>' +
+      '<div class="flowersrow" id="flowersRow">' + flowersHtml() + '</div>' +
+      bottomBarHtml() +
       '</div>';
 
     document.getElementById('homeBtn').addEventListener('click', function () {
       state.screen = 'home'; ctx.render();
     });
-    document.getElementById('knobsGrid').addEventListener('click', function (e) {
-      var btn = e.target.closest('.knobbtn');
+    document.getElementById('flowersRow').addEventListener('click', function (e) {
+      var btn = e.target.closest('.flowerbtn');
       if (!btn) return;
-      handleHowManyAnswer(parseInt(btn.getAttribute('data-idx'), 10));
+      handleFlowerPress(parseInt(btn.getAttribute('data-idx'), 10));
     });
+    document.getElementById('confirmBtn').addEventListener('click', handleConfirmPress);
+  }
+
+  // Bấm 1 nút hoa: NGHE THỬ câu của hoa đó, đánh dấu đang chọn hoa này
+  // (viền nổi bật) — CHƯA chốt đáp án, bé có thể bấm hoa khác để nghe lại
+  // câu khác bao nhiêu lần tuỳ ý trước khi bấm nút "bảng tính" xác nhận.
+  function handleFlowerPress(idx) {
+    if (state.answered) return;
+    round.selectedIdx = idx;
+    ctx.speak(round.options[idx].phrase);
+
+    var flowerEls = document.querySelectorAll('#flowersRow .flowerbtn');
+    Array.prototype.forEach.call(flowerEls, function (el, i) {
+      el.classList.toggle('selected', i === idx);
+    });
+    document.getElementById('confirmBtn').disabled = false;
   }
 
   // Chuông "ting" khi bấm đúng — y hệt 3 game kia.
@@ -197,24 +245,33 @@ export function createHowManyGame(ctx) {
     } catch (e) { /* Web Audio không khả dụng — bỏ qua, không phá UI */ }
   }
 
-  function handleHowManyAnswer(idx) {
+  function setOwlMood(mood) {
+    state.howManyMood = mood;
+    var wrap = document.getElementById('owlWrap');
+    if (!wrap) return;
+    wrap.innerHTML = owlMoodImg(mood);
+  }
+
+  // Bấm nút "bảng tính" — XÁC NHẬN hoa đang chọn (round.selectedIdx) là
+  // đáp án cuối cùng. Chưa chọn hoa nào thì bấm cũng không có tác dụng gì
+  // (nút đã bị disable ở CSS/thuộc tính "disabled" cho tới khi chọn hoa).
+  function handleConfirmPress() {
     if (state.answered) return;
+    if (round.selectedIdx === null) return;
     state.answered = true;
 
     var store = ctx.getStore();
-    var knobs = document.querySelectorAll('#knobsGrid .knobbtn');
+    var idx = round.selectedIdx;
+    var flowerEls = document.querySelectorAll('#flowersRow .flowerbtn');
     var isCorrect = idx === round.correctIdx;
     var responseTimeMs = Date.now() - state.cardShownAt;
-
-    // Bấm núm nào, đọc ĐÚNG câu của núm đó — đây là cơ chế chính (bé phải
-    // tự đếm bằng mắt rồi mới bấm thử, không có gợi ý âm thanh trước).
-    ctx.speak(round.options[idx].phrase);
 
     if (isCorrect) {
       applyAnswer(store.words, round.targetWord.id, 'see', classifyAnswer(true, responseTimeMs));
       saveProgress(store);
       state.correct++;
-      knobs[idx].classList.add('correct');
+      flowerEls[idx].classList.add('correct');
+      setOwlMood('happy');
       playDing();
 
       var isDone = state.correct >= HOWMANY_WIN_TARGET;
@@ -225,12 +282,13 @@ export function createHowManyGame(ctx) {
     } else {
       applyAnswer(store.words, round.targetWord.id, 'see', 'wrong');
       saveProgress(store);
-      knobs[idx].classList.add('wrong');
-      knobs[round.correctIdx].classList.add('correct');
-      // Đợi câu vừa bấm đọc xong rồi mới đọc tiếp câu đúng, tránh chồng
-      // 2 câu lên nhau (đè mất câu trước — đúng lỗi đã sửa ở
+      flowerEls[idx].classList.add('wrong');
+      flowerEls[round.correctIdx].classList.add('correct');
+      setOwlMood('sad');
+      // Đợi câu vừa nghe (lúc bấm hoa) đọc xong rồi mới đọc tiếp câu đúng,
+      // tránh chồng 2 câu lên nhau (đúng lỗi đã sửa ở
       // engine/audio-provider.js, ở đây chủ động giãn cách thêm cho chắc).
-      setTimeout(function () { ctx.speak(round.options[round.correctIdx].phrase); }, 1500);
+      setTimeout(function () { ctx.speak(round.options[round.correctIdx].phrase); }, 1200);
       setTimeout(function () { renderHowMany(); }, 3600);
     }
   }
@@ -269,12 +327,16 @@ export function createHowManyGame(ctx) {
     });
   }
 
-  // Markup ô icon của game này trong lưới chọn trò chơi ở Trang chủ — chỉ
-  // dùng emoji (không có ảnh nền riêng như 3 game kia, vì game này không
-  // có bối cảnh/nhân vật cụ thể — thuần "đếm đồ vật trên khay").
+  // Markup ô icon của game này trong lưới chọn trò chơi ở Trang chủ —
+  // dùng ảnh Cú (trạng thái chờ đợi, xem Bước 16 trong PROMPT.md), có
+  // fallback emoji nếu ảnh chưa tồn tại.
   function gameTileHtml(title) {
     return '<button type="button" class="gametile howmany-tile" data-id="howmany">' +
-      '<span class="emoji">🔢</span><span class="name">' + title + '</span></button>';
+      '<span class="howmanytile-face" id="howmanyTileFace">' +
+      '<img src="assets/characters/owl-idle.png" alt="" id="howmanyTileImg" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">' +
+      '<span class="howmanytile-fallback" id="howmanyTileFallback" hidden>🦉</span>' +
+      '</span>' +
+      '<span class="name">' + title + '</span></button>';
   }
 
   return {
