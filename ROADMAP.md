@@ -1390,6 +1390,28 @@ cần đếm nữa. Vẫn giữ đúng skill "Nhìn" (see), chỉ đổi CÁCH h
   đúng cú pháp "số + danh từ" (vd "ten bags") không đổi. 25 unit test
   vẫn pass.
 
+## Vòng 31 — "How Many?": thêm lại ảnh đồ vật cạnh số + đẩy cụm này/Cú lên cao
+
+Theo phản hồi người dùng sau Vòng 30 (bỏ hẳn ảnh đồ vật đi hơi quá tay):
+
+- Thêm lại ảnh đồ vật — nhưng CHỈ 1 tấm (không lặp lại N lần như bản
+  gốc trước Vòng 30) — đặt CẠNH ảnh con số, không phải thay thế nhau.
+  `pickObjectWord()` lấy lại 2 trường `image`/`emoji` đã bỏ ở Vòng 30.
+  `countAreaHtml()` giờ render `.numbercard` + `.objectcard` cạnh nhau
+  trong cùng `.countarea` (flex hàng ngang, có gap).
+- Cú thông thái (to x3 từ Vòng 29) vẫn bị hàng hoa che khá nhiều dù đã
+  đứng sau (z-index âm) — hàng hoa "che mất" cảm giác thị giác dù vẫn
+  bấm được. Xử lý bằng cách đẩy CẢ 2 cụm lên cao hơn: `.countarea` đổi
+  padding trên/dưới bất đối xứng (`1vh 6vw 7vh` — dưới nhiều hơn hẳn
+  trên) để cụm số+đồ vật dồn lên cao hơn trong vùng `flex:1`, đồng thời
+  `.owlwrap` tăng `bottom` từ 104px lên 172px để Cú cũng nhích lên theo.
+  Kết quả: vùng chồng lấn giữa Cú và hàng hoa giảm hẳn (đo bằng
+  Playwright: từ ~129px chồng lấn xuống còn ~92px, và phần chồng lấn
+  còn lại chủ yếu là phần thân dưới/chân Cú chứ không còn che khuôn mặt).
+- Kiểm thử lại bằng Playwright: cả 2 ảnh (số + đồ vật) tải đúng, luồng
+  chọn hoa → xác nhận vẫn đúng (viền vàng/xanh/đỏ, Cú đổi đúng trạng
+  thái vui/buồn ở vị trí mới). 25 unit test vẫn pass.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
