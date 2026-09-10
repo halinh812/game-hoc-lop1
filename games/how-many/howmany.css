@@ -116,8 +116,14 @@
   background:linear-gradient(180deg, rgba(50,38,15,0) 45%, rgba(40,28,10,.45) 100%);
 }
 .gametile.howmany-tile .name{ position:relative; z-index:1; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.55); }
+/* 112px (to hơn hẳn 78px của bill-tile/forest-tile/farm-tile) — bù cho
+   việc ảnh owl-idle.png tự nó có khoảng đệm trong suốt quanh hình nhiều
+   hơn hẳn ảnh tiger/dog/Bill (hình Cú chỉ chiếm ~37%x55% khung ảnh gốc,
+   trong khi tiger/dog/Bill chiếm 65-79%), nên cùng 1 kích thước khung sẽ
+   ra hình Cú nhìn nhỏ hơn hẳn — phải nới khung to hơn mới nhìn "ngang
+   cỡ" các icon khác trên Trang chủ. */
 .howmanytile-face{
-  position:relative; z-index:1; display:block; width:78px; height:78px;
+  position:relative; z-index:1; display:block; width:112px; height:112px;
   animation:tileSway 2.6s ease-in-out infinite;
 }
 .howmanytile-face img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 4px 3px rgba(20,40,25,.3)); }

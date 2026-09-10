@@ -1412,6 +1412,20 @@ Theo phản hồi người dùng sau Vòng 30 (bỏ hẳn ảnh đồ vật đi 
   chọn hoa → xác nhận vẫn đúng (viền vàng/xanh/đỏ, Cú đổi đúng trạng
   thái vui/buồn ở vị trí mới). 25 unit test vẫn pass.
 
+## Vòng 32 — Icon Cú ở Trang chủ to lên ngang các icon game khác
+
+Người dùng phản hồi icon "How Many?" ở lưới chọn game nhìn nhỏ hơn hẳn
+3 icon kia (hổ/chó/Bill). Đo thử bằng script Python (bounding box theo
+kênh alpha): `owl-idle.png` chỉ chiếm ~37%×55% khung ảnh 900×900 gốc,
+trong khi `tiger.png`/`dog.png`/`bill-idle.png` chiếm 65-79% — cùng 1
+khung CSS 78px thì hình Cú thực tế nhỏ hơn hẳn vì bản thân ảnh có nhiều
+khoảng đệm trong suốt quanh hình hơn. Sửa bằng cách nới khung
+`.howmanytile-face` từ 78px lên 112px (thuần CSS, không đụng vào file
+ảnh) để bù lại, không cần hỏi ý kiến sửa ảnh theo CLAUDE.md vì không
+chỉnh sửa/ghi đè ảnh nào. Tác dụng phụ chấp nhận được: cả hàng lưới
+chứa "Help Bill!"+"How Many?" cao hơn hàng "Mystic Jungle"+"My Little
+Farm" một chút (do CSS Grid tự giãn hàng theo ô cao nhất).
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
