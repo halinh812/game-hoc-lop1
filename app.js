@@ -11,7 +11,7 @@
 // thấy — chỉ trang phụ huynh mới có số liệu.
 
 import { loadContentPacks } from './engine/content-loader.js';
-import { loadProgress, saveProgress, setProfile, getProfile } from './engine/progress-store.js';
+import { loadProgress, saveProgress, setProfile, getProfile, CURRENT_VERSION } from './engine/progress-store.js';
 import {
   SKILLS,
   SKILL_LABELS,
@@ -380,6 +380,89 @@ function parentUpdateFilterBadge(group) {
 // listener gắn trên document thì không tự mất theo).
 var parentFilterDocClickHandler = null;
 
+// "Sao lưu / Khôi phục tiến độ" — tiến độ của bé chỉ lưu trong localStorage
+// của ĐÚNG 1 trình duyệt trên ĐÚNG 1 máy (xem engine/progress-store.js), nên
+// đổi máy/đổi trình duyệt/xoá dữ liệu trình duyệt đều làm mất hết nếu không
+// có bản sao. Tính năng này cho phụ huynh tự tải progress ra 1 file .json
+// rồi nạp lại được, không cần biết mở console hay chỉnh sửa gì kỹ thuật.
+function backupCardHtml() {
+  return '<div class="backupcard">' +
+    '<h3>Sao lưu tiến độ của bé</h3>' +
+    '<p>Tải tiến độ ra 1 file để phòng khi đổi điện thoại, xoá dữ liệu trình duyệt, hoặc muốn chuyển sang máy khác — sau đó chọn lại đúng file này để khôi phục.</p>' +
+    '<div class="backupbtns">' +
+    '<button type="button" class="backupbtn" id="exportBtn">💾 Tải file sao lưu</button>' +
+    '<button type="button" class="backupbtn ghost" id="importBtn">📂 Khôi phục từ file</button>' +
+    '</div>' +
+    '<input type="file" id="importFile" accept="application/json" hidden>' +
+    '<div id="backupMsg"></div>' +
+    '</div>';
+}
+
+function exportProgress() {
+  var profile = getProfile(store);
+  var safeName = (profile && profile.name ? profile.name : 'be')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'd')
+    .replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'be';
+  var dateStr = new Date().toISOString().slice(0, 10);
+  var filename = 'tien-do-' + safeName + '-' + dateStr + '.json';
+
+  var blob = new Blob([JSON.stringify(store, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+}
+
+function backupMsg(text, type) {
+  var el = document.getElementById('backupMsg');
+  if (!el) return;
+  el.textContent = text;
+  el.className = 'msg ' + type;
+}
+
+function handleImportFile(e) {
+  var file = e.target.files[0];
+  e.target.value = ''; // cho phép chọn lại đúng file đó lần nữa nếu cần
+  if (!file) return;
+
+  var reader = new FileReader();
+  reader.onload = function () {
+    var parsed;
+    try {
+      parsed = JSON.parse(reader.result);
+    } catch (err) {
+      backupMsg('File không đọc được — không phải file sao lưu hợp lệ.', 'err');
+      return;
+    }
+    if (!parsed || typeof parsed !== 'object' || typeof parsed.words !== 'object') {
+      backupMsg('File không đúng định dạng tiến độ.', 'err');
+      return;
+    }
+    if (parsed.version !== CURRENT_VERSION) {
+      backupMsg('File này lưu từ phiên bản cũ hơn, không khôi phục được.', 'err');
+      return;
+    }
+    var childName = (parsed.profile && parsed.profile.name) || '(chưa rõ tên)';
+    var ok = window.confirm(
+      'Khôi phục sẽ THAY THẾ toàn bộ tiến độ hiện tại trên máy này bằng dữ liệu ' +
+      'trong file (hồ sơ: ' + childName + '). Bạn chắc chắn chứ?'
+    );
+    if (!ok) return;
+
+    saveProgress(parsed);
+    backupMsg('Đã khôi phục xong! Đang tải lại trang...', 'ok');
+    setTimeout(function () { location.reload(); }, 900);
+  };
+  reader.onerror = function () {
+    backupMsg('Không đọc được file, thử lại nhé.', 'err');
+  };
+  reader.readAsText(file);
+}
+
 function renderParent() {
   if (parentFilterDocClickHandler) {
     document.removeEventListener('click', parentFilterDocClickHandler);
@@ -411,11 +494,18 @@ function renderParent() {
     '</div>' +
     (filtersHtml ? '<div class="reportfilters">' + filtersHtml + '</div>' : '') +
     '<div id="reportBody"></div>' +
+    backupCardHtml() +
     '</div>';
 
   document.getElementById('backBtn').addEventListener('click', function () {
     state.screen = 'home'; render();
   });
+
+  document.getElementById('exportBtn').addEventListener('click', exportProgress);
+  document.getElementById('importBtn').addEventListener('click', function () {
+    document.getElementById('importFile').click();
+  });
+  document.getElementById('importFile').addEventListener('change', handleImportFile);
 
   Array.prototype.forEach.call(document.querySelectorAll('.filterddBtn'), function (btn) {
     btn.addEventListener('click', function (e) {

@@ -239,6 +239,23 @@
   }
   .emptystate{ text-align:center; color:#8B968E; font-size:.86rem; padding:40px 10px; line-height:1.6; }
 
+  /* Khối "Sao lưu / Khôi phục tiến độ" cuối Trang phụ huynh — luôn hiện
+     (khác khối "Thêm/sửa từ vựng" chỉ hiện khi chạy qua server quản trị
+     local), vì đây là tính năng cần cho MỌI bản (kể cả GitHub Pages tĩnh). */
+  .backupcard{ background:#fff; border:1px solid #EAE5D5; border-radius:12px; padding:14px 16px; margin-top:20px; }
+  .backupcard h3{ font-family:'Baloo 2', sans-serif; font-size:.95rem; font-weight:800; margin:0 0 6px; }
+  .backupcard p{ font-size:.78rem; color:#6B7A70; margin:0 0 12px; line-height:1.5; }
+  .backupbtns{ display:flex; gap:10px; flex-wrap:wrap; }
+  .backupbtn{
+    flex:1; min-width:140px; appearance:none; border:none; border-radius:12px; padding:10px 14px; cursor:pointer;
+    font-size:.82rem; font-weight:700; color:#fff; background:#2f8f5b; font-family:inherit;
+  }
+  .backupbtn.ghost{ background:#EFEBDD; color:#233A2A; border:1px solid #EAE5D5; }
+  .backupcard .msg{ margin-top:10px; padding:8px 10px; border-radius:8px; font-size:.78rem; line-height:1.5; }
+  .backupcard .msg:empty{ display:none; margin:0; padding:0; }
+  .backupcard .msg.ok{ background:#E6F5EC; color:#1f6d43; }
+  .backupcard .msg.err{ background:#FBECEB; color:#B24A43; }
+
   /* Phần "Thêm/sửa từ vựng" trong Trang phụ huynh — chỉ tự hiện ra (nút +
      trong pheader) khi trang này đang được mở qua server quản trị local
      (npm start), vì lúc đó mới có API /api/* để ghi file. Trên GitHub
