@@ -37,6 +37,7 @@ chỉ cần 1 dáng đứng/ngồi đơn giản, thoải mái.
 - [Bước 17 — 10 ảnh con số 1-10 dễ thương, thay cho đếm hình lặp lại](#buoc-17)
 - [Bước 18 — Nhân vật + ảnh nền cho game #5 "Word Safari" (Đọc Chữ)](#buoc-18)
 - [Bước 19 — Nhân vật + ảnh nền cho game #6 "ABC Vui" (Bảng chữ cái)](#buoc-19)
+- [Bước 20 — Nhân vật + ảnh nền cho game #7 "Bếp Vui" (Đồ vật nhà bếp)](#buoc-20)
 
 <a id="buoc-1"></a>
 ## Bước 1 — Bạn tạo ảnh
@@ -1452,3 +1453,150 @@ Không cần xoá nền — giữ nguyên làm 1 ảnh nền đầy khung (JPG/P
 được). Gửi thẳng vào `assets/backgrounds/abc-bg.jpg` qua Git (không qua
 `_raw_incoming/`, giống cách làm ở Bước 7/9/14/18.2 — ảnh nền full-bleed
 không cần xử lý gì thêm).
+
+<a id="buoc-20"></a>
+## Bước 20 — Nhân vật + ảnh nền cho game #7 "Bếp Vui" (Đồ vật nhà bếp)
+
+Game #7 dạy 10 đồ vật nhà bếp — theo đúng ảnh bếp thật của gia đình
+người dùng gửi làm cảm hứng (tủ bếp gỗ, bếp ga, nồi, nồi cơm điện, bồn
+rửa, quạt, bàn ghế...). **Cơ chế KHÁC HẲN mọi game trước**: không phải 4
+thẻ/hình rời rạc, mà là **1 ẢNH NỀN BẾP DUY NHẤT** vẽ sẵn cả 10 đồ vật
+trong đó — mỗi câu hỏi, 4 trong 10 đồ vật đó SÁNG NHẤP NHÁY ngay trên
+chính ảnh nền để gợi ý "đáp án nằm trong 4 món này", nghe âm thanh đọc
+tên 1 món, bé bấm thẳng vào ĐÚNG VỊ TRÍ món đó trong ảnh (không phải bấm
+vào 1 ô thẻ riêng).
+
+Vì bé bấm trực tiếp lên toạ độ từng món TRONG ảnh nền, ảnh phải được vẽ
+sao cho **10 món đều tách biệt rõ ràng, không món nào chồng/che lên món
+khác**, và cần theo đúng bố cục mô tả dưới đây để sau khi có ảnh thật,
+tôi xác định đúng toạ độ bấm cho từng món (không thể đoán trước toạ độ
+chính xác khi ảnh chưa tồn tại).
+
+Chủ đề chọn: nhân vật đại diện là **mèo con đầu bếp** (đội mũ đầu bếp
+trắng) — khác hẳn 6 linh vật đã có (hổ/chó/bạn nhỏ/cú/chồn đất/gà con).
+
+### 20.1 — Nhân vật mèo đầu bếp (3 trạng thái)
+
+#### Khung phong cách (dán trước, dùng chung cho cả 3 trạng thái)
+
+```
+Cute chibi-style baby cat character illustration for a children's
+mobile learning game, flat vector cartoon art style with soft
+cel-shading and gentle gradient highlights, oversized round head with a
+much smaller compact plump body (chibi/baby proportions), extremely
+large glossy round eyes with a bright white catchlight sparkle, small
+rounded ears, soft cream-white fur with a few simple small orange
+tabby patches, wearing a tall white chef's toque hat and a small white
+chef's apron with a red neck strap, smooth rounded shapes with no sharp
+edges, thin clean dark outline around the whole character, saturated
+warm and cheerful color palette, standing pose facing slightly to the
+side, centered on a plain solid white (#FFFFFF) background, no ground
+shadow, no scenery, no other characters, no text, no watermark, no
+logo, square 1:1 composition, character fills about 75-85% of the
+frame.
+Avoid: realistic or photographic proportions, photographic texture,
+scary or fierce look, background scenery, multiple characters in
+frame, cropped body parts, text or watermark.
+```
+
+#### Prompt riêng: chờ đợi (ảnh mặc định — cũng dùng làm icon Trang chủ)
+
+```
+The cat standing calmly upright in a relaxed neutral pose, one tiny paw
+resting on its apron, chef hat sitting neatly upright, a soft
+closed-mouth content smile, calm patient and attentive expression —
+like it's waiting for the next order in the kitchen.
+```
+
+Lưu thành `chefcat-idle.png`.
+
+#### Prompt riêng: vui (bé chọn đúng)
+
+```
+The cat standing upright with both tiny front paws raised up and open
+in the air, big bright sparkling eyes, chef hat tilted a touch from
+excitement, a cheerful wide open-mouth happy expression, rosy cheek
+blush marks, as if a dish just turned out perfectly.
+```
+
+Lưu thành `chefcat-happy.png`.
+
+#### Prompt riêng: buồn (bé chọn sai)
+
+```
+The cat standing with shoulders slightly slumped forward, both tiny
+paws hanging low in front, big sparkling eyes now looking slightly
+downcast with a small furrowed brow, chef hat drooping a little to one
+side, a gentle disappointed but still cute and sympathetic (not scary)
+expression.
+```
+
+Lưu thành `chefcat-sad.png`.
+
+Lưu cả 3 ảnh vào `assets/_raw_incoming/` với đúng 3 tên trên, gửi qua
+Git theo đúng quy trình ở Bước 11 — tôi sẽ xoá nền + tối ưu + lưu vào
+`assets/characters/`.
+
+### 20.2 — Ảnh nền "nhà bếp" (10 đồ vật tách biệt rõ ràng)
+
+Tỉ lệ khung hình **dọc (portrait) 9:16**. Khác mọi ảnh nền trước — ảnh
+này KHÔNG chỉ trang trí mà là chính "bàn cờ" để bé bấm vào, nên bố cục
+phải theo đúng 3 tầng mô tả dưới đây (trên/giữa/dưới), mỗi món 1 vị trí
+riêng, cách nhau rõ ràng, không chồng lấn:
+
+```
+Vibrant, cheerful flat-vector cartoon illustration of a cozy home
+kitchen, background art for a children's mobile learning game, in the
+same cute soft cel-shaded style as a chibi character illustration
+(smooth rounded shapes, no sharp or scary edges, thin clean outlines
+on every object, warm saturated colors, gentle gradient lighting,
+bright even daytime lighting). Portrait orientation, 9:16 aspect
+ratio, full-bleed edge-to-edge illustration filling the entire frame.
+No people or animals anywhere in the image.
+
+Layout, arranged in 3 clear horizontal bands from top to bottom (every
+object below must be clearly separated from every other object with
+visible empty space between them — nothing overlapping or touching):
+
+TOP band (upper wall): a row of warm wood-toned kitchen cabinets with
+rounded handles mounted on a light-colored tiled wall, spanning the
+full width.
+
+MIDDLE band (counter height, left to right): on the left, a white rice
+cooker sitting on the counter; in the center, a gas stove with one
+round cooking pot sitting on top of it (the pot clearly a separate
+distinguishable shape on top of the stove, not merged into one blob);
+on the right, a kitchen sink with a simple faucet. Slightly in front
+of the counter, between the rice cooker and the stove, place a round
+bowl; between the stove and the sink, place a round plate — both
+sitting on the counter edge, clearly separate from the pot/rice
+cooker/sink above them.
+
+BOTTOM band (kitchen floor, foreground): on the left side, a free-
+standing pedestal electric fan; on the right side, a small round
+dining table with one simple chair next to it (table and chair as two
+separate clearly distinguishable shapes, not merged).
+
+Plain light-colored tile floor and light wall tiles in the background,
+warm and inviting mood, nothing else added beyond the objects listed
+above (no extra decorations, no extra furniture, no readable text or
+labels anywhere).
+Avoid: photographic or realistic rendering, 3D render look, dark or
+moody lighting, cluttered composition, overlapping or touching
+objects, any human or animal character, any text/letters/watermark,
+cropped or off-center composition.
+```
+
+Không cần xoá nền — giữ nguyên làm 1 ảnh nền đầy khung. Gửi thẳng vào
+`assets/backgrounds/kitchen-bg.jpg` qua Git (không qua `_raw_incoming/`,
+giống cách làm ở Bước 7/9/14/18.2/19.2 — ảnh nền full-bleed không cần xử
+lý gì thêm).
+
+**Lưu ý quan trọng** (khác mọi ảnh nền trước): sau khi có ảnh thật, tôi
+cần XEM ảnh để tự xác định đúng toạ độ (%) của từng món trong 10 món rồi
+mới viết được code (mỗi món là 1 vùng bấm được, gắn đúng vị trí nó nằm
+trong ảnh) — bước này không thể làm trước khi có ảnh, khác các game
+trước (đã biết trước toạ độ vì dùng thẻ/icon rời, không phải bấm thẳng
+lên ảnh nền). Nếu ảnh AI ra không đúng bố cục 3 tầng như mô tả (vd 2 món
+bị chồng lên nhau), cứ gửi qua tôi xem thử — có thể vẫn xác định được
+toạ độ, hoặc sẽ nhờ bạn tạo lại prompt với chỉnh sửa cụ thể hơn.
