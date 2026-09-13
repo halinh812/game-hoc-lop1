@@ -106,9 +106,16 @@ export function createBillGame(ctx) {
     return row;
   }
 
+  // Chỉ bắt đầu tính "thời gian trả lời" của bé từ lúc câu đọc XONG (qua
+  // onEnd) — trước đó cardShownAt đã được đặt tạm ở renderBill/
+  // advanceBillRound làm mốc dự phòng (đề phòng trình duyệt không hỗ trợ
+  // đọc hoặc onEnd không gọi được vì lý do nào đó), nhưng mốc đúng luôn là
+  // đây. Nghe hết 1 câu vốn đã mất 1-2 giây — tính cả vào thời gian trả lời
+  // của bé sẽ oan cho bé (lỗi thật đã gặp ở "How Many?", xem Vòng 34 trong
+  // ROADMAP.md).
   function speakBillTarget() {
     var w = state.slots[state.targetIdx];
-    ctx.speak(w.promptAudioText || ('I want a ' + w.en + '.'));
+    ctx.speak(w.promptAudioText || ('I want a ' + w.en + '.'), function () { state.cardShownAt = Date.now(); });
   }
 
   // Nhân vật Bill — 3 trạng thái cảm xúc (chờ đợi/vui/buồn, xem Bước 12
