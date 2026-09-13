@@ -26,6 +26,7 @@ import { createForestGame } from './games/khu-rung-ky-bi/forest.js';
 import { createFarmGame } from './games/nong-trai-cua-be/farm.js';
 import { createBillGame } from './games/bill/bill.js';
 import { createHowManyGame } from './games/how-many/howmany.js';
+import { createWordSafariGame } from './games/word-safari/wordsafari.js';
 
 var CONTENT_PACKS = [
   'content/packs/colors-v1.json',
@@ -41,7 +42,7 @@ var GAMES = [
   { id: 'farm', title: 'My Little Farm', emoji: '🐶', skill: 'listen', available: true },
   { id: 'bill', title: 'Help Bill!', emoji: '🎒', skill: 'listen', available: true },
   { id: 'howmany', title: 'How Many?', emoji: '🔢', skill: 'see', available: true },
-  { id: 'g5', title: 'Sắp ra mắt', available: false },
+  { id: 'wordsafari', title: 'Word Safari', emoji: '🔤', skill: 'read', available: true },
   { id: 'g6', title: 'Sắp ra mắt', available: false },
   { id: 'g7', title: 'Sắp ra mắt', available: false },
   { id: 'g8', title: 'Sắp ra mắt', available: false }
@@ -111,6 +112,14 @@ var howManyGame = createHowManyGame({
   render: render,
   owlMascot: owlMascot
 });
+var wordSafariGame = createWordSafariGame({
+  state: state,
+  getStore: function () { return store; },
+  getWords: function () { return WORDS; },
+  speak: speak,
+  render: render,
+  owlMascot: owlMascot
+});
 
 function render() {
   if (state.screen === 'loading') renderLoading();
@@ -125,6 +134,8 @@ function render() {
   else if (state.screen === 'billSummary') billGame.renderBillSummary();
   else if (state.screen === 'howmany') howManyGame.renderHowMany();
   else if (state.screen === 'howmanySummary') howManyGame.renderHowManySummary();
+  else if (state.screen === 'wordsafari') wordSafariGame.renderWordSafari();
+  else if (state.screen === 'wordsafariSummary') wordSafariGame.renderWordSafariSummary();
   else if (state.screen === 'parent') renderParent();
 }
 
@@ -217,6 +228,7 @@ function renderHome() {
       if (g.id === 'farm') return farmGame.gameTileHtml(g.title);
       if (g.id === 'bill') return billGame.gameTileHtml(g.title);
       if (g.id === 'howmany') return howManyGame.gameTileHtml(g.title);
+      if (g.id === 'wordsafari') return wordSafariGame.gameTileHtml(g.title);
       return '<button type="button" class="gametile" data-id="' + g.id + '">' +
         '<span class="emoji">' + g.emoji + '</span><span class="name">' + g.title + '</span></button>';
     }
@@ -252,6 +264,7 @@ function renderHome() {
     else if (id === 'farm') farmGame.startFarmGame();
     else if (id === 'bill') billGame.startBillGame();
     else if (id === 'howmany') howManyGame.startHowManyGame();
+    else if (id === 'wordsafari') wordSafariGame.startWordSafariGame();
   });
 }
 

@@ -1,0 +1,79 @@
+/* CSS RIÊNG của game "Word Safari" — nạp qua <link> trong index.html
+   (games/word-safari/wordsafari.css), nên MỌI url() ảnh trong file này
+   phải tính từ đường dẫn của CHÍNH FILE NÀY (../../assets/...), không
+   phải từ index.html — xem giải thích đầy đủ ở đầu
+   games/nong-trai-cua-be/farm.css. */
+
+/* Ảnh nền savanna (Bước 18.2 trong PROMPT.md). LƯU Ý (lỗi thật đã gặp ở
+   bill.css): background KHÔNG được viết "linear-gradient(...) url(...)"
+   liền nhau không dấu phẩy — chỉ 1 màu đặc (không phải gradient) làm nền
+   dự phòng phía sau url(), giống hệt farm.css/forest.css/bill.css/
+   howmany.css. */
+.world-bg.wordsafariphoto{ background:#F2DFA8 url('../../assets/backgrounds/word-safari-bg.jpg') center/cover no-repeat; }
+
+/* ---------- ảnh của từ đang hỏi + nút nghe lại ---------- */
+.safaristage{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; }
+.safariimgcard{
+  position:relative; width:48vw; height:48vw; max-width:210px; max-height:210px;
+  display:flex; align-items:center; justify-content:center;
+}
+.safariimgcard img.safariimg{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 8px 6px rgba(20,40,25,.32)); }
+.safariimgcard .safarifallback{ font-size:30vw; line-height:1; filter:drop-shadow(0 8px 6px rgba(20,40,25,.28)); }
+.safariimgcard .safarifallback[hidden]{ display:none; }
+
+/* ---------- lưới 4 ô đáp án bằng CHỮ (khác 4 game trước dùng hình) ---------- */
+.optionsgrid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:6px 4vw 2vh; }
+.optionbtn{
+  border:none; border-radius:16px; padding:14px 8px; cursor:pointer; text-align:center;
+  background:var(--glass); border:1px solid var(--glass-border); color:var(--ink);
+  font-family:'Baloo 2', sans-serif; font-weight:700; font-size:1.05rem; text-transform:capitalize;
+  box-shadow:0 4px 0 rgba(20,40,25,.14), 0 8px 14px rgba(20,40,25,.16);
+  transition:transform .1s ease, box-shadow .1s ease;
+}
+.optionbtn:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(20,40,25,.14); }
+.optionbtn.correct{ background:#E6F5EC; border-color:var(--success); color:#1f6d43; box-shadow:0 0 0 3px rgba(47,143,91,.35), 0 8px 14px rgba(20,40,25,.16); }
+.optionbtn.wrong{ background:#FBECEB; border-color:#B24A43; color:#B24A43; box-shadow:0 0 0 3px rgba(178,74,67,.3), 0 8px 14px rgba(20,40,25,.16); }
+
+/* ---------- chồn đất: nổi cố định góc dưới-trái màn hình ---------- */
+/* Cùng kỹ thuật với .owlwrap trong games/how-many/howmany.css: neo bằng
+   "bottom", z-index ÂM + pointer-events:none để chỉ trang trí, không che/
+   chặn bấm 4 ô đáp án bên dưới. */
+.safarimascotwrap{
+  position:absolute; left:2px; bottom:96px; width:150px; height:150px;
+  z-index:-1; pointer-events:none;
+}
+.safarimascotwrap img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 5px 4px rgba(20,40,25,.28)); }
+.safarimascotfallback{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:100px; line-height:1;
+}
+.safarimascotfallback[hidden]{ display:none; }
+
+/* ---------- màn "sắp mở khoá" (chưa đủ từ đã qua LV3) ---------- */
+.safarilockedmascot{ width:140px; height:140px; position:relative; }
+.safarilockedmascot img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 6px 5px rgba(20,40,25,.3)); }
+.safarilockedmascot .safarimascotfallback{ font-size:96px; }
+
+/* ---------- ô icon ở lưới chọn trò chơi (Trang chủ) ---------- */
+/* Nền là 1 khung crop nhỏ của chính ảnh nền word-safari-bg.jpg trong game
+   — theo đúng cách forest-tile/farm-tile/bill-tile/howmany-tile đã làm. */
+.gametile.wordsafari-tile{
+  position:relative; overflow:hidden; border:1px solid var(--glass-border);
+  background:#F2DFA8 url('../../assets/backgrounds/word-safari-bg.jpg') 50% 30%/230% no-repeat;
+}
+.gametile.wordsafari-tile::before{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(50,38,15,0) 45%, rgba(40,28,10,.45) 100%);
+}
+.gametile.wordsafari-tile .name{ position:relative; z-index:1; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.55); }
+.wordsafaritile-face{
+  position:relative; z-index:1; display:block; width:78px; height:78px;
+  animation:tileSway 2.6s ease-in-out infinite;
+}
+.wordsafaritile-face img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 4px 3px rgba(20,40,25,.3)); }
+.wordsafaritile-fallback{ display:flex; align-items:center; justify-content:center; width:100%; height:100%; font-size:44px; }
+.wordsafaritile-fallback[hidden]{ display:none; }
+
+@media (prefers-reduced-motion: reduce){
+  .wordsafaritile-face,.optionbtn{ animation:none !important; }
+}
