@@ -1469,6 +1469,53 @@ không "cày" LV kiểu đó được nữa, LV phản ánh đúng trí nhớ d�
   "bé đã học hết bộ": 1 con đến hạn / 3 con đến hạn / không con nào đến hạn
   → cả 3 trường hợp đều hiện đủ 4 con. 28 unit test pass.
 
+## Vòng 34 — "How Many?" không lên điểm: bỏ chấm theo thời gian, chấm theo số bông đã nghe
+
+Người dùng báo trò "How Many?" không lên điểm và tự đoán nguyên nhân nằm ở
+logic đếm thời gian trả lời, vì màn này BẮT BUỘC phải bấm hoa mới nghe được
+— đoán đúng.
+
+**Nguyên nhân:** `handleConfirmPress` chấm bằng
+`classifyAnswer(true, responseTimeMs)` với mốc `state.cardShownAt` đặt từ
+lúc vào câu. Ngưỡng "đúng-nhanh" của engine là 2.5 giây, trong khi riêng
+việc nghe hết 1 câu TTS ("three rulers") đã hơn 1 giây, cộng thao tác bấm
+hoa + bấm bảng tính là chắc chắn vượt ngưỡng. Nên mọi câu đúng đều bị chấm
+`correct-slow`, mà `correct-slow` chỉ tăng LV khi LV < 2 → **từ nào lên tới
+LV2 là đứng yên vĩnh viễn**.
+
+Đo bằng Playwright trên máy thật, cùng 1 thao tác "nghe 1 bông rồi xác nhận
+luôn":
+
+| Cách bấm | Thời gian | Kết quả |
+| --- | --- | --- |
+| Bấm tức thì (máy, không kịp nghe) | 436ms | LV 2 → 3 |
+| Có nghỉ nghe câu như bé thật | 3354ms | LV 2 → 2 (kẹt) |
+
+**Sửa (theo đúng hướng người dùng nêu):** bỏ hẳn đo thời gian ở màn này,
+đổi sang đếm **số bông hoa bé phải nghe trước khi chốt** — thước đo đúng
+với cơ chế chơi của màn:
+
+- Nghe đúng 1 bông rồi xác nhận luôn (nghe ra ngay) → `correct-fast`, LV
+  tăng bình thường.
+- Phải dò sang bông khác mới ra → `correct-slow` (giữ nguyên LV ở mốc cao).
+- Bấm lại CÙNG 1 bông để nghe lần nữa không tính là "dò thêm" — chỉ đếm số
+  bông KHÁC NHAU (`round.daNghe`).
+- Trả lời sai vẫn `wrong` như cũ.
+
+Dọn theo: bỏ `state.cardShownAt` và import `classifyAnswer` trong
+`howmany.js` (không còn ai dùng).
+
+Kiểm thử lại bằng Playwright: nghe 1 bông + nghỉ 3.5s rồi xác nhận → LV
+2→3 ✅ (trước đây kẹt ở 2); dò đủ 4 bông mới ra → LV 2→2 ✅ (đúng ý nghĩa
+"đúng nhưng chưa chắc"). 28 unit test vẫn pass.
+
+**Còn ngỏ — 3 game kia có thể dính vấn đề tương tự (chưa sửa, chờ ý kiến):**
+forest/farm/bill cũng đặt `cardShownAt` TRƯỚC khi đọc câu hỏi, nên thời
+gian đọc TTS (~1-1.5 giây) bị tính vào thời gian trả lời của bé, chỉ còn
+lại ~1 giây để kịp ngưỡng 2.5 giây. Khác với "How Many?" ở chỗ vẫn có thể
+kịp (bé chỉ cần bấm 1 lần, không phải nghe thử rồi xác nhận), nên chưa đổi
+gì để tránh tự ý mở rộng phạm vi.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
