@@ -10,6 +10,10 @@
 // đang nghe thử). Không có prompt nào đọc SẴN lúc vào câu (khác 3 game
 // kia) nên màn này cũng không có nút "Nghe lại" riêng.
 //
+// CHẤM ĐIỂM KHÁC 3 GAME KIA: không đo thời gian trả lời mà đếm SỐ BÔNG HOA
+// bé phải nghe trước khi chốt (xem handleConfirmPress) — vì ở màn này bé
+// bắt buộc phải nghe mới trả lời được nên đo thời gian luôn ra "chậm".
+//
 // Từ vựng được CHẤM ĐIỂM (skill=see) là SỐ ĐẾM (content/packs/
 // numbers-v1.json, id "one".."ten") — đồ vật (content/packs/objects-v1.json)
 // chỉ đóng vai trò minh hoạ (1 ảnh, không lặp lại) + góp danh từ cho câu
@@ -24,7 +28,7 @@
 // thích chi tiết hơn ở đầu games/khu-rung-ky-bi/forest.js.
 
 import { wordsInCat } from '../../engine/content-loader.js';
-import { buildRound, applyAnswer, classifyAnswer, shuffle } from '../../engine/learning-engine.js';
+import { buildRound, applyAnswer, shuffle } from '../../engine/learning-engine.js';
 import { saveProgress } from '../../engine/progress-store.js';
 import { starIcon, CLOSE_SVG, worldBg } from '../../engine/ui-shared.js';
 
@@ -107,7 +111,10 @@ export function createHowManyGame(ctx) {
     });
     var correctIdx = options.reduce(function (found, o, i) { return o.value === targetValue ? i : found; }, -1);
 
-    return { targetWord: targetWord, targetValue: targetValue, objWord: objWord, options: options, correctIdx: correctIdx, selectedIdx: null };
+    // daNghe = tập các bông hoa bé đã bấm nghe thử trong câu này (theo chỉ
+    // số ô). Dùng để chấm "đúng ngay lần đầu" hay "phải dò nhiều bông mới
+    // ra" — xem handleConfirmPress.
+    return { targetWord: targetWord, targetValue: targetValue, objWord: objWord, options: options, correctIdx: correctIdx, selectedIdx: null, daNghe: {} };
   }
 
   function startHowManyGame() {
@@ -181,7 +188,6 @@ export function createHowManyGame(ctx) {
 
   function renderHowMany() {
     round = buildRoundData();
-    state.cardShownAt = Date.now();
     state.answered = false;
     state.howManyMood = 'idle';
 
@@ -215,6 +221,10 @@ export function createHowManyGame(ctx) {
   function handleFlowerPress(idx) {
     if (state.answered) return;
     round.selectedIdx = idx;
+    // Ghi nhận bông này đã được nghe. Bấm lại CÙNG 1 bông để nghe lần nữa
+    // không tính là "dò thêm" — chỉ bấm sang bông KHÁC mới tính (xem
+    // handleConfirmPress).
+    round.daNghe[idx] = true;
     ctx.speak(round.options[idx].phrase);
 
     var flowerEls = document.querySelectorAll('#flowersRow .flowerbtn');
@@ -280,10 +290,19 @@ export function createHowManyGame(ctx) {
     var idx = round.selectedIdx;
     var flowerEls = document.querySelectorAll('#flowersRow .flowerbtn');
     var isCorrect = idx === round.correctIdx;
-    var responseTimeMs = Date.now() - state.cardShownAt;
+
+    // KHÔNG chấm theo THỜI GIAN như 3 game kia (lỗi thật đã gặp): ở màn này
+    // bé BẮT BUỘC phải bấm hoa nghe câu rồi mới trả lời được, riêng việc
+    // nghe hết 1 câu đã quá ngưỡng "nhanh" 2.5 giây của engine — nên mọi câu
+    // đúng đều bị chấm "đúng-chậm", và từ nào lên tới LV2 là đứng yên vĩnh
+    // viễn (không lên điểm nữa).
+    // Thước đo đúng của màn này là SỐ BÔNG HOA bé phải nghe trước khi chốt:
+    // nghe đúng 1 bông rồi xác nhận luôn = nghe ra ngay = "đúng-nhanh";
+    // phải dò sang bông khác mới ra = chưa chắc = "đúng-chậm".
+    var soBongDaNghe = Object.keys(round.daNghe).length;
 
     if (isCorrect) {
-      applyAnswer(store.words, round.targetWord.id, 'see', classifyAnswer(true, responseTimeMs));
+      applyAnswer(store.words, round.targetWord.id, 'see', soBongDaNghe <= 1 ? 'correct-fast' : 'correct-slow');
       saveProgress(store);
       state.correct++;
       flowerEls[idx].classList.add('correct');
