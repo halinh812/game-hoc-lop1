@@ -1649,3 +1649,52 @@ Tiếp tục yêu cầu người dùng, chỉnh thêm giao diện game #4:
   hơn 1 chút (giảm `padding-top` của `.countarea` từ 5vh xuống 2vh) để
   chừa thêm không gian thị giác cho Cú lớn hơn ở phía dưới.
 - 25 unit test vẫn pass.
+
+## Vòng 37 — Game #5 "Word Safari" (Đọc Chữ) — game đầu tiên luyện kỹ năng "Đọc"
+
+Xây hoàn chỉnh game thứ 5 theo đúng plan đã thống nhất trước đó: khác hẳn
+cơ chế + kỹ năng của 4 game trước.
+
+- **Cơ chế mới**: hiện 1 ảnh + phát âm thanh ĐÚNG 1 từ tiếng Anh (không
+  phải cả câu như "Help Bill!"), bé chọn đúng trong 4 Ô CHỮ VIẾT bên dưới
+  (4 game trước đều chọn bằng hình/âm thanh — đây là game đầu tiên bé phải
+  ĐỌC chữ để trả lời).
+- **Kỹ năng mới**: `skill='read'` — kỹ năng "Đọc" trong Learning Engine đã
+  định nghĩa sẵn từ lâu (`engine/learning-engine.js`) nhưng chưa game nào
+  dùng tới trước Vòng này.
+- **Vốn từ tự động mở khoá** (khác hẳn cách chọn thủ công qua Trang phụ
+  huynh của các game khác): 1 từ được tự động đưa vào rổ của Word Safari
+  ngay khi nó đạt LV3 trở lên ở BẤT KỲ kỹ năng nào khác (`isWordUnlocked()`
+  trong `games/word-safari/wordsafari.js`) — không cần phụ huynh can thiệp,
+  không giới hạn theo 1 bộ từ (category) như các game kia, gộp CHUNG mọi
+  bộ từ (animal/object/number/color/family/fruit) vì "Đọc" không phân biệt
+  chủ đề.
+- Chưa đủ từ đã mở khoá (`MIN_POOL = 4`) thì hiện màn "Sắp mở khoá!" thay
+  vì chơi luôn — tránh trường hợp chỉ có 1-2 từ khiến câu hỏi lặp lại y hệt
+  mãi mãi.
+- Tái dùng gần như nguyên vẹn hạ tầng Learning Engine có sẵn, không cần sửa
+  gì thêm ở `engine/`: `buildRound()` chọn từ theo đúng hạn ôn của riêng
+  kỹ năng "read", `pickOptions()` sinh 4 lựa chọn (ưu tiên nhiễu cùng chủ
+  đề, đã có sẵn từ trước — chưa game nào dùng tới), `classifyAnswer()`/
+  `applyAnswer()` chấm điểm theo thời gian trả lời (không có cơ chế bắt
+  buộc nghe nhiều lần như "How Many?" nên dùng lại time-based bình thường,
+  không cần `skipDueGate`/đếm số lần nghe).
+- Nhân vật chồn đất thám hiểm (3 trạng thái chờ đợi/vui/buồn) + ảnh nền
+  savanna — ảnh do người dùng tự tạo bằng prompt ở Bước 18 (PROMPT.md),
+  gửi qua Git, đã xử lý xoá nền + resize 900×900 (characters) / đổi đuôi
+  .jpeg→.jpg (nền, giữ nguyên 1536×2752 khớp forest-bg/school-bg/
+  howmany-bg).
+- File mới: `games/word-safari/wordsafari.js` + `wordsafari.css`. Nối vào
+  `app.js` (import, thêm vào mảng `GAMES` thay ô "g5" trống, tạo factory,
+  thêm nhánh `render()`/`renderHome()`/click handler) + thêm `<link>` CSS
+  vào `index.html`.
+- Kiểm thử bằng Playwright (script dựng riêng, không phải test có sẵn):
+  rổ từ tự động lọc đúng (chỉ từ đã LV3+ ở kỹ năng khác mới xuất hiện làm
+  câu hỏi), 4 ô chữ hiện đủ + đúng nội dung, trả lời đúng tăng LV kỹ năng
+  "read" (không đụng LV kỹ năng khác của từ đó), trả lời sai đánh dấu
+  đúng/sai + đổi cảm xúc chồn đất + tự chuyển câu, màn "Sắp mở khoá" hiện
+  đúng khi rổ từ dưới `MIN_POOL`, chơi đủ 10 câu đúng ra màn thắng cuộc.
+  Đã chụp ảnh QA (Trang chủ, màn chơi, màn thắng, màn khoá) — giao diện
+  khớp phong cách chung, icon Trang chủ cùng cỡ các game khác, chồn đất
+  không che nút bấm. 29 unit test hiện có vẫn pass nguyên (không cần sửa
+  `engine/` cho game này).
