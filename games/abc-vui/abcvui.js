@@ -11,6 +11,16 @@
 // không cần chờ ảnh. Âm thanh đọc ĐÚNG 1 CHỮ CÁI (vd "A"), không phải cả
 // câu như Bill ("I want a book").
 //
+// Bấm ĐÚNG xong: thẻ chữ cái còn "lật" sang mặt sau lộ ra 1 ảnh từ vựng
+// bắt đầu bằng đúng chữ cái đó (vd "T" → ảnh con hổ "Tiger") rồi đọc tên
+// từ đó, nối liền việc nhận mặt chữ với 1 từ có nghĩa cụ thể — xem
+// pickWordForLetter()/flipTileToReveal(). Chọn NGẪU NHIÊN trong mọi từ
+// (không riêng bộ "letter") khớp chữ cái đầu, không cố định 1 từ/chữ cái
+// qua các lượt. Chữ cái nào CHƯA có từ nào bắt đầu bằng nó (vd I/J/V/X lúc
+// vốn từ còn ít) thì bỏ qua bước lật, giữ nguyên hành vi cũ — tự động lật
+// được ngay khi phụ huynh thêm từ mới bắt đầu bằng chữ đó, không cần sửa
+// code.
+//
 // Nhân vật gà con 3 trạng thái cảm xúc + ảnh nền riêng — xem Bước 19 trong
 // PROMPT.md, người dùng tự tạo bằng AI rồi gửi qua Git (Bước 11) — chưa có
 // lúc viết file này nên <img> có fallback emoji/màu nền tạm.
@@ -89,9 +99,45 @@ export function createAbcVuiGame(ctx) {
   // Thẻ chữ cái TO, thuần CSS/font — không cần ảnh AI (khác billTileMedia()
   // vốn cần ảnh đồ vật). Màu nền đổi theo vị trí (data-idx), không đổi
   // theo chữ cái, để 4 thẻ luôn dễ phân biệt vị trí qua màu quen mắt.
+  // Bọc trong 1 "thẻ lật" (abcflipcard, mặt trước = chữ cái, mặt sau =
+  // ảnh từ vựng) — mặt sau CHƯA có nội dung lúc render, chỉ được điền +
+  // lật khi bé chọn ĐÚNG chữ này và có ít nhất 1 từ bắt đầu bằng chữ đó
+  // (xem flipTileToReveal()/pickWordForLetter()).
   function abcTileMedia(w, idx) {
     var color = TILE_COLORS[idx % TILE_COLORS.length];
-    return '<span class="tileswing"><span class="abcletter" style="background:' + color + '">' + w.en + '</span></span>';
+    return '<span class="tileswing"><span class="abcflipcard">' +
+      '<span class="abcflipface abcflipfront"><span class="abcletter" style="background:' + color + '">' + w.en + '</span></span>' +
+      '<span class="abcflipface abcflipback"></span>' +
+      '</span></span>';
+  }
+
+  // Tìm 1 từ vựng bất kỳ (KHÔNG thuộc bộ "letter") bắt đầu bằng đúng chữ
+  // cái vừa học, để lật thẻ ra minh hoạ (vd chữ "T" → "Tiger"). Chọn NGẪU
+  // NHIÊN trong số các từ khớp — cùng 1 chữ cái sẽ ra từ khác nhau qua các
+  // lượt chơi, không cố định luôn 1 từ (theo đúng yêu cầu người dùng).
+  // Trả về null nếu chưa có từ nào bắt đầu bằng chữ đó (vd I/J/V/X lúc bộ
+  // từ còn ít) — gọi nơi dùng phải tự bỏ qua bước lật khi null.
+  function pickWordForLetter(letterEn) {
+    var target = (letterEn || '').charAt(0).toUpperCase();
+    if (!target) return null;
+    var candidates = ctx.getWords().filter(function (w) {
+      return w.cat !== 'letter' && w.en && w.en.charAt(0).toUpperCase() === target;
+    });
+    if (!candidates.length) return null;
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
+
+  // Điền nội dung mặt sau + lật thẻ đang được nhắc tới (tileEl) sang ảnh
+  // minh hoạ của "word". Ảnh có thể lỗi tải (đang ở bản chưa đủ ảnh AI
+  // cho mọi từ) nên có fallback emoji giống mọi nơi khác trong app.
+  function flipTileToReveal(tileEl, word) {
+    var flipCard = tileEl.querySelector('.abcflipcard');
+    if (!flipCard) return;
+    var back = flipCard.querySelector('.abcflipback');
+    back.innerHTML = word.image
+      ? '<img src="' + word.image + '" alt="" onerror="this.hidden=true;this.nextElementSibling.hidden=false;"><span class="abcflipfallback" hidden>' + (word.emoji || '❓') + '</span>'
+      : '<span class="abcflipfallback">' + (word.emoji || '❓') + '</span>';
+    flipCard.classList.add('flipped');
   }
 
   function abcStarsRow() {
@@ -272,11 +318,31 @@ export function createAbcVuiGame(ctx) {
       setAbcMood('happy');
       flyLetterToMascot(tileEls[idx], targetWord, function () { showHeldLetter(targetWord); });
 
+      // Lật thẻ vừa chọn đúng ra ảnh 1 từ bắt đầu bằng chữ cái đó (vd "T"
+      // → "Tiger") — CHỈ khi đã có ít nhất 1 từ như vậy trong vốn từ
+      // (pickWordForLetter trả về null thì bỏ qua hẳn bước lật, giữ
+      // nguyên hành vi cũ). Đợi 1 nhịp ngắn sau khi thẻ sáng xanh mới lật,
+      // rồi đợi lật xong mới đọc tên từ đó — tránh chồng lên câu đọc tên
+      // chữ cái vừa phát ở trên (đúng nguyên lý tránh đua tranh audio đã
+      // áp dụng ở mọi game khác, xem Vòng 18/35 trong ROADMAP.md).
+      var revealWord = pickWordForLetter(targetWord.en);
       var isDone = state.correct >= ABC_WIN_TARGET;
-      setTimeout(function () {
-        if (isDone) { state.screen = 'abcvuiSummary'; ctx.render(); }
-        else advanceAbcRound(state.targetIdx);
-      }, isDone ? 700 : 900);
+
+      if (revealWord) {
+        setTimeout(function () {
+          flipTileToReveal(tileEls[idx], revealWord);
+          setTimeout(function () { ctx.speak(revealWord.en); }, 400);
+        }, 500);
+        setTimeout(function () {
+          if (isDone) { state.screen = 'abcvuiSummary'; ctx.render(); }
+          else advanceAbcRound(state.targetIdx);
+        }, isDone ? 2300 : 2700);
+      } else {
+        setTimeout(function () {
+          if (isDone) { state.screen = 'abcvuiSummary'; ctx.render(); }
+          else advanceAbcRound(state.targetIdx);
+        }, isDone ? 700 : 900);
+      }
     } else {
       applyAnswer(store.words, targetWord.id, 'listen', 'wrong');
       saveProgress(store);

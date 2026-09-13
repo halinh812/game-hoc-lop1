@@ -1815,3 +1815,37 @@ game NỀN TẢNG dạy bảng chữ cái TRƯỚC.
   nguyên (không đụng gì tới `engine/`). Tính năng Sao lưu/Khôi phục tiến
   độ (Vòng 38) kiểm thử lại vẫn hoạt động đúng sau khi thêm gói nội dung
   mới.
+
+## Vòng 41 — "ABC Vui": thẻ lật ra ảnh minh hoạ khi bấm đúng chữ cái
+
+Nâng cấp theo yêu cầu người dùng: bấm ĐÚNG 1 chữ cái xong, thẻ đó "lật"
+sang mặt sau lộ ra ảnh 1 từ vựng bắt đầu bằng đúng chữ cái đó (vd "T" →
+ảnh con hổ "Tiger") rồi đọc tên từ đó — nối liền việc nhận mặt chữ với 1
+từ có nghĩa cụ thể, thay vì chỉ dừng ở mức "nghe tên chữ cái" khô khan.
+
+- `pickWordForLetter(letterEn)`: tìm NGẪU NHIÊN 1 từ (từ TOÀN BỘ vốn từ,
+  không riêng bộ "letter") có `en` bắt đầu bằng đúng chữ cái đó — chọn
+  ngẫu nhiên mỗi lần nên cùng 1 chữ cái sẽ ra từ khác nhau qua các lượt
+  chơi (đúng yêu cầu "không nhất thiết T là lật ra Tiger"). Trả về `null`
+  nếu chưa có từ nào khớp — nơi gọi tự bỏ qua bước lật, giữ nguyên hành
+  vi cũ (đúng yêu cầu "chữ chưa có từ thì không cần lật, có từ mới thì
+  lật" — tự động theo vốn từ hiện có, không cần sửa code khi thêm từ).
+- Đổi cấu trúc thẻ chữ cái thành "thẻ lật" 2 mặt bằng CSS 3D transform
+  (`transform-style:preserve-3d` + `rotateY(180deg)` + `backface-
+  visibility:hidden`) — mặt trước là chữ cái màu (như cũ), mặt sau là ảnh
+  từ vựng (`flipTileToReveal()`), viền sáng đúng/sai chuyển từ gắn trên
+  chữ cái sang gắn trên cả thẻ lật để thấy được dù đang ở mặt nào.
+- **Lỗi thật gặp phải lúc build**: `.abcflipcard` là `<span>` (inline mặc
+  định) — khai báo `width:100%; height:100%` không có tác dụng gì trên
+  phần tử inline, khiến cả thẻ co về đúng 0×0 (phát hiện bằng
+  `getBoundingClientRect()` khi debug ảnh lật không hiện gì cả dù đã tải
+  đúng). Sửa bằng cách thêm `display:block` cho `.abcflipcard`.
+- Trình tự phát âm khi lật: đọc tên chữ cái xong (như cũ) → đợi 1 nhịp →
+  lật thẻ → đợi lật xong mới đọc tên từ vựng — tránh chồng audio (đúng
+  nguyên lý đã áp dụng từ Vòng 18/35). Thời gian trước khi chuyển câu tiếp
+  theo giãn ra (900ms → ~2700ms) CHỈ khi có lật; chữ cái chưa có từ khớp
+  vẫn giữ nguyên nhịp độ cũ.
+- Kiểm thử bằng Playwright: xác nhận đúng cặp chữ cái → từ được lật + đọc
+  (vd K→Koala, N→notebook, D→Donkey), xác nhận chữ chưa có từ khớp (vd
+  V/X) KHÔNG lật, luồng trả lời sai + chơi đủ 10 câu thắng cuộc vẫn đúng
+  sau khi đổi timing. 29 unit test vẫn pass nguyên (không đụng `engine/`).
