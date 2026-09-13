@@ -317,15 +317,36 @@
   }
   button:focus-visible{ outline:3px solid var(--gold); outline-offset:2px; }
 </style>
-<!-- CSS dùng chung cho cơ chế "bắt con vật" (mọi game kiểu nghe tên +
-     bấm đúng con vật dùng lại) -->
-<link rel="stylesheet" href="engine/catch-game.css">
-<!-- CSS riêng của từng game — mỗi game 1 file, xem games/<slug>/*.css -->
-<link rel="stylesheet" href="games/khu-rung-ky-bi/forest.css">
-<link rel="stylesheet" href="games/nong-trai-cua-be/farm.css">
-<link rel="stylesheet" href="games/bill/bill.css">
-<link rel="stylesheet" href="games/how-many/howmany.css">
-<link rel="stylesheet" href="games/word-safari/wordsafari.css">
+<!-- CSS/JS của app KHÔNG dùng <link>/<script src> tĩnh — nạp bằng JS với
+     query "?v=<thời điểm tải trang>" (xem script cuối <head>) để LUÔN lấy
+     đúng bản mới nhất mỗi lần vào trang, không phụ thuộc trình duyệt cache
+     bao lâu. Lỗi thật đã gặp: sau khi đẩy bản mới lên, index.html (nằm
+     ngay trong response HTML, luôn được kiểm tra lại) thì cập nhật ngay,
+     nhưng app.js (file rời, trình duyệt tự quyết định cache bao lâu) vẫn
+     giữ bản cũ cả chục phút sau — tính năng mới thêm vào app.js không
+     hiện ra dù trang đã build xong từ lâu. Ảnh trong assets/ KHÔNG áp
+     dụng cách này (để giữ cache, vì ảnh nặng hơn nhiều và hiếm khi đổi
+     nội dung ở đúng tên file cũ). -->
+<script>
+  (function () {
+    var v = Date.now();
+    var cssFiles = [
+      'engine/catch-game.css',
+      'games/khu-rung-ky-bi/forest.css',
+      'games/nong-trai-cua-be/farm.css',
+      'games/bill/bill.css',
+      'games/how-many/howmany.css',
+      'games/word-safari/wordsafari.css'
+    ];
+    cssFiles.forEach(function (href) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = href + '?v=' + v;
+      document.head.appendChild(link);
+    });
+    window.__appCacheBust = v;
+  })();
+</script>
 </head>
 <body>
 
@@ -333,7 +354,24 @@
   <div class="world" id="root"></div>
 </div>
 
-<script type="module" src="app.js"></script>
+<script>
+  (function () {
+    // Chỉ cache-bust file app.js (nơi chứa hầu hết tính năng UI/màn hình).
+    // Có thử remap luôn cả các "import" bên trong (engine/*.js, games/*/*.js)
+    // qua Import Map nhưng gặp lỗi thật khi 2 dạng đường dẫn tương đối khác
+    // nhau ("./engine/…" từ app.js và "../../engine/…" từ games/<slug>/*.js)
+    // cùng trỏ về 1 file — trình duyệt chuẩn hoá 2 khoá đó theo URL của
+    // TÀI LIỆU (index.html) chứ không theo URL của từng file import, khiến
+    // chúng đụng nhau và bị chặn hẳn (lỗi "blocked by a null value", cả
+    // trang trắng). Bỏ hẳn Import Map, chỉ giữ cách đơn giản/an toàn hơn:
+    // bust đúng app.js — các file con (engine/games) ít thay đổi hơn app.js
+    // và thường được tải lại tự nhiên cùng lúc app.js đổi.
+    var s = document.createElement('script');
+    s.type = 'module';
+    s.src = 'app.js?v=' + (window.__appCacheBust || Date.now());
+    document.body.appendChild(s);
+  })();
+</script>
 
 </body>
 </html>

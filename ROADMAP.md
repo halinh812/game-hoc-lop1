@@ -1732,3 +1732,43 @@ khi chạy qua server quản trị local):
   tiến độ khôi phục khớp 100% với bản gốc (kiểm tra tới từng LV/next/
   correctCount của 1 từ cụ thể). 29 unit test hiện có vẫn pass nguyên
   (không đụng gì tới `engine/`).
+
+## Vòng 39 — Các ô chọn game không đều cỡ + `app.js` bị cache cũ trên điện thoại
+
+Sau khi thêm game #5, phát hiện 2 lỗi hiển thị thật khi người dùng tự kiểm
+tra trên điện thoại:
+
+- **Các ô chọn game không đều cỡ**: `.gamegrid` (lưới 2 cột) không ép các
+  HÀNG cao bằng nhau — mỗi hàng tự co theo đúng icon cao nhất của riêng
+  hàng đó. Hàng chứa "How Many?" (icon 112px, xem Vòng 32) bị kéo cao hẳn
+  (171px), còn hàng chứa "Word Safari" (đứng cạnh ô "Sắp ra mắt" nhỏ,
+  40px) chỉ cao 137px — ô "Word Safari" nhìn nhỏ hơn hẳn dù icon của nó
+  cùng cỡ 78px với "Help Bill!". Sửa bằng 1 dòng `grid-auto-rows:1fr` —
+  ép MỌI hàng cao bằng hàng cao nhất dù lưới không có chiều cao cố định.
+  Đo lại bằng Playwright: mọi ô đều 193×171px.
+- **`app.js` bị trình duyệt cache bản cũ**: sau khi đẩy tính năng mới lên
+  `main` và GitHub Pages build xong, 1 điện thoại (điện thoại cũ bé hay
+  chơi) vẫn không thấy tính năng mới dù các thay đổi CSS (nằm ngay trong
+  `<style>` của `index.html`) đã cập nhật bình thường — chỉ riêng
+  `app.js` (file rời, không có gì báo hiệu cho trình duyệt biết đã có
+  bản mới) bị giữ cache. Sửa bằng cách không dùng `<script src="app.js">`
+  tĩnh nữa — thay bằng 1 đoạn JS nhỏ tự tạo thẻ `<script type="module">`
+  với `src="app.js?v=<Date.now() lúc tải trang>"`, buộc trình duyệt luôn
+  coi đây là URL mới → luôn fetch lại. Áp dụng tương tự cho các `<link
+  rel="stylesheet">` của từng game (`engine/catch-game.css`,
+  `games/*/*.css`) để phòng hờ y hệt.
+  - Đã thử thêm Import Map để remap luôn cả các "import" TĨNH bên trong
+    `app.js` (import `engine/*.js`, `games/*/*.js` không có query) sang
+    bản có `?v=`, nhưng gặp lỗi thật khiến cả trang trắng ("Failed to
+    resolve module specifier ... blocked by a null value") — nguyên nhân:
+    2 dạng đường dẫn tương đối khác nhau cùng trỏ 1 file (`app.js` dùng
+    `./engine/X.js`, còn `games/<slug>/*.js` dùng `../../engine/X.js`)
+    được trình duyệt CHUẨN HOÁ theo URL của TÀI LIỆU (`index.html`) khi
+    parse Import Map, khiến 2 khoá khác nhau đụng nhau. Đã BỎ HẲN Import
+    Map, chỉ giữ cache-bust cho đúng `app.js` — an toàn, đã kiểm thử kỹ
+    bằng Playwright (bắt sự kiện `request` xác nhận đúng URL có `?v=`,
+    `pageerror` rỗng, vào được Trang phụ huynh — tức toàn bộ chuỗi import
+    `engine/games` vẫn chạy đúng).
+  - Kiểm thử lại toàn bộ sau khi đổi cấu trúc nạp CSS/JS: 29 unit test
+    pass, luồng chơi Word Safari + xuất/nhập file sao lưu + kích thước ô
+    chọn game đều hoạt động đúng như trước.
