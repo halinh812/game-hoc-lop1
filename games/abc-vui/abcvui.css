@@ -59,18 +59,40 @@
    .freeplay phía trên) — ghi đè "position:absolute" mặc định của
    .freetile (dành cho kiểu rải tự do ở forest/farm) thành vị trí bình
    thường trong lưới, đúng kỹ thuật ở .billstage .freetile. */
-.abcstage .freetile{ position:static; width:30vw; height:30vw; max-width:132px; max-height:132px; }
+.abcstage .freetile{ position:static; width:30vw; height:30vw; max-width:132px; max-height:132px; perspective:800px; }
 .abcletter{
   width:100%; height:100%; display:flex; align-items:center; justify-content:center;
   border-radius:22%; color:#fff; font-family:'Baloo 2', sans-serif; font-weight:800;
   font-size:15vw; line-height:1; text-shadow:0 2px 0 rgba(0,0,0,.15);
   box-shadow:0 5px 0 rgba(20,40,25,.18), 0 8px 14px rgba(20,40,25,.22);
 }
-/* .freetile.correct/.wrong (engine/catch-game.css) áp filter:drop-shadow
-   lên <img>/<video> — thẻ ở đây là chữ CSS thuần nên cần viền sáng riêng
-   bằng box-shadow thay vì filter. */
-.abcstage .freetile.wrong .abcletter{ box-shadow:0 0 0 4px #B24A43, 0 8px 16px rgba(20,40,25,.3); }
-.abcstage .freetile.correct .abcletter{ box-shadow:0 0 0 4px var(--success), 0 8px 16px rgba(20,40,25,.3); }
+/* "Thẻ lật" bọc quanh mặt trước (chữ cái)/mặt sau (ảnh từ vựng) —
+   perspective ở .freetile (phía trên) + preserve-3d ở đây tạo hiệu ứng
+   xoay 3D thật khi bấm đúng và có từ để lật ra (xem flipTileToReveal()
+   trong abcvui.js). .freetile.correct/.wrong (engine/catch-game.css) áp
+   filter:drop-shadow lên <img>/<video> — không có tác dụng với thẻ chữ
+   CSS thuần ở đây, nên viền sáng đúng/sai gắn thẳng lên .abcflipcard
+   (không phải .abcletter) để vẫn thấy được dù đang ở mặt nào. */
+.abcflipcard{
+  /* LỖI THẬT ĐÃ GẶP: đây là <span> (inline mặc định) — width/height:100%
+     KHÔNG có tác dụng gì trên phần tử inline, khiến cả thẻ co về đúng
+     0×0 (đo được bằng getBoundingClientRect() lúc debug), ảnh mặt sau dù
+     tải đúng vẫn không thấy gì vì nằm trong 1 khung 0×0. Bắt buộc phải
+     có display:block (hoặc inline-block) thì width/height mới có hiệu lực. */
+  display:block; position:relative; width:100%; height:100%; border-radius:22%;
+  transform-style:preserve-3d; transition:transform .6s cubic-bezier(.4,.2,.2,1);
+}
+.abcflipcard.flipped{ transform:rotateY(180deg); }
+.abcstage .freetile.wrong .abcflipcard{ box-shadow:0 0 0 4px #B24A43, 0 8px 16px rgba(20,40,25,.3); }
+.abcstage .freetile.correct .abcflipcard{ box-shadow:0 0 0 4px var(--success), 0 8px 16px rgba(20,40,25,.3); }
+.abcflipface{
+  position:absolute; inset:0; border-radius:22%; backface-visibility:hidden;
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.abcflipback{ background:#fff; transform:rotateY(180deg); }
+.abcflipback img{ width:100%; height:100%; object-fit:contain; padding:8%; }
+.abcflipfallback{ font-size:11vw; line-height:1; }
+.abcflipfallback[hidden]{ display:none; }
 
 /* Chữ cái "bay" từ ô của nó về cạnh gà con lúc bấm đúng — cùng kỹ thuật
    --dx/--dy với .billflyicon trong games/bill/bill.css, chỉ khác nội
@@ -110,5 +132,5 @@
 
 @media (prefers-reduced-motion: reduce){
   .abctile-face,.abcflyletter{ animation:none !important; }
-  .abcheld{ transition:none !important; }
+  .abcheld,.abcflipcard{ transition:none !important; }
 }
