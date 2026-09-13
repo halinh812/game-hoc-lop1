@@ -301,8 +301,14 @@ export function createHowManyGame(ctx) {
     // phải dò sang bông khác mới ra = chưa chắc = "đúng-chậm".
     var soBongDaNghe = Object.keys(round.daNghe).length;
 
+    // skipDueGate: true — kho từ của màn này chỉ có 10 số (numbers-v1.json),
+    // chơi bình thường cũng lặp hết vòng trong vài chục giây, nhanh hơn hẳn
+    // mốc hẹn ôn LV1 (1 phút) — luật "chưa tới hạn thì không tăng LV" (xem
+    // Vòng 33) vốn sinh ra để chặn Ô LẤP CHỖ TRỐNG ở màn 4 ô kia, không có ý
+    // nghĩa ở đây và sẽ chặn oan tiến độ hợp lệ (lỗi thật đã gặp — xem
+    // Vòng 36 trong ROADMAP.md).
     if (isCorrect) {
-      applyAnswer(store.words, round.targetWord.id, 'see', soBongDaNghe <= 1 ? 'correct-fast' : 'correct-slow');
+      applyAnswer(store.words, round.targetWord.id, 'see', soBongDaNghe <= 1 ? 'correct-fast' : 'correct-slow', { skipDueGate: true });
       saveProgress(store);
       state.correct++;
       flowerEls[idx].classList.add('correct');

@@ -72,7 +72,16 @@ export function applyAnswer(wordsMap, wordId, skill, outcome, opts) {
   // giữ nguyên cả LV lẫn lịch ôn cũ. Ngược lại, trả lời SAI thì vẫn phạt
   // như thường: sai là bằng chứng thật sự rằng bé chưa nhớ, bất kể đã cách
   // quãng bao lâu.
-  var notDueYet = p.seen && p.next > now;
+  //
+  // opts.skipDueGate — lối thoát riêng cho game có kho từ RẤT NHỎ (vd "How
+  // Many?" chỉ có 10 số, xem Vòng 36 trong ROADMAP.md). Luật "chưa tới hạn"
+  // ở trên vốn sinh ra để chặn "ô lấp chỗ trống" trong màn 4 ô (forest/farm/
+  // bill) — không có ý nghĩa với game chỉ hỏi 1 câu/lượt (size=1): khi kho
+  // từ chỉ có 10 món, bé chơi bình thường cũng lặp hết vòng trong vài chục
+  // giây (nhanh hơn hẳn mốc hẹn ôn LV1 = 1 phút), nên bị luật này chặn tăng
+  // LV liên tục dù đang chơi và trả lời đúng hoàn toàn hợp lệ, không phải
+  // đang "cày" 1 từ lặp lại tức thì.
+  var notDueYet = !opts.skipDueGate && p.seen && p.next > now;
   p.seen = true;
 
   if (outcome === 'correct-fast' || outcome === 'correct-slow') {
