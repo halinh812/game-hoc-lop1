@@ -72,12 +72,26 @@ export function createWebSpeechProvider() {
     isSupported: function () {
       return typeof window !== 'undefined' && 'speechSynthesis' in window;
     },
+    // opts.onEnd (tuỳ chọn) — gọi đúng 1 lần khi câu này đọc XONG (dù đọc
+    // trôi chảy hay bị lỗi giữa chừng), để nơi gọi biết chính xác lúc nào
+    // bé mới THỰC SỰ nghe hết câu — vd đo "thời gian trả lời" phải tính từ
+    // mốc này chứ không phải từ lúc lệnh đọc được gọi (nghe câu vốn đã mất
+    // 1-2 giây, tính cả vào thời gian trả lời của bé là oan cho bé). Nếu bị
+    // 1 lần gọi speak() MỚI hơn đè lên trước khi câu này kịp đọc xong thì
+    // onEnd của câu CŨ sẽ KHÔNG được gọi (coi như huỷ) — chỉ onEnd của câu
+    // mới nhất mới có ý nghĩa.
     speak: function (text, opts) {
       opts = opts || {};
+      var myId = ++latestSpeakId;
+      var doneCalled = false;
+      function done() {
+        if (doneCalled || myId !== latestSpeakId) return;
+        doneCalled = true;
+        if (opts.onEnd) opts.onEnd();
+      }
       try {
-        if (!this.isSupported()) return;
+        if (!this.isSupported()) { done(); return; }
         var synth = window.speechSynthesis;
-        var myId = ++latestSpeakId;
 
         var u = new SpeechSynthesisUtterance(text);
         u.lang = opts.lang || 'en-US';
@@ -86,6 +100,8 @@ export function createWebSpeechProvider() {
         u.rate = opts.rate != null ? opts.rate : 0.92;
         u.pitch = opts.pitch != null ? opts.pitch : 1.0;
         if (cachedBestVoice) u.voice = cachedBestVoice;
+        u.onend = done;
+        u.onerror = done;
 
         if (synth.speaking || synth.pending) synth.cancel();
         // Lỗi trình duyệt đã biết (nhiều nhất trên Chrome Android): gọi
@@ -100,7 +116,9 @@ export function createWebSpeechProvider() {
         }, 60);
       } catch (e) {
         // Một số trình duyệt (đặc biệt Safari iOS) yêu cầu tương tác người
-        // dùng trước khi phát được âm thanh — bỏ qua lỗi, không phá UI.
+        // dùng trước khi phát được âm thanh — bỏ qua lỗi, không phá UI, vẫn
+        // gọi onEnd để nơi gọi không bị treo chờ mãi.
+        done();
       }
     }
   };

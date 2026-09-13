@@ -69,8 +69,10 @@ var state = {
   targetIdx: 0    // slot nào đang là đáp án đúng của câu hỏi hiện tại
 };
 
-function speak(text) {
-  audio.speak(text, { lang: 'en-US' });
+// onEnd (tuỳ chọn) — gọi khi câu đọc XONG, để game biết chính xác lúc nào
+// mới nên bắt đầu tính "thời gian trả lời" của bé (xem engine/audio-provider.js).
+function speak(text, onEnd) {
+  audio.speak(text, { lang: 'en-US', onEnd: onEnd });
 }
 
 // Gắn 1 lần lúc khởi động — mỗi game chỉ nhận đúng những gì nó cần thay

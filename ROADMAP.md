@@ -1516,6 +1516,37 @@ lại ~1 giây để kịp ngưỡng 2.5 giây. Khác với "How Many?" ở ch�
 kịp (bé chỉ cần bấm 1 lần, không phải nghe thử rồi xác nhận), nên chưa đổi
 gì để tránh tự ý mở rộng phạm vi.
 
+## Vòng 35 — Sửa nốt 3 game kia: chỉ tính giờ trả lời SAU khi đọc xong câu hỏi
+
+Tiếp nối Vòng 34 (đã sửa "How Many?"), người dùng yêu cầu sửa luôn 3 game
+còn lại (Khu rừng kỳ bí, Nông trại của bé, Help Bill!) — cùng gốc rễ: mốc
+`cardShownAt` được đặt ngay lúc VÀO câu (trước khi đọc), nên thời gian đọc
+TTS (~1-2 giây) bị tính oan vào "thời gian trả lời" của bé.
+
+**Sửa tận gốc ở tầng phát âm thanh** (`engine/audio-provider.js`): thêm
+tham số `opts.onEnd` cho `speak()` — gọi ĐÚNG 1 lần khi câu đọc xong (bắt cả
+2 sự kiện `onend`/`onerror` của `SpeechSynthesisUtterance`, và gọi ngay lập
+tức nếu trình duyệt không hỗ trợ đọc hoặc lệnh đọc bị lỗi — không để nơi
+gọi treo chờ mãi). Nếu có 1 lần gọi `speak()` MỚI hơn đè lên trước khi câu
+cũ kịp đọc xong thì `onEnd` của câu CŨ bị huỷ (không gọi) — chỉ `onEnd` của
+câu mới nhất có ý nghĩa. `app.js`'s `speak(text, onEnd)` truyền thẳng tham
+số này xuống.
+
+**3 game** (`forest.js`/`farm.js`/`bill.js`) đổi `speakXTarget()` để nhận
+callback này: `state.cardShownAt = Date.now()` giờ được đặt LẦN 2 — lần đầu
+(giữ nguyên như cũ) làm mốc dự phòng ngay lúc vào câu (đề phòng trình duyệt
+không đọc được), lần 2 (mới) ghi đè bằng callback `onEnd` ngay khi câu đọc
+xong — đây mới là mốc THẬT SỰ dùng để tính `responseTimeMs`. Bấm "Nghe lại"
+(replay thủ công) cũng reset lại mốc này sau khi đọc lại xong — hợp lý vì
+bé chủ động nghe lại thì tính thời gian phản xạ từ đó là đúng.
+
+Kiểm thử bằng Playwright: giả lập TTS thật mất 1.6 giây mới đọc xong (thay
+vì môi trường không có giọng đọc, `onerror` bắn gần như tức thì), bấm đúng
+ngay ~100ms sau khi "đọc xong" → cả 3 game đều lên LV bình thường
+(`correct-fast`), đúng như hành vi mong muốn — trước khi sửa, cùng thao
+tác này sẽ luôn bị chấm `correct-slow` giống hệt lỗi đã gặp ở "How Many?".
+28 unit test vẫn pass (không đổi gì ở engine chấm điểm, chỉ đổi MỐC đo).
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs

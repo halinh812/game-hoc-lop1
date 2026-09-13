@@ -88,9 +88,16 @@ export function createForestGame(ctx) {
     return row;
   }
 
+  // Chỉ bắt đầu tính "thời gian trả lời" của bé từ lúc câu đọc XONG (qua
+  // onEnd) — trước đó cardShownAt đã được đặt tạm ở renderForest/
+  // advanceForestRound làm mốc dự phòng (đề phòng trình duyệt không hỗ trợ
+  // đọc hoặc onEnd không gọi được vì lý do nào đó), nhưng mốc đúng luôn là
+  // đây. Nghe hết 1 câu vốn đã mất 1-2 giây — tính cả vào thời gian trả lời
+  // của bé sẽ oan cho bé (lỗi thật đã gặp ở "How Many?", xem Vòng 34 trong
+  // ROADMAP.md).
   function speakForestTarget() {
     var w = state.slots[state.targetIdx];
-    ctx.speak('Catch the ' + w.en + '!');
+    ctx.speak('Catch the ' + w.en + '!', function () { state.cardShownAt = Date.now(); });
   }
 
   // Chuông "ting" 2 nốt lên cao khi bấm đúng — tự tổng hợp bằng Web Audio,
