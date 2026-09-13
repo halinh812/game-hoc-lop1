@@ -35,6 +35,7 @@ chỉ cần 1 dáng đứng/ngồi đơn giản, thoải mái.
 - [Bước 15 — Thêm 10 đồ vật ở trường (đợt 2) cho game #3](#buoc-15)
 - [Bước 16 — Bộ ảnh cho game #4 "How Many?"](#buoc-16)
 - [Bước 17 — 10 ảnh con số 1-10 dễ thương, thay cho đếm hình lặp lại](#buoc-17)
+- [Bước 18 — Nhân vật + ảnh nền cho game #5 "Word Safari" (Đọc Chữ)](#buoc-18)
 
 <a id="buoc-1"></a>
 ## Bước 1 — Bạn tạo ảnh
@@ -1210,3 +1211,126 @@ nút xác nhận đã có sẵn trong `assets/howmany/`).
 `assets/howmany/numbers/`, đang chạy trong game (đã thay hẳn cụm N
 hình đồ vật lặp lại cũ bằng 1 ảnh con số duy nhất, xem Vòng 30 trong
 ROADMAP.md).
+
+<a id="buoc-18"></a>
+## Bước 18 — Nhân vật + ảnh nền cho game #5 "Word Safari" (Đọc Chữ)
+
+Game #5 luyện kỹ năng **Đọc** (khác hẳn 4 game trước: Nghe×3, Nhìn×1) —
+hiện 1 ảnh (vd con hổ) + phát âm thanh "tiger", bé đọc và bấm đúng 1
+trong 4 ô CHỮ bên dưới khớp với ảnh/âm vừa nghe. Từ vựng dùng lại toàn
+bộ ảnh con vật/đồ vật đã có (không cần vẽ thêm ảnh từ vựng nào) — chỉ
+cần 2 nhóm ảnh MỚI: (1) nhân vật đại diện của game (3 trạng thái cảm
+xúc, giống hệt cơ chế Bill/Cú ở Bước 12/16), (2) ảnh nền riêng.
+
+Chủ đề chọn: **"safari"** (bé đi thám hiểm tìm/đọc từ) — nhân vật là 1
+chú **chồn đất (meerkat)** nhỏ đội mũ thám hiểm, đeo ống nhòm (gợi liên
+tưởng "tìm kiếm"), đứng thẳng theo đúng dáng tự nhiên của loài chồn đất
+(dáng "canh gác" quen thuộc) — khác hẳn hổ (rừng)/chó (nông trại)/bạn
+nhỏ (Bill)/cú (How Many?) đã dùng, để bé dễ phân biệt game nào với
+game nào chỉ qua icon.
+
+### 18.1 — Nhân vật chồn đất thám hiểm (3 trạng thái)
+
+#### Khung phong cách (dán trước, dùng chung cho cả 3 trạng thái)
+
+```
+Cute chibi-style baby meerkat character illustration for a children's
+mobile learning game, flat vector cartoon art style with soft
+cel-shading and gentle gradient highlights, oversized round head with a
+much smaller compact plump body (chibi/baby proportions), extremely
+large glossy round eyes with a bright white catchlight sparkle, small
+rounded ears, soft sandy-tan fur with a lighter cream belly and a few
+simple small dark stripe markings low on the back, standing upright on
+its hind legs the way real meerkats naturally stand (a cute "lookout"
+pose), tiny front paws held near its chest, wearing a small round pair
+of toy binoculars hanging on a strap around its neck and a tiny khaki
+safari hat tilted slightly to one side, smooth rounded shapes with no
+sharp edges, thin clean dark outline around the whole character,
+saturated warm and cheerful color palette, standing pose facing
+slightly to the side, centered on a plain solid white (#FFFFFF)
+background, no ground shadow, no scenery, no other characters, no
+text, no watermark, no logo, square 1:1 composition, character fills
+about 75-85% of the frame.
+Avoid: realistic or photographic proportions, photographic texture,
+scary or fierce look, background scenery, multiple characters in
+frame, cropped body parts, text or watermark.
+```
+
+#### Prompt riêng: chờ đợi (ảnh mặc định — cũng dùng làm icon Trang chủ)
+
+```
+The meerkat standing calmly upright in a relaxed neutral pose, one tiny
+paw resting lightly on the binoculars around its neck, head tilted
+slightly to one side as if curiously scanning around, a soft
+closed-mouth content smile, calm patient and attentive expression —
+like it's quietly looking out for something interesting.
+```
+
+Lưu thành `meerkat-idle.png`.
+
+#### Prompt riêng: vui (bé đọc đúng)
+
+```
+The meerkat standing upright with both tiny front paws raised up and
+open in the air, big bright sparkling eyes, the safari hat tilted a
+touch more from excitement, a cheerful wide open-mouth happy
+expression, rosy cheek blush marks, as if it just spotted something
+wonderful.
+```
+
+Lưu thành `meerkat-happy.png`.
+
+#### Prompt riêng: buồn (bé đọc sai)
+
+```
+The meerkat standing with shoulders slightly slumped forward, both tiny
+paws hanging low in front, big sparkling eyes now looking slightly
+downcast with a small furrowed brow, the safari hat drooping a little
+to one side, a gentle disappointed but still cute and sympathetic (not
+scary) expression.
+```
+
+Lưu thành `meerkat-sad.png`.
+
+Lưu cả 3 ảnh vào `assets/_raw_incoming/` với đúng 3 tên trên, gửi qua
+Git theo đúng quy trình ở Bước 11 — tôi sẽ xoá nền + tối ưu + lưu vào
+`assets/characters/`.
+
+### 18.2 — Ảnh nền "safari" (đồng cỏ)
+
+Khác hẳn khu rừng rậm rạp ven sông của "Mystic Jungle" (Bước 7) — đổi
+sang **đồng cỏ savanna khô, thoáng, nắng vàng hoàng hôn** cho đúng cảm
+giác "safari". Tỉ lệ khung hình **dọc (portrait) 9:16**, chừa khoảng
+trống rõ ràng ở giữa/phía dưới khung hình (nơi ảnh từ vựng + 4 ô chữ sẽ
+hiển thị đè lên trên).
+
+```
+Vibrant, cheerful flat-vector cartoon illustration of an open African
+savanna/safari grassland, background art for a children's mobile
+learning game, in the same cute soft cel-shaded style as a chibi
+character illustration (smooth rounded shapes, no sharp or scary
+edges, thin clean outlines on major shapes, warm saturated colors,
+gentle gradient lighting). A warm golden-hour sky gradient at the top
+(soft orange-yellow fading to pale blue) with a large warm glowing sun
+low on the horizon and a few small fluffy clouds. In the middle
+distance, 2-3 small iconic flat-topped acacia trees silhouetted
+against the sky, and a gentle rolling hill line far in the background.
+Tall golden-green savanna grass tufts and a couple of smooth round
+boulders frame the left and right edges of the image, leaving the
+center and lower-middle area of the frame open as flat golden
+grassland (this open space is reserved for game content that will be
+placed on top later, so keep it visually calm and uncluttered, not the
+busiest part of the image). Bright, inviting, warm playful mood.
+Portrait orientation, 9:16 aspect ratio, full-bleed edge-to-edge
+illustration filling the entire frame. Absolutely no people, no
+children, no characters, no animals, no text, no letters, no logo, no
+watermark anywhere in the image.
+Avoid: photographic or realistic rendering, 3D render look, dark or
+scary mood, cluttered or busy composition, any human or animal
+character, any text or watermark, cropped or off-center composition.
+```
+
+Không cần xoá nền — giữ nguyên làm 1 ảnh nền đầy khung (JPG/PNG đều
+được). Gửi thẳng vào `assets/backgrounds/word-safari-bg.jpg` qua Git
+(không qua `_raw_incoming/`, giống cách làm ở Bước 7/9/14 — ảnh nền
+full-bleed không cần xử lý gì thêm).
