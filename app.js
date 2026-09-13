@@ -27,6 +27,7 @@ import { createFarmGame } from './games/nong-trai-cua-be/farm.js';
 import { createBillGame } from './games/bill/bill.js';
 import { createHowManyGame } from './games/how-many/howmany.js';
 import { createWordSafariGame } from './games/word-safari/wordsafari.js';
+import { createAbcVuiGame } from './games/abc-vui/abcvui.js';
 
 var CONTENT_PACKS = [
   'content/packs/colors-v1.json',
@@ -34,7 +35,8 @@ var CONTENT_PACKS = [
   'content/packs/numbers-v1.json',
   'content/packs/fruits-v1.json',
   'content/packs/family-v1.json',
-  'content/packs/objects-v1.json'
+  'content/packs/objects-v1.json',
+  'content/packs/alphabet-v1.json'
 ];
 
 var GAMES = [
@@ -43,7 +45,7 @@ var GAMES = [
   { id: 'bill', title: 'Help Bill!', emoji: '🎒', skill: 'listen', available: true },
   { id: 'howmany', title: 'How Many?', emoji: '🔢', skill: 'see', available: true },
   { id: 'wordsafari', title: 'Word Safari', emoji: '🔤', skill: 'read', available: true },
-  { id: 'g6', title: 'Sắp ra mắt', available: false },
+  { id: 'abcvui', title: 'ABC Vui', emoji: '🐥', skill: 'listen', available: true },
   { id: 'g7', title: 'Sắp ra mắt', available: false },
   { id: 'g8', title: 'Sắp ra mắt', available: false }
 ];
@@ -120,6 +122,14 @@ var wordSafariGame = createWordSafariGame({
   render: render,
   owlMascot: owlMascot
 });
+var abcVuiGame = createAbcVuiGame({
+  state: state,
+  getStore: function () { return store; },
+  getWords: function () { return WORDS; },
+  speak: speak,
+  render: render,
+  owlMascot: owlMascot
+});
 
 function render() {
   if (state.screen === 'loading') renderLoading();
@@ -136,6 +146,8 @@ function render() {
   else if (state.screen === 'howmanySummary') howManyGame.renderHowManySummary();
   else if (state.screen === 'wordsafari') wordSafariGame.renderWordSafari();
   else if (state.screen === 'wordsafariSummary') wordSafariGame.renderWordSafariSummary();
+  else if (state.screen === 'abcvui') abcVuiGame.renderAbcVui();
+  else if (state.screen === 'abcvuiSummary') abcVuiGame.renderAbcVuiSummary();
   else if (state.screen === 'parent') renderParent();
 }
 
@@ -229,6 +241,7 @@ function renderHome() {
       if (g.id === 'bill') return billGame.gameTileHtml(g.title);
       if (g.id === 'howmany') return howManyGame.gameTileHtml(g.title);
       if (g.id === 'wordsafari') return wordSafariGame.gameTileHtml(g.title);
+      if (g.id === 'abcvui') return abcVuiGame.gameTileHtml(g.title);
       return '<button type="button" class="gametile" data-id="' + g.id + '">' +
         '<span class="emoji">' + g.emoji + '</span><span class="name">' + g.title + '</span></button>';
     }
@@ -265,6 +278,7 @@ function renderHome() {
     else if (id === 'bill') billGame.startBillGame();
     else if (id === 'howmany') howManyGame.startHowManyGame();
     else if (id === 'wordsafari') wordSafariGame.startWordSafariGame();
+    else if (id === 'abcvui') abcVuiGame.startAbcVuiGame();
   });
 }
 

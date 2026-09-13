@@ -1772,3 +1772,46 @@ tra trên điện thoại:
   - Kiểm thử lại toàn bộ sau khi đổi cấu trúc nạp CSS/JS: 29 unit test
     pass, luồng chơi Word Safari + xuất/nhập file sao lưu + kích thước ô
     chọn game đều hoạt động đúng như trước.
+
+## Vòng 40 — Game #6 "ABC Vui" (bảng chữ cái) — bước nền tảng trước Word Safari
+
+Người dùng phản hồi "Word Safari" (game #5, đọc cả từ) **quá khó** với
+bé lớp 1 mới học — đúng thật: bé chưa biết mặt chữ cái thì không thể
+"đọc" được chữ nào cả, bất kể từ đó đã quen thuộc qua tai đến đâu. Cần 1
+game NỀN TẢNG dạy bảng chữ cái TRƯỚC.
+
+- **Nội dung mới**: `content/packs/alphabet-v1.json` — 26 chữ cái IN HOA
+  A-Z (chưa dạy chữ thường, theo yêu cầu người dùng — giữ đơn giản cho
+  bước đầu). Mỗi chữ chỉ cần `text_en`/`text_vi`/`emoji` (chính là chữ
+  cái đó) — KHÔNG cần ảnh AI, khác mọi content pack trước.
+- **Cơ chế**: tái dùng gần như nguyên vẹn cơ chế đã ổn định của "Help
+  Bill!" (`games/bill/bill.js`) — 4 thẻ cố định lưới 2×2, nghe âm thanh
+  đọc tên 1 chữ cái (không phải cả câu), bấm đúng thẻ thì chữ "bay" về
+  nhân vật + chuông vui, bấm sai thì thẻ đúng sáng lên. Chỉ khác: thẻ
+  hiển thị CHỮ CÁI TO bằng CSS/font (không phải ảnh minh hoạ) — nên game
+  này chạy được ngay, không cần chờ ảnh nào để bắt đầu chơi.
+- **Kỹ năng**: Nghe (skill=listen) — dùng chung skill với forest/farm/
+  bill (đã có tiền lệ nhiều game share 1 skill trên các vốn từ khác
+  nhau), không cần sửa Learning Engine.
+- **Nhân vật**: gà con "học trò" (đeo kính), 3 trạng thái cảm xúc — ảnh
+  AI-ảnh-ngoài do người dùng tự tạo (Bước 19 trong PROMPT.md), CHƯA có
+  lúc build — game chạy với fallback emoji 🐥 to (giống hệt cách
+  bill.js/wordsafari.js đã làm, chỉ cần đổi tên file khi ảnh về sau).
+- File mới: `games/abc-vui/abcvui.js` + `abcvui.css`, dựng lại đúng cấu
+  trúc HTML/CSS của `games/bill/bill.css` (`.billstage`/`.billmascotwrap`
+  /`.billmascot`/`.billflyicon`...) nhưng đổi tên lớp thành `abc*` và
+  thay phần hiển thị ảnh bằng `.abcletter` (thẻ chữ to, 4 màu nền cố
+  định theo vị trí, không theo chữ cái). Nối vào `app.js` (thêm pack vào
+  `CONTENT_PACKS`, import, `GAMES`, factory, `render()`/`renderHome()`/
+  click handler) + thêm CSS vào danh sách nạp động trong `index.html`
+  (Vòng 39).
+- Kiểm thử bằng Playwright: 4 thẻ hiện đúng 4 chữ cái ngẫu nhiên, bắt
+  đúng chữ đang được đọc (theo dõi `speechSynthesis.speak` thật) rồi bấm
+  đúng thẻ → tăng đúng LV kỹ năng "Nghe" của đúng chữ cái đó; luồng trả
+  lời sai (đánh dấu đúng/sai + đổi cảm xúc); chơi đủ 10 câu đúng → màn
+  thắng cuộc. Đã chụp ảnh QA Trang chủ (6 ô đều 193×171px, khớp
+  `grid-auto-rows:1fr` ở Vòng 39) + màn chơi + màn thắng — giao diện đẹp,
+  thẻ chữ cái màu sắc rực rỡ dễ phân biệt. 29 unit test hiện có vẫn pass
+  nguyên (không đụng gì tới `engine/`). Tính năng Sao lưu/Khôi phục tiến
+  độ (Vòng 38) kiểm thử lại vẫn hoạt động đúng sau khi thêm gói nội dung
+  mới.
