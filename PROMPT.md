@@ -36,6 +36,7 @@ chỉ cần 1 dáng đứng/ngồi đơn giản, thoải mái.
 - [Bước 16 — Bộ ảnh cho game #4 "How Many?"](#buoc-16)
 - [Bước 17 — 10 ảnh con số 1-10 dễ thương, thay cho đếm hình lặp lại](#buoc-17)
 - [Bước 18 — Nhân vật + ảnh nền cho game #5 "Word Safari" (Đọc Chữ)](#buoc-18)
+- [Bước 19 — Nhân vật + ảnh nền cho game #6 "ABC Vui" (Bảng chữ cái)](#buoc-19)
 
 <a id="buoc-1"></a>
 ## Bước 1 — Bạn tạo ảnh
@@ -1334,3 +1335,120 @@ Không cần xoá nền — giữ nguyên làm 1 ảnh nền đầy khung (JPG/P
 được). Gửi thẳng vào `assets/backgrounds/word-safari-bg.jpg` qua Git
 (không qua `_raw_incoming/`, giống cách làm ở Bước 7/9/14 — ảnh nền
 full-bleed không cần xử lý gì thêm).
+
+<a id="buoc-19"></a>
+## Bước 19 — Nhân vật + ảnh nền cho game #6 "ABC Vui" (Bảng chữ cái)
+
+Game #6 dạy bé 26 chữ cái IN HOA (A-Z) — nghe âm thanh đọc tên 1 chữ cái,
+bấm đúng 1 trong 4 thẻ chữ hiện trên màn. Khác mọi game trước: **thẻ chữ
+cái không cần ảnh AI** — chỉ là chữ to hiển thị bằng CSS/font, không phải
+minh hoạ. Vì vậy chỉ cần 2 nhóm ảnh: (1) nhân vật đại diện (3 trạng thái
+cảm xúc, đúng cơ chế Bill/Cú/Chồn đất ở Bước 12/16/18), (2) ảnh nền riêng.
+
+Chủ đề chọn: **gà con** đang tập học chữ — đeo kính tròn nhỏ kiểu "học
+trò chăm chỉ", khác hẳn 5 linh vật đã có (hổ/chó/bạn nhỏ/cú/chồn đất),
+không con nào đeo kính nên dễ phân biệt ngay từ icon.
+
+### 19.1 — Nhân vật gà con "học trò" (3 trạng thái)
+
+#### Khung phong cách (dán trước, dùng chung cho cả 3 trạng thái)
+
+```
+Cute chibi-style baby chick character illustration for a children's
+mobile learning game, flat vector cartoon art style with soft
+cel-shading and gentle gradient highlights, oversized round fluffy
+head with a much smaller compact round body (chibi/baby proportions),
+extremely large glossy round eyes with a bright white catchlight
+sparkle, soft fluffy bright yellow feathers with a slightly lighter
+fluffy patch on the belly, a small round orange beak, tiny orange
+stub feet, wearing a small pair of round black-rimmed toy eyeglasses
+low on its beak (a cute "studious little pupil" look), no other
+clothing or props, smooth rounded shapes with no sharp edges, thin
+clean dark outline around the whole character, saturated warm and
+cheerful color palette, standing pose facing slightly to the side,
+centered on a plain solid white (#FFFFFF) background, no ground
+shadow, no scenery, no other characters, no text, no watermark, no
+logo, square 1:1 composition, character fills about 75-85% of the
+frame.
+Avoid: realistic or photographic proportions, photographic texture,
+scary or fierce look, background scenery, multiple characters in
+frame, cropped body parts, text or watermark.
+```
+
+#### Prompt riêng: chờ đợi (ảnh mặc định — cũng dùng làm icon Trang chủ)
+
+```
+The chick standing calmly upright in a relaxed neutral pose, head
+tilted slightly to one side as if thinking, eyeglasses sitting neatly,
+a soft closed-mouth content smile, calm patient and attentive
+expression — like a diligent little pupil waiting for the next
+question.
+```
+
+Lưu thành `chick-idle.png`.
+
+#### Prompt riêng: vui (bé trả lời đúng)
+
+```
+The chick standing upright with both tiny wings raised up and open in
+the air, big bright sparkling eyes, eyeglasses tilted a touch from
+excitement, a cheerful wide open-beak happy expression, rosy cheek
+blush marks, as if it just got a gold star on its homework.
+```
+
+Lưu thành `chick-happy.png`.
+
+#### Prompt riêng: buồn (bé trả lời sai)
+
+```
+The chick standing with shoulders slightly slumped forward, both tiny
+wings drooping low, big sparkling eyes now looking slightly downcast
+with a small furrowed brow, eyeglasses slipped a little down the
+beak, a gentle disappointed but still cute and sympathetic (not
+scary) expression.
+```
+
+Lưu thành `chick-sad.png`.
+
+Lưu cả 3 ảnh vào `assets/_raw_incoming/` với đúng 3 tên trên, gửi qua
+Git theo đúng quy trình ở Bước 11 — tôi sẽ xoá nền + tối ưu + lưu vào
+`assets/characters/`.
+
+### 19.2 — Ảnh nền "góc học ABC"
+
+Khác hẳn sân trường (Bill, Bước 14) hay bảng đen lớp học (How Many?,
+Bước 16) — đổi sang **góc chơi/học ở nhà, ấm áp, nhiều khối chữ cái gỗ
+đầy màu sắc** cho đúng cảm giác "học vỡ lòng". Tỉ lệ khung hình **dọc
+(portrait) 9:16**, chừa khoảng trống rõ ràng ở giữa/phía dưới khung hình
+(nơi 4 thẻ chữ cái sẽ hiển thị đè lên trên).
+
+```
+Vibrant, cheerful flat-vector cartoon illustration of a cozy children's
+playroom/nursery corner, background art for a children's mobile
+learning game, in the same cute soft cel-shaded style as a chibi
+character illustration (smooth rounded shapes, no sharp or scary
+edges, thin clean outlines on major shapes, warm saturated pastel
+colors, gentle gradient lighting). A soft pastel wall in the upper
+background (warm cream or light mint), with a large round sunny window
+letting in warm golden morning light from one side. Scattered around
+the edges of the frame: colorful wooden alphabet building blocks in
+red, yellow, blue and green stacked in small loose piles, a couple of
+soft rounded floor cushions, and a small potted plant. A soft round
+rug covers the lower-middle area of the frame in a warm cream color,
+left open and uncluttered (this open space is reserved for game
+content that will be placed on top later, so keep it visually calm,
+not the busiest part of the image). Bright, inviting, warm playful
+mood. Portrait orientation, 9:16 aspect ratio, full-bleed edge-to-edge
+illustration filling the entire frame. Absolutely no people, no
+children, no characters, no animals, no readable text or letters on
+any block or poster, no logo, no watermark anywhere in the image.
+Avoid: photographic or realistic rendering, 3D render look, dark or
+scary mood, cluttered or busy composition, any human or animal
+character, any readable text/letters/watermark, cropped or off-center
+composition.
+```
+
+Không cần xoá nền — giữ nguyên làm 1 ảnh nền đầy khung (JPG/PNG đều
+được). Gửi thẳng vào `assets/backgrounds/abc-bg.jpg` qua Git (không qua
+`_raw_incoming/`, giống cách làm ở Bước 7/9/14/18.2 — ảnh nền full-bleed
+không cần xử lý gì thêm).
