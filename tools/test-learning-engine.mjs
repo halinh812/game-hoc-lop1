@@ -77,8 +77,12 @@ test('applyAnswer: correct-fast trên kỹ năng "listen" -> LV tăng lên 1, kh
 
 test('applyAnswer: 2 kỹ năng của CÙNG 1 từ tiến độ hoàn toàn tách biệt', function () {
   var words = {};
-  applyAnswer(words, 'w1', 'listen', 'correct-fast');
-  applyAnswer(words, 'w1', 'listen', 'correct-fast');
+  var t0 = Date.now();
+  applyAnswer(words, 'w1', 'listen', 'correct-fast', { now: t0 });
+  // Lần đúng thứ 2 phải cách đủ lâu để từ TỚI HẠN ôn lại (LV1 = 1 phút) thì
+  // mới được tính tăng LV — trả lời lại ngay lập tức không tăng (xem
+  // applyAnswer / test "chưa tới hạn ôn" bên dưới).
+  applyAnswer(words, 'w1', 'listen', 'correct-fast', { now: t0 + 2 * 60000 });
   applyAnswer(words, 'w1', 'read', 'wrong');
   var listenP = getSkillProgress(words, 'w1', 'listen');
   var readP = getSkillProgress(words, 'w1', 'read');
@@ -122,6 +126,30 @@ test('applyAnswer: LV không vượt quá MAX_LEVEL (10) hay xuống dưới 0',
   assert.equal(words2.w2.skills.write.level, 0);
 });
 
+test('applyAnswer: đúng nhưng từ CHƯA TỚI HẠN ôn -> giữ nguyên LV và lịch ôn', function () {
+  // Từ chưa tới hạn chỉ lên màn hình để lấp cho đủ ô (xem buildRound). Nhớ
+  // được ngay sau vài giây không chứng minh bé đã nhớ lâu, nên không tăng LV
+  // và cũng không được dời lịch ôn đã hẹn.
+  var now = Date.now();
+  var nextCu = now + 60 * 60000;
+  var words = { w1: { skills: { listen: { level: 4, next: nextCu, seen: true, correctCount: 4, wrongCount: 0 } } } };
+  var p = applyAnswer(words, 'w1', 'listen', 'correct-fast', { now: now });
+  assert.equal(p.level, 4, 'LV giữ nguyên, không tăng');
+  assert.equal(p.next, nextCu, 'lịch ôn giữ nguyên, không bị dời');
+  assert.equal(p.correctCount, 5, 'vẫn ghi nhận là 1 lần trả lời đúng');
+});
+
+test('applyAnswer: SAI ở từ chưa tới hạn ôn -> vẫn bị giảm LV như thường', function () {
+  // Sai là bằng chứng thật sự rằng bé chưa nhớ, bất kể đã cách quãng bao lâu.
+  var now = Date.now();
+  var nextCu = now + INTERVALS_MIN[4] * 60000; // đúng lịch của LV4: 2 ngày nữa
+  var words = { w1: { skills: { listen: { level: 4, next: nextCu, seen: true, correctCount: 4, wrongCount: 0 } } } };
+  var p = applyAnswer(words, 'w1', 'listen', 'wrong', { now: now });
+  assert.equal(p.level, 3);
+  assert.equal(p.wrongCount, 1);
+  assert.ok(p.next < nextCu, 'bị hẹn ôn lại sớm hơn lịch cũ');
+});
+
 test('applyAnswer: next = now + đúng khoảng INTERVALS_MIN theo LV mới', function () {
   var words = {};
   var before = Date.now();
@@ -148,10 +176,13 @@ test('totalStars: cộng LV mọi kỹ năng của mọi từ, 0 khi chưa học
   assert.equal(totalStars({}), 0);
   assert.equal(totalStars(null), 0);
   var words = {};
-  applyAnswer(words, 'tiger', 'listen', 'correct-fast'); // listen LV0->1
-  applyAnswer(words, 'tiger', 'read', 'correct-fast');   // read LV0->1
-  applyAnswer(words, 'lion', 'listen', 'correct-fast');
-  applyAnswer(words, 'lion', 'listen', 'correct-fast');  // listen LV0->1->2
+  var t0 = Date.now();
+  applyAnswer(words, 'tiger', 'listen', 'correct-fast', { now: t0 }); // listen LV0->1
+  applyAnswer(words, 'tiger', 'read', 'correct-fast', { now: t0 });   // read LV0->1
+  applyAnswer(words, 'lion', 'listen', 'correct-fast', { now: t0 });
+  // Cách 2 phút để "lion" tới hạn ôn (LV1 = 1 phút) thì lần đúng thứ 2 mới
+  // được tính tăng LV tiếp.
+  applyAnswer(words, 'lion', 'listen', 'correct-fast', { now: t0 + 2 * 60000 }); // LV1->2
   assert.equal(totalStars(words), 4, 'tiger(1+1) + lion(2) = 4 sao');
 });
 
@@ -185,6 +216,24 @@ test('buildRound: due theo kỹ năng "read" không bị ảnh hưởng bởi ti
   var roundRead = buildRound(words, progress, 'read', { size: 6, now: now, rng: seededRng(3) });
   var idsRead = roundRead.map(function (w) { return w.id; });
   assert.ok(idsRead.indexOf('w1') !== -1, 'w1 phải xuất hiện trong round "read" vì kỹ năng read của nó chưa học');
+});
+
+test('buildRound: LUÔN đủ size kể cả khi hết từ mới và chỉ vài từ đến hạn', function () {
+  // Lỗi thật đã gặp: bé học hết cả bộ (không còn từ mới), chỉ 1 từ đến hạn ->
+  // "Khu rừng kỳ bí" chỉ hiện 1 con thay vì đủ 4. Từ đã học nhưng chưa tới
+  // hạn phải được dùng để lấp cho đủ ô.
+  var words = fakeWords();
+  var now = Date.now();
+  var progress = {};
+  words.forEach(function (w) {
+    progress[w.id] = { skills: { listen: { level: 3, next: now + 60 * 60000, seen: true, correctCount: 3, wrongCount: 0 } } };
+  });
+  progress[words[0].id].skills.listen.next = now - 1000; // đúng 1 từ đến hạn
+
+  var round = buildRound(words, progress, 'listen', { size: 4, now: now, rng: seededRng(9) });
+  assert.equal(round.length, 4, 'phải đủ 4 ô');
+  assert.equal(new Set(round.map(function (w) { return w.id; })).size, 4, '4 ô phải là 4 từ khác nhau');
+  assert.ok(round.some(function (w) { return w.id === words[0].id; }), 'từ đến hạn vẫn phải có mặt');
 });
 
 test('buildRound: trong số từ đến hạn, tỉ lệ sai cao hơn được ưu tiên lên trước', function () {

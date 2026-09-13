@@ -1426,6 +1426,49 @@ chỉnh sửa/ghi đè ảnh nào. Tác dụng phụ chấp nhận được: c�
 chứa "Help Bill!"+"How Many?" cao hơn hàng "Mystic Jungle"+"My Little
 Farm" một chút (do CSS Grid tự giãn hàng theo ô cao nhất).
 
+## Vòng 33 — Sửa lỗi màn chơi không đủ 4 ô + không "cày" LV được nữa
+
+Người dùng báo: chơi nhiều thì "Khu rừng kỳ bí" có lúc chỉ hiện 3 con, có
+lúc 1 con thay vì đủ 4, và tự đoán nguyên nhân nằm ở logic chọn từ theo LV
+— đoán đúng.
+
+**Nguyên nhân** (`engine/learning-engine.js`, `buildRound`): từ trong bộ
+được chia đúng 2 rổ — "đến hạn ôn" (`seen && next <= now`) và "chưa học bao
+giờ" (`!seen`). Nhóm thứ 3 — **đã học rồi nhưng chưa tới hạn ôn lại** —
+không thuộc rổ nào nên không bao giờ được dùng. Khi bé đã học hết cả bộ
+(hết từ mới) mà chỉ 1-3 từ đến hạn, `round` chỉ có 1-3 phần tử → màn chơi
+render đúng bấy nhiêu ô. Nhánh dự phòng `round.length === 0` chỉ cứu được
+trường hợp rỗng hoàn toàn, không cứu trường hợp thiếu một phần. Lỗi này
+dùng chung cho **cả 3 game 4 ô** (Khu rừng kỳ bí, Nông trại của bé, Help
+Bill!) vì cùng gọi `buildRound(..., { size: 4 })`; "How Many?" (size 1)
+không dính vì luôn rơi vào nhánh dự phòng.
+
+**Sửa 1 — luôn đủ số ô:** sau khi lấy due + từ mới, nếu vẫn thiếu thì lấp
+nốt bằng từ "đã học nhưng chưa tới hạn" (xáo trộn để đa dạng). Nhánh
+`round.length === 0` cũ trở thành thừa (trường hợp rỗng giờ tự rơi đúng vào
+nhánh lấp mới) nên xoá hẳn.
+
+**Sửa 2 — chưa tới lượt thì không tăng LV:** theo đúng yêu cầu người dùng,
+từ được đưa lên chỉ để lấp ô không được hưởng tiến độ. `applyAnswer` giờ tự
+kiểm tra: nếu từ đã học và lịch ôn còn ở tương lai thì trả lời ĐÚNG chỉ ghi
+nhận `correctCount`, **giữ nguyên cả LV lẫn lịch ôn**. Trả lời SAI vẫn phạt
+như thường (sai là bằng chứng thật sự bé chưa nhớ, không phụ thuộc đã cách
+quãng bao lâu). Kiểm tra nằm trong engine chứ không ở từng game, nên cả 4
+game (và game sau này) tự động theo đúng luật, không cần nhớ truyền cờ.
+
+Tác dụng phụ tích cực: trước đây bé (hoặc người test) trả lời đúng cùng 1
+từ liên tục trong vài giây là LV tăng vù vù dù chưa hề cách quãng — giờ
+không "cày" LV kiểu đó được nữa, LV phản ánh đúng trí nhớ dài hạn hơn.
+
+- 2 unit test cũ khẳng định hành vi CŨ (trả lời đúng 2 lần liên tiếp trong
+  cùng 1 mili-giây được +2 LV) nên phải sửa lại cho đúng luật mới: giãn mốc
+  thời gian giữa 2 lần trả lời bằng tham số `opts.now` mới của `applyAnswer`.
+- Thêm 3 test mới khoá luật: đúng-khi-chưa-tới-hạn giữ nguyên LV + lịch ôn;
+  sai-khi-chưa-tới-hạn vẫn giảm LV; `buildRound` luôn trả đủ `size`.
+- Kiểm thử thêm bằng Playwright trên máy thật với dữ liệu tiến độ giả lập
+  "bé đã học hết bộ": 1 con đến hạn / 3 con đến hạn / không con nào đến hạn
+  → cả 3 trường hợp đều hiện đủ 4 con. 28 unit test pass.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs

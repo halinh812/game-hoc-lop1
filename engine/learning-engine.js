@@ -59,25 +59,36 @@ export function getSkillProgress(wordsMap, wordId, skill) {
 
 // Áp dụng 1 kết quả trả lời vào ĐÚNG 1 kỹ năng của 1 từ. Trả về bản ghi
 // progress mới của riêng kỹ năng đó (4 kỹ năng còn lại của từ không đổi).
-export function applyAnswer(wordsMap, wordId, skill, outcome) {
+export function applyAnswer(wordsMap, wordId, skill, outcome, opts) {
+  opts = opts || {};
+  var now = opts.now || Date.now();
   var p = ensureSkillProgress(wordsMap, wordId, skill);
+
+  // "Chưa tới lượt ôn" = từ này đã học rồi và lịch ôn vẫn còn ở tương lai.
+  // Nó chỉ được đưa lên màn hình để lấp cho đủ số ô (xem buildRound), chứ
+  // không phải vì đến hạn. Trả lời ĐÚNG một từ như vậy không được tính là
+  // "nhớ thêm 1 mốc" — bản chất ngắt quãng là phải cách đủ lâu mới biết bé
+  // còn nhớ hay không, nhớ ngay sau 1 phút không chứng minh được gì — nên
+  // giữ nguyên cả LV lẫn lịch ôn cũ. Ngược lại, trả lời SAI thì vẫn phạt
+  // như thường: sai là bằng chứng thật sự rằng bé chưa nhớ, bất kể đã cách
+  // quãng bao lâu.
+  var notDueYet = p.seen && p.next > now;
   p.seen = true;
 
-  if (outcome === 'correct-fast') {
-    p.level = Math.min(MAX_LEVEL, p.level + 1);
+  if (outcome === 'correct-fast' || outcome === 'correct-slow') {
     p.correctCount = (p.correctCount || 0) + 1;
-  } else if (outcome === 'correct-slow') {
+    if (notDueYet) return p;
     // Đúng nhưng chậm: công nhận đúng, nhưng chỉ tăng LV nếu còn thấp
     // (chưa chắc). Ở LV cao, đúng-chậm giữ nguyên thay vì công nhận thuộc
     // quá sớm.
-    p.level = p.level < 2 ? Math.min(MAX_LEVEL, p.level + 1) : p.level;
-    p.correctCount = (p.correctCount || 0) + 1;
+    var duocTangLevel = outcome === 'correct-fast' || p.level < 2;
+    if (duocTangLevel) p.level = Math.min(MAX_LEVEL, p.level + 1);
   } else {
     p.level = Math.max(0, p.level - 1);
     p.wrongCount = (p.wrongCount || 0) + 1;
   }
 
-  p.next = Date.now() + INTERVALS_MIN[p.level] * 60000;
+  p.next = now + INTERVALS_MIN[p.level] * 60000;
   return p;
 }
 
@@ -143,8 +154,17 @@ export function buildRound(pool, wordsMap, skill, opts) {
   if (round.length < size) {
     round = round.concat(shuffle(brandNew, rng).slice(0, size - round.length));
   }
-  if (round.length === 0) {
-    round = shuffle(pool.slice(), rng).slice(0, size);
+  // Lấp nốt cho ĐỦ "size" bằng những từ ĐÃ HỌC NHƯNG CHƯA TỚI HẠN ôn — nhóm
+  // này trước đây không thuộc rổ "due" lẫn rổ "brandNew" nên bị bỏ quên hẳn:
+  // khi bé đã học hết cả bộ (không còn từ mới) mà chỉ 1-3 từ đến hạn, màn
+  // chơi chỉ hiện được 1-3 ô thay vì đủ 4 (lỗi thật đã gặp ở "Khu rừng kỳ
+  // bí"). Chúng chỉ đóng vai trò lấp ô cho đủ — trả lời đúng một từ chưa tới
+  // hạn KHÔNG được tăng LV (xem applyAnswer).
+  if (round.length < size) {
+    var picked = {};
+    round.forEach(function (w) { picked[w.id] = true; });
+    var filler = pool.filter(function (w) { return !picked[w.id]; });
+    round = round.concat(shuffle(filler, rng).slice(0, size - round.length));
   }
   return shuffle(round, rng);
 }
