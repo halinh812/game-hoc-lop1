@@ -139,6 +139,18 @@ test('applyAnswer: đúng nhưng từ CHƯA TỚI HẠN ôn -> giữ nguyên LV 
   assert.equal(p.correctCount, 5, 'vẫn ghi nhận là 1 lần trả lời đúng');
 });
 
+test('applyAnswer: opts.skipDueGate -> vẫn tăng LV dù chưa tới hạn (kho từ nhỏ, vd "How Many?")', function () {
+  // Game chỉ hỏi 1 câu/lượt với kho từ rất nhỏ (10 số) lặp hết vòng nhanh
+  // hơn hẳn mốc hẹn ôn LV1 -> luật "chưa tới hạn" (sinh ra để chặn Ô LẤP
+  // CHỖ TRỐNG ở màn 4 ô) không áp dụng, dùng skipDueGate để bỏ qua.
+  var now = Date.now();
+  var nextCu = now + 60 * 60000; // còn 1 tiếng nữa mới tới hạn theo lịch cũ
+  var words = { w1: { skills: { see: { level: 1, next: nextCu, seen: true, correctCount: 1, wrongCount: 0 } } } };
+  var p = applyAnswer(words, 'w1', 'see', 'correct-fast', { now: now, skipDueGate: true });
+  assert.equal(p.level, 2, 'LV vẫn tăng dù chưa tới hạn');
+  assert.equal(p.next, now + INTERVALS_MIN[2] * 60000, 'lịch ôn được TÍNH LẠI theo LV mới (10 phút), không giữ lịch cũ (1 tiếng)');
+});
+
 test('applyAnswer: SAI ở từ chưa tới hạn ôn -> vẫn bị giảm LV như thường', function () {
   // Sai là bằng chứng thật sự rằng bé chưa nhớ, bất kể đã cách quãng bao lâu.
   var now = Date.now();

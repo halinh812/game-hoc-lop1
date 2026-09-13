@@ -1547,6 +1547,41 @@ ngay ~100ms sau khi "đọc xong" → cả 3 game đều lên LV bình thường
 tác này sẽ luôn bị chấm `correct-slow` giống hệt lỗi đã gặp ở "How Many?".
 28 unit test vẫn pass (không đổi gì ở engine chấm điểm, chỉ đổi MỐC đo).
 
+## Vòng 36 — "How Many?" vẫn không lên LV: luật chống-farm (Vòng 33) áp nhầm cho kho từ nhỏ
+
+Người dùng báo tiếp: chơi How Many? khá nhanh nhưng vẫn không lên LV. Nghi
+lúc đầu là do sửa Vòng 34 (đổi sang chấm theo số bông đã nghe) chưa đúng —
+kiểm tra bằng Playwright thì logic Vòng 34 vẫn đúng y nguyên. Đào sâu hơn
+bằng cách mô phỏng ĐÚNG hành vi người dùng mô tả — chơi 24 lượt liên tục,
+luôn trả lời đúng càng nhanh càng tốt — mới lộ ra thủ phạm thật:
+
+**Nguyên nhân:** luật "chưa tới hạn ôn thì không tăng LV" thêm ở Vòng 33
+(chặn Ô LẤP CHỖ TRỐNG trong màn 4 ô của forest/farm/bill) bị `applyAnswer`
+áp dụng chung cho MỌI game qua engine dùng chung — kể cả How Many?, dù màn
+này không hề có khái niệm "ô lấp chỗ trống" (chỉ hỏi đúng 1 câu/lượt).
+Kho số của How Many? chỉ có **10 từ** (numbers-v1.json) — bé chơi bình
+thường cũng lặp hết 1 vòng trong khoảng 15-20 giây, NHANH HƠN HẲN mốc hẹn
+ôn của LV1 (1 phút). Nên ngay sau lượt đầu tiên đi hết 10 số, mọi lượt
+tiếp theo đều rơi vào "đã học rồi nhưng chưa tới hạn" → LV bị đứng yên
+vĩnh viễn dù bé trả lời đúng liên tục — y hệt triệu chứng "chơi nhanh mà
+không lên LV" người dùng mô tả, nhưng gốc rễ khác hẳn lần trước (Vòng 34 là
+sai CÁCH ĐO, lần này là chặn NHẦM ĐỐI TƯỢNG).
+
+Xác nhận bằng Playwright — chơi 24 lượt liên tục toàn đúng: 10 lượt đầu
+(mỗi số 1 lần) lên đều LV0→1, nhưng lượt 11 trở đi (bắt đầu lặp lại số cũ)
+correctCount vẫn tăng còn LV đứng im hoàn toàn ở tất cả các lượt sau.
+
+**Sửa:** thêm `opts.skipDueGate` cho `applyAnswer` — bỏ qua hẳn luật
+"chưa tới hạn" khi bật cờ này. How Many? truyền `{ skipDueGate: true }` vì
+cơ chế riêng của màn (phải nghe đúng bông rồi mới xác nhận được, xem Vòng
+34) đã tự có chống-farm riêng, không cần thêm lớp chặn theo ngày-giờ vốn
+chỉ hợp với kho từ lớn (20-40 từ như 3 game kia). 3 game 4-ô còn lại GIỮ
+NGUYÊN luật cũ, không đổi gì.
+
+Thêm 1 unit test khoá hành vi `skipDueGate`. Kiểm thử lại bằng Playwright
+với đúng kịch bản 24 lượt liên tục: LV giờ tăng đều đặn theo từng câu đúng
+(không còn đứng yên sau lượt 10). 29 unit test pass.
+
 ## Ghi chú kỹ thuật lâu dài
 
 - Âm thanh: Web Speech API (hiện tại) → Google Cloud TTS Neural2 / ElevenLabs
