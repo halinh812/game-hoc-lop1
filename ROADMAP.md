@@ -1698,3 +1698,37 @@ cơ chế + kỹ năng của 4 game trước.
   khớp phong cách chung, icon Trang chủ cùng cỡ các game khác, chồn đất
   không che nút bấm. 29 unit test hiện có vẫn pass nguyên (không cần sửa
   `engine/` cho game này).
+
+## Vòng 38 — "Sao lưu / Khôi phục tiến độ" trong Trang phụ huynh
+
+Sau khi đổi trò chơi mới, người dùng gặp tình huống 1 điện thoại (điện
+thoại cũ bé hay chơi) không tự cập nhật do trình duyệt lưu cache bản
+trang cũ — hỏi cách xoá cache thì lo mất tiến độ đã lưu (tiến độ chỉ nằm
+trong `localStorage` của ĐÚNG 1 trình duyệt/1 máy, xoá "dữ liệu trang
+web" — khác "cache/ảnh đệm" — sẽ mất sạch). Yêu cầu: hướng dẫn sao lưu
+tiến độ của bé trước khi xoá.
+
+Thay vì chỉ hướng dẫn bằng console trình duyệt (rất khó thao tác trên
+điện thoại, đặc biệt iOS Safari không có console nếu không nối máy Mac),
+xây hẳn 1 tính năng ngay trong Trang phụ huynh (`app.js`), luôn hiện ở
+mọi bản (kể cả GitHub Pages tĩnh, khác khối "Thêm/sửa từ vựng" chỉ hiện
+khi chạy qua server quản trị local):
+
+- **💾 Tải file sao lưu**: xuất toàn bộ `store` (progress-store.js) ra 1
+  file `.json` tải về máy (`tien-do-<tên bé>-<ngày>.json`), dùng
+  `Blob` + `<a download>` — hoạt động bình thường trên trình duyệt thật
+  (khác giới hạn sandbox riêng của Claude Artifacts).
+- **📂 Khôi phục từ file**: chọn lại file đã tải, đọc bằng `FileReader`,
+  kiểm tra hợp lệ (có `words`, đúng `CURRENT_VERSION` — file phiên bản cũ
+  hơn báo lỗi rõ ràng thay vì để `migrate()` âm thầm xoá sạch khi tải lại
+  trang), hỏi xác nhận (`window.confirm`, có kèm tên hồ sơ trong file để
+  phụ huynh biết đang khôi phục đúng bé nào) vì thao tác này THAY THẾ
+  toàn bộ tiến độ hiện tại trên máy, rồi `saveProgress()` + tải lại trang.
+- Tên file tự động bỏ dấu tiếng Việt (`profile.name` qua NFD normalize +
+  xử lý riêng "đ/Đ" — cùng kỹ thuật `cmSlugify()` đã dùng cho content
+  manager) để không lỗi ký tự trên hệ điều hành khác nhau.
+- Kiểm thử bằng Playwright: xuất file đúng nội dung + đúng tên, xoá sạch
+  `localStorage` mô phỏng máy mới/cache bị xoá, nạp lại file vừa xuất →
+  tiến độ khôi phục khớp 100% với bản gốc (kiểm tra tới từng LV/next/
+  correctCount của 1 từ cụ thể). 29 unit test hiện có vẫn pass nguyên
+  (không đụng gì tới `engine/`).
