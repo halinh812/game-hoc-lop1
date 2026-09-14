@@ -159,20 +159,55 @@ export function createKitchenGame(ctx) {
     ctx.speak(w.promptAudioText || w.en, function () { state.cardShownAt = Date.now(); });
   }
 
+  // Ảnh nền phải giữ ĐÚNG tỉ lệ khung hình gốc (1536:2752) để % toạ độ
+  // của HOTSPOTS/GLOW_ASSETS luôn khớp đúng vị trí thật (xem giải thích ở
+  // đầu file) — nhưng vẫn cần to HẾT MỨC CÓ THỂ trong khoảng trống thật
+  // sự còn lại (giữa topbar và nút loa), để nhìn "full màn hình" giống
+  // các game khác thay vì co nhỏ lại thành 1 khung bé. LỖI THẬT đã gặp ở
+  // bản trước: dùng công thức CSS cố định
+  // "calc((100vh - 210px) * 0.5581)" để đoán trước chiều cao khả dụng —
+  // con số "210px" chỉ đúng tình cờ ở 1 vài kích thước màn hình, sai ở đa
+  // số máy thật (thường ra kết quả NHỎ HƠN NHIỀU không gian thật đang có
+  // trống), khiến khung ảnh trông "bé tí giữa màn hình". Sửa triệt để
+  // bằng JS: đo ĐÚNG kích thước thật còn trống của .kitchenstagewrap
+  // (getBoundingClientRect(), không đoán trước bằng số cố định nào), rồi
+  // tự tính khung to nhất vừa khít (chiều rộng đầy khung nếu chiều cao
+  // theo tỉ lệ đó vẫn vừa, ngược lại lấy đầy chiều cao) — luôn chính xác
+  // với MỌI kích thước màn hình thật, không cần đoán trước bất kỳ số nào.
+  var KITCHEN_IMG_RATIO = 1536 / 2752;
+  function fitKitchenStage() {
+    var wrap = document.getElementById('kitchenStageWrap');
+    var stage = document.getElementById('kitchenStage');
+    if (!wrap || !stage) return;
+    var rect = wrap.getBoundingClientRect();
+    var w = rect.width;
+    var h = w / KITCHEN_IMG_RATIO;
+    if (h > rect.height) { h = rect.height; w = h * KITCHEN_IMG_RATIO; }
+    stage.style.width = Math.round(w) + 'px';
+    stage.style.height = Math.round(h) + 'px';
+  }
+  // Đo lại mỗi khi đổi kích thước/xoay màn hình — chỉ áp dụng khi đang ở
+  // đúng màn chơi này (tránh chạy thừa/lỗi khi DOM của màn khác đang hiện).
+  window.addEventListener('resize', function () {
+    if (state.screen === 'kitchen') fitKitchenStage();
+  });
+
   function renderKitchen() {
     state.cardShownAt = Date.now();
 
     root.innerHTML = worldBg('kitchenphoto') +
-      '<div class="content">' +
+      '<div class="content kitchencontent">' +
       '<div class="topbar">' +
       '<button class="iconbtn" id="homeBtn" aria-label="Về trang chủ">' + CLOSE_SVG + '</button>' +
       '<div class="starsrow" id="kitchenStars" style="margin:0;">' + kitchenStarsRow() + '</div>' +
       '<span style="width:38px;"></span>' +
       '</div>' +
+      '<div class="kitchenstagewrap" id="kitchenStageWrap">' +
       '<div class="kitchenstage" id="kitchenStage">' +
       '<img src="assets/backgrounds/kitchen-bg.jpg" alt="" class="kitchenimg">' +
       hotspotsHtml() +
       '<div class="kitchenmascotwrap" id="kitchenMascotWrap">' + kitchenMascotHtml(state.kitchenMood || 'idle') + '</div>' +
+      '</div>' +
       '</div>' +
       '<button class="soundbtn" id="speakBtn" aria-label="Nghe lại">' + SPEAK_SVG + '</button>' +
       '</div>';
@@ -182,6 +217,7 @@ export function createKitchenGame(ctx) {
     });
     document.getElementById('speakBtn').addEventListener('click', speakKitchenTarget);
     speakKitchenTarget();
+    fitKitchenStage();
 
     var stage = document.getElementById('kitchenStage');
     Array.prototype.forEach.call(stage.querySelectorAll('.kitchenhotspot'), function (btn) {

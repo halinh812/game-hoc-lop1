@@ -2027,3 +2027,45 @@ không cần cuộn), lưới 2 cột × 3 hàng hiện đủ + hàng 4 (Kitchen
 lộ ra khi vuốt lên trong đúng khối `.gamegrid-scroll`. Bấm chọn game/nút
 phụ huynh vẫn hoạt động đúng, tính năng Sao lưu tiến độ + kích thước 7 ô
 vẫn nhất quán, 29 unit test vẫn pass nguyên.
+
+## Vòng 46 — Sửa lỗi Kitchen: ảnh bếp bị thu bé lại 1 khung, không full trang
+
+Người dùng phản hồi: "Game kitchen, ảnh không full cả trang mà chỉ bé lại
+1 khung. Tôi muốn nó phải full cả trang như các game khác".
+
+Nguyên nhân: `.kitchenstage` dùng công thức CSS cố định
+`width:min(100%, calc((100vh - 210px) * 0.5581))` để vừa giữ đúng tỉ lệ
+khung hình gốc (1536:2752, bắt buộc vì các vùng bấm trong `GLOW_ASSETS`
+định vị theo % toạ độ tính trên đúng ảnh gốc) vừa "đoán" chiều cao còn
+trống sau khi trừ topbar/nút loa bằng con số "210px" cố định. Con số này
+chỉ đúng trên 1 kích thước màn hình cụ thể lúc viết — trên phần lớn thiết
+bị thật, khoảng trống thật còn lại khác xa 210px, khiến công thức tính ra
+kích thước nhỏ hơn nhiều so với không gian thực sự có, tạo cảm giác ảnh
+"bị thu bé lại 1 khung". Ngoài ra `.content` mặc định còn có
+`padding-top:100px` (dành chỗ cho linh vật nổi TRÊN topbar ở các game
+khác) mà Kitchen không dùng tới, càng lãng phí thêm không gian dọc.
+
+Sửa bằng cách đo THẬT thay vì đoán bằng công thức:
+
+- Thêm `.content.kitchencontent{padding-top:14px; padding-bottom:8px;}`
+  ghi đè `padding-top:100px` mặc định, trả lại phần lớn không gian dọc
+  lãng phí cho khung ảnh.
+- Bọc `.kitchenstage` trong `.kitchenstagewrap` (flex:1, min-height:0) —
+  chiếm chính xác hết khoảng trống còn lại giữa topbar và nút loa.
+- Thêm hàm `fitKitchenStage()` trong `kitchen.js`: đo kích thước THẬT của
+  `.kitchenstagewrap` bằng `getBoundingClientRect()`, tính kích thước lớn
+  nhất có thể vừa khít (so sánh vừa theo chiều rộng và theo chiều cao,
+  lấy cách nào cho ảnh nhỏ hơn) rồi gán trực tiếp `width`/`height` bằng
+  pixel cho `.kitchenstage` — luôn khớp đúng không gian thực tế của thiết
+  bị đang chạy, không còn phụ thuộc 1 con số đoán trước. Gọi lại hàm này
+  mỗi khi resize màn hình (chỉ khi đang ở màn Kitchen).
+
+Kiểm thử bằng Playwright ở viewport mô phỏng điện thoại (390×780): khung
+ảnh tăng từ ~300×538 (khi chỉ sửa riêng phần đo JS, chưa bỏ padding thừa)
+lên ~348×624 trên tổng khung chứa 358×624 (~97% bề rộng, gần như kín khung
+— đúng như các game khác). Tỉ lệ khung hình vẫn giữ đúng ~0.5577 so với
+gốc 0.5581 (vùng bấm không bị lệch vị trí). Resize sang kích thước khác
+(430×900) khung ảnh tự tính lại đúng (398×713). Chạy lại toàn bộ luồng
+chơi Kitchen (trả lời đúng lẫn sai đủ 10 vòng): thứ tự vùng sáng, nhãn
+audio, badge ✓/✗, đổi tâm trạng mèo đầu bếp, màn thắng cuộc — tất cả vẫn
+hoạt động đúng như trước. 29 unit test vẫn pass nguyên.
