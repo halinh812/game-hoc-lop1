@@ -37,7 +37,7 @@ chỉ cần 1 dáng đứng/ngồi đơn giản, thoải mái.
 - [Bước 17 — 10 ảnh con số 1-10 dễ thương, thay cho đếm hình lặp lại](#buoc-17)
 - [Bước 18 — Nhân vật + ảnh nền cho game #5 "Word Safari" (Đọc Chữ)](#buoc-18)
 - [Bước 19 — Nhân vật + ảnh nền cho game #6 "ABC Vui" (Bảng chữ cái)](#buoc-19)
-- [Bước 20 — Nhân vật + ảnh nền cho game #7 "Bếp Vui" (Đồ vật nhà bếp)](#buoc-20)
+- [Bước 20 — Nhân vật + ảnh nền cho game #7 "Kitchen" (Đồ vật nhà bếp)](#buoc-20)
 
 <a id="buoc-1"></a>
 ## Bước 1 — Bạn tạo ảnh
@@ -1455,7 +1455,7 @@ Không cần xoá nền — giữ nguyên làm 1 ảnh nền đầy khung (JPG/P
 không cần xử lý gì thêm).
 
 <a id="buoc-20"></a>
-## Bước 20 — Nhân vật + ảnh nền cho game #7 "Bếp Vui" (Đồ vật nhà bếp)
+## Bước 20 — Nhân vật + ảnh nền cho game #7 "Kitchen" (Đồ vật nhà bếp)
 
 Game #7 dạy 10 đồ vật nhà bếp — theo đúng ảnh bếp thật của gia đình
 người dùng gửi làm cảm hứng (tủ bếp gỗ, bếp ga, nồi, nồi cơm điện, bồn
