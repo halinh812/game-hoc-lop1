@@ -48,8 +48,7 @@ var GAMES = [
   { id: 'howmany', title: 'How Many?', emoji: '🔢', skill: 'see', available: true },
   { id: 'wordsafari', title: 'Word Safari', emoji: '🔤', skill: 'read', available: true },
   { id: 'abcvui', title: 'ABC', emoji: '🐥', skill: 'listen', available: true },
-  { id: 'kitchen', title: 'Kitchen', emoji: '🍳', skill: 'listen', available: true },
-  { id: 'g8', title: 'Sắp ra mắt', available: false }
+  { id: 'kitchen', title: 'Kitchen', emoji: '🍳', skill: 'listen', available: true }
 ];
 
 var audio = createAudioProvider();
@@ -262,15 +261,17 @@ function renderHome() {
   }).join('');
 
   root.innerHTML = worldBg() +
-    '<div class="content">' +
+    '<div class="content homepage">' +
     '<div class="profilebar">' +
     '<button type="button" class="avatarcircle" id="avatarEditBtn" aria-label="Đổi hồ sơ">' + avatarSvg(profile.avatarId, 44) + '</button>' +
     '<div class="greet">Chào ' + profile.name + '! <span>Chọn trò chơi để bắt đầu nhé</span></div>' +
     '<div class="starsbadge" title="Tổng số sao đã đạt được">' + starIcon('#FFD25A', 20, '#E4952A') + '<span>' + totalStars(store.words) + '</span></div>' +
     '</div>' +
-    '<div class="gamegrid" id="gameGrid">' + tiles + '</div>' +
-    '<div class="homemascot">' + owlMascot(72) + '</div>' +
+    '<div class="gamegrid-scroll"><div class="gamegrid" id="gameGrid">' + tiles + '</div></div>' +
+    '<div class="homebottombar">' +
+    '<div class="homemascot-mini">' + owlMascot(46) + '</div>' +
     '<button type="button" class="parentbtn" id="parentLink">👪 Dành cho phụ huynh</button>' +
+    '</div>' +
     '</div>';
 
   document.getElementById('avatarEditBtn').addEventListener('click', function () {
