@@ -1,0 +1,332 @@
+// Game "Kitchen" — luyện kỹ năng "Nghe" (skill=listen, dùng chung skill
+// với forest/farm/bill/abcvui, trên vốn từ khác: 10 đồ vật nhà bếp lấy
+// cảm hứng từ ảnh bếp thật của gia đình người dùng).
+//
+// CƠ CHẾ KHÁC HẲN mọi game trước: không có thẻ/icon rời — cả 10 đồ vật
+// đều nằm chung trong 1 ẢNH NỀN BẾP DUY NHẤT (assets/backgrounds/
+// kitchen-bg.jpg). Mỗi câu hỏi, 4 trong 10 đồ vật đó SÁNG NHẤP NHÁY ngay
+// tại đúng vị trí của nó trong ảnh (viền vàng nhấp nháy — xem HOTSPOTS +
+// .kitchenhotspot trong kitchen.css), nghe âm thanh đọc tên 1 món, bé bấm
+// THẲNG vào đúng vị trí món đó trong ảnh (không phải bấm vào ô thẻ).
+//
+// HOTSPOTS: toạ độ % (left/top/width/height) của từng đồ vật, đo trực
+// tiếp trên ảnh THẬT sau khi nhận từ người dùng (Bước 20 trong PROMPT.md)
+// — vẽ khung kiểm tra chồng lên ảnh thật nhiều lần cho khớp trước khi đưa
+// vào đây. Không thể đoán trước khi chưa có ảnh, khác hẳn các game thẻ
+// rời (forest/farm/bill/abcvui) vốn không phụ thuộc bố cục ảnh cụ thể.
+// Nếu sau này đổi ảnh nền khác, các toạ độ này PHẢI đo lại từ đầu.
+var HOTSPOTS = {
+  cabinet: { left: 3, top: 6, width: 94, height: 16 },
+  rice_cooker: { left: 1, top: 33, width: 23, height: 14 },
+  pot: { left: 41, top: 31, width: 23, height: 10 },
+  stove: { left: 30, top: 39, width: 39, height: 7 },
+  sink: { left: 72, top: 22, width: 28, height: 25 },
+  bowl: { left: 18, top: 45.5, width: 22, height: 8 },
+  plate: { left: 55, top: 47, width: 28, height: 6 },
+  fan: { left: 4, top: 56, width: 27, height: 28 },
+  chair: { left: 49, top: 57, width: 19, height: 27 },
+  table: { left: 66, top: 59, width: 34, height: 23 }
+};
+
+// Đúng đủ 10 đồ vật trong ảnh (không hơn không kém, theo yêu cầu người
+// dùng) nên đích thắng cuộc = đúng kích thước vốn từ, giống "How Many?"
+// (10 số).
+var KITCHEN_WIN_TARGET = 10;
+
+// Ảnh nền có tỉ lệ khung hình CỐ ĐỊNH 1536×2752 — khác mọi ảnh nền khác
+// trong app (vốn chỉ trang trí, phủ kín màn hình theo background-size:
+// cover bất kể tỉ lệ màn thật). Ở đây bé phải bấm ĐÚNG TOẠ ĐỘ trong ảnh
+// nên KHÔNG được để ảnh bị crop lệch theo màn hình — .kitchenstage khoá
+// đúng tỉ lệ khung hình này (xem kitchen.css), đảm bảo % toạ độ luôn khớp
+// đúng vị trí thật trên mọi kích thước màn hình.
+import { wordsInCat } from '../../engine/content-loader.js';
+import { buildRound, applyAnswer, classifyAnswer, getSkillProgress, wrongRate } from '../../engine/learning-engine.js';
+import { saveProgress } from '../../engine/progress-store.js';
+import { starIcon, CLOSE_SVG, SPEAK_SVG, worldBg } from '../../engine/ui-shared.js';
+
+export function createKitchenGame(ctx) {
+  var root = document.getElementById('root');
+  var state = ctx.state;
+
+  // Ảnh mèo đầu bếp có thể CHƯA tồn tại (đang chờ người dùng tự tạo bằng
+  // AI) — bắt sự kiện "error" của <img> để tự chuyển sang fallback emoji,
+  // giống hệt cách games/bill/bill.js đã làm.
+  window.addEventListener('error', function (e) {
+    var t = e.target;
+    if (!t || t.tagName !== 'IMG') return;
+    if (t.id === 'kitchenMascotImg' || t.id === 'kitchenTileImg') {
+      t.hidden = true;
+      var fbId = t.id === 'kitchenMascotImg' ? 'kitchenFallback' : 'kitchenTileFallback';
+      var fb = document.getElementById(fbId);
+      if (fb) fb.hidden = false;
+    }
+  }, true);
+
+  // Y hệt pickTargetIndex() của forest.js/farm.js/bill.js/abcvui.js — ưu
+  // tiên từ đã đến hạn ôn, trong đó ưu tiên tỉ lệ sai cao hơn.
+  function pickTargetIndex(slots) {
+    var store = ctx.getStore();
+    var now = Date.now();
+    var scored = slots.map(function (w, i) {
+      var p = getSkillProgress(store.words, w.id, 'listen');
+      var due = (p && p.seen && p.next <= now) ? 1 : 0;
+      return { i: i, due: due, wr: wrongRate(p), level: p ? p.level : 0, rnd: Math.random() };
+    });
+    scored.sort(function (a, b) {
+      return (b.due - a.due) || (b.wr - a.wr) || (a.level - b.level) || (a.rnd - b.rnd);
+    });
+    return scored[0].i;
+  }
+
+  function pickReplacementWord(replaceIdx) {
+    var store = ctx.getStore();
+    var exclude = {};
+    state.slots.forEach(function (w) { exclude[w.id] = true; });
+    var candidates = state.kitchenPool.filter(function (w) { return !exclude[w.id]; });
+    if (!candidates.length) candidates = state.kitchenPool.filter(function (w) { return w.id !== state.slots[replaceIdx].id; });
+    if (!candidates.length) candidates = state.kitchenPool.slice();
+    return buildRound(candidates, store.words, 'listen', { size: 1 })[0];
+  }
+
+  function startKitchenGame() {
+    var store = ctx.getStore();
+    state.kitchenPool = wordsInCat(ctx.getWords(), 'object', 'kitchen');
+    state.slots = buildRound(state.kitchenPool, store.words, 'listen', { size: 4 });
+    state.targetIdx = pickTargetIndex(state.slots);
+    state.correct = 0;
+    state.answered = false;
+    state.kitchenMood = 'idle';
+    state.screen = 'kitchen';
+    ctx.render();
+  }
+
+  function kitchenStarsRow() {
+    var row = '';
+    for (var i = 0; i < KITCHEN_WIN_TARGET; i++) {
+      var lit = i < state.correct;
+      var starMarkup = starIcon(lit ? '#FFD25A' : 'rgba(255,255,255,.55)', 16, 'rgba(35,58,42,.35)');
+      row += starMarkup.replace('<svg ', '<svg class="' + (lit ? 'lit' : '') + '" ');
+    }
+    return row;
+  }
+
+  // 4 vùng bấm trong suốt, đặt đúng toạ độ % của từng đồ vật (HOTSPOTS)
+  // theo ĐÚNG từ đang hiển thị ở slot đó — viền vàng nhấp nháy mặc định
+  // (CSS .kitchenhotspot), đổi màu đúng/sai sau khi bé bấm.
+  function hotspotsHtml() {
+    return state.slots.map(function (w, i) {
+      var h = HOTSPOTS[w.id];
+      if (!h) return '';
+      var style = 'left:' + h.left + '%;top:' + h.top + '%;width:' + h.width + '%;height:' + h.height + '%;';
+      return '<button type="button" class="kitchenhotspot" data-idx="' + i + '" style="' + style + '" aria-label="' + w.en + '"></button>';
+    }).join('');
+  }
+
+  var KITCHEN_MOOD_IMG = { idle: 'chefcat-idle.png', happy: 'chefcat-happy.png', sad: 'chefcat-sad.png' };
+  var KITCHEN_MOOD_FALLBACK = { idle: '🐱', happy: '😻', sad: '😿' };
+  function kitchenMascotHtml(mood) {
+    var file = KITCHEN_MOOD_IMG[mood] || KITCHEN_MOOD_IMG.idle;
+    var fallback = KITCHEN_MOOD_FALLBACK[mood] || KITCHEN_MOOD_FALLBACK.idle;
+    return '<img src="assets/characters/' + file + '" alt="Mèo đầu bếp" id="kitchenMascotImg">' +
+      '<span class="kitchenfallback" id="kitchenFallback" hidden>' + fallback + '</span>';
+  }
+
+  function setKitchenMood(mood) {
+    state.kitchenMood = mood;
+    var wrap = document.getElementById('kitchenMascotWrap');
+    if (!wrap) return;
+    wrap.innerHTML = kitchenMascotHtml(mood);
+  }
+
+  // Chỉ bắt đầu tính "thời gian trả lời" của bé từ lúc câu đọc XONG (qua
+  // onEnd) — cùng nguyên lý với speakBillTarget()/speakAbcTarget() (Vòng
+  // 35 trong ROADMAP.md).
+  function speakKitchenTarget() {
+    var w = state.slots[state.targetIdx];
+    ctx.speak(w.promptAudioText || w.en, function () { state.cardShownAt = Date.now(); });
+  }
+
+  function renderKitchen() {
+    state.cardShownAt = Date.now();
+
+    root.innerHTML = worldBg('kitchenphoto') +
+      '<div class="content">' +
+      '<div class="topbar">' +
+      '<button class="iconbtn" id="homeBtn" aria-label="Về trang chủ">' + CLOSE_SVG + '</button>' +
+      '<div class="starsrow" id="kitchenStars" style="margin:0;">' + kitchenStarsRow() + '</div>' +
+      '<span style="width:38px;"></span>' +
+      '</div>' +
+      '<div class="kitchenstage" id="kitchenStage">' +
+      '<img src="assets/backgrounds/kitchen-bg.jpg" alt="" class="kitchenimg">' +
+      hotspotsHtml() +
+      '<div class="kitchenmascotwrap" id="kitchenMascotWrap">' + kitchenMascotHtml(state.kitchenMood || 'idle') + '</div>' +
+      '</div>' +
+      '<button class="soundbtn" id="speakBtn" aria-label="Nghe lại">' + SPEAK_SVG + '</button>' +
+      '</div>';
+
+    document.getElementById('homeBtn').addEventListener('click', function () {
+      state.screen = 'home'; ctx.render();
+    });
+    document.getElementById('speakBtn').addEventListener('click', speakKitchenTarget);
+    speakKitchenTarget();
+
+    var stage = document.getElementById('kitchenStage');
+    Array.prototype.forEach.call(stage.querySelectorAll('.kitchenhotspot'), function (btn) {
+      btn.addEventListener('click', function () {
+        handleKitchenAnswer(parseInt(btn.getAttribute('data-idx'), 10));
+      });
+    });
+  }
+
+  // Chuông "ting" khi bấm đúng — y hệt các game kia (mỗi game tự giữ 1
+  // bản sao riêng theo đúng quy ước đã có).
+  var sharedAudioCtx = null;
+  function playDing() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    try {
+      if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      var ctxAudio = sharedAudioCtx;
+      var now = ctxAudio.currentTime;
+      [523.25, 659.25, 783.99, 1046.5].forEach(function (freq, i) {
+        var start = now + i * 0.075;
+        var dur = 0.32;
+
+        var body = ctxAudio.createOscillator();
+        var bodyGain = ctxAudio.createGain();
+        body.type = 'triangle';
+        body.frequency.value = freq;
+        bodyGain.gain.setValueAtTime(0, start);
+        bodyGain.gain.linearRampToValueAtTime(0.22, start + 0.015);
+        bodyGain.gain.exponentialRampToValueAtTime(0.001, start + dur);
+        body.connect(bodyGain).connect(ctxAudio.destination);
+        body.start(start);
+        body.stop(start + dur);
+
+        var sparkle = ctxAudio.createOscillator();
+        var sparkleGain = ctxAudio.createGain();
+        sparkle.type = 'sine';
+        sparkle.frequency.value = freq * 2;
+        sparkleGain.gain.setValueAtTime(0, start);
+        sparkleGain.gain.linearRampToValueAtTime(0.08, start + 0.015);
+        sparkleGain.gain.exponentialRampToValueAtTime(0.001, start + dur * 0.8);
+        sparkle.connect(sparkleGain).connect(ctxAudio.destination);
+        sparkle.start(start);
+        sparkle.stop(start + dur * 0.8);
+      });
+    } catch (e) { /* Web Audio không khả dụng — bỏ qua, không phá UI */ }
+  }
+
+  function handleKitchenAnswer(idx) {
+    if (state.answered) return;
+    state.answered = true;
+
+    var store = ctx.getStore();
+    var hotspotEls = document.querySelectorAll('.kitchenhotspot');
+    var targetWord = state.slots[state.targetIdx];
+    var isCorrect = idx === state.targetIdx;
+    var responseTimeMs = Date.now() - state.cardShownAt;
+
+    if (isCorrect) {
+      var outcome = classifyAnswer(true, responseTimeMs);
+      applyAnswer(store.words, targetWord.id, 'listen', outcome);
+      saveProgress(store);
+      state.correct++;
+      ctx.speak(targetWord.promptAudioText || targetWord.en);
+      hotspotEls[idx].classList.add('correct');
+      playDing();
+      setKitchenMood('happy');
+
+      var isDone = state.correct >= KITCHEN_WIN_TARGET;
+      setTimeout(function () {
+        if (isDone) { state.screen = 'kitchenSummary'; ctx.render(); }
+        else advanceKitchenRound(state.targetIdx);
+      }, isDone ? 700 : 1300);
+    } else {
+      applyAnswer(store.words, targetWord.id, 'listen', 'wrong');
+      saveProgress(store);
+      hotspotEls[idx].classList.add('wrong');
+      hotspotEls[state.targetIdx].classList.add('correct');
+      ctx.speak(targetWord.promptAudioText || targetWord.en);
+      setKitchenMood('sad');
+      setTimeout(function () { advanceKitchenRound(state.targetIdx); }, 3200);
+    }
+  }
+
+  function advanceKitchenRound(replaceIdx) {
+    state.slots[replaceIdx] = pickReplacementWord(replaceIdx);
+    state.targetIdx = pickTargetIndex(state.slots);
+    state.answered = false;
+
+    var stage = document.getElementById('kitchenStage');
+    var mascotWrap = stage.querySelector('.kitchenmascotwrap');
+    Array.prototype.forEach.call(stage.querySelectorAll('.kitchenhotspot'), function (el) { el.remove(); });
+    stage.insertAdjacentHTML('beforeend', hotspotsHtml());
+    // insertAdjacentHTML thêm hotspot mới vào SAU mascot trong DOM — chuyển
+    // lại mascot ra sau cùng để luôn nổi trên hotspot (tránh hotspot che
+    // mất 1 phần mèo nếu 2 vùng chồng nhau).
+    if (mascotWrap) stage.appendChild(mascotWrap);
+    Array.prototype.forEach.call(stage.querySelectorAll('.kitchenhotspot'), function (btn) {
+      btn.addEventListener('click', function () {
+        handleKitchenAnswer(parseInt(btn.getAttribute('data-idx'), 10));
+      });
+    });
+
+    document.getElementById('kitchenStars').innerHTML = kitchenStarsRow();
+    setKitchenMood('idle');
+    state.cardShownAt = Date.now();
+    speakKitchenTarget();
+  }
+
+  function renderKitchenSummary() {
+    root.innerHTML = worldBg() +
+      '<div class="content">' +
+      '<div class="summary-mid" id="summaryMid">' +
+      '<div class="starburst">' + starIcon('#FFD25A', 28) + starIcon('#F4A93B', 36) + starIcon('#FFD25A', 28) + '</div>' +
+      ctx.owlMascot(64) +
+      '<h2>Giỏi quá!</h2>' +
+      '<p>Bé nhớ đồ vật nhà bếp giỏi lắm!</p>' +
+      '<div class="summary-btns">' +
+      '<button class="chunkybtn coral" id="againBtn">Chơi lại</button>' +
+      '<button class="ghostbtn" id="homeBtn2">Chọn trò khác</button>' +
+      '</div></div></div>';
+
+    var mid = document.getElementById('summaryMid');
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      var colors = ['#F4A93B', '#E4633F', '#2F8F5B', '#FFD25A'];
+      for (var i = 0; i < 14; i++) {
+        var f = document.createElement('div');
+        f.className = 'fall';
+        f.style.left = (10 + Math.random() * 90) + '%';
+        f.style.width = '7px'; f.style.height = '11px';
+        f.style.background = colors[i % colors.length];
+        f.style.animationDuration = (2 + Math.random() * 1.4) + 's';
+        f.style.animationDelay = (Math.random() * 2.4) + 's';
+        mid.appendChild(f);
+      }
+    }
+
+    document.getElementById('againBtn').addEventListener('click', startKitchenGame);
+    document.getElementById('homeBtn2').addEventListener('click', function () {
+      state.screen = 'home'; ctx.render();
+    });
+  }
+
+  // Markup ô icon của game này trong lưới chọn trò chơi ở Trang chủ —
+  // dùng ảnh mèo đầu bếp (trạng thái chờ đợi), có fallback emoji nếu ảnh
+  // chưa tồn tại.
+  function gameTileHtml(title) {
+    return '<button type="button" class="gametile kitchen-tile" data-id="kitchen">' +
+      '<span class="kitchentile-face" id="kitchenTileFace">' +
+      '<img src="assets/characters/chefcat-idle.png" alt="" id="kitchenTileImg">' +
+      '<span class="kitchentile-fallback" id="kitchenTileFallback" hidden>🐱</span>' +
+      '</span>' +
+      '<span class="name">' + title + '</span></button>';
+  }
+
+  return {
+    startKitchenGame: startKitchenGame,
+    renderKitchen: renderKitchen,
+    renderKitchenSummary: renderKitchenSummary,
+    gameTileHtml: gameTileHtml
+  };
+}

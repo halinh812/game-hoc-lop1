@@ -1,0 +1,88 @@
+/* CSS RIÊNG của game "Kitchen" — phần cơ chế chấm điểm/thanh sao/nút nghe
+   lại/màn kết quả dùng chung với các game khác nằm ở engine/catch-game.css
+   (xem .starsrow/.soundbtn/.summary-*). Nạp qua <link> trong index.html
+   (games/kitchen/kitchen.css), nên MỌI url() ảnh trong file này phải tính
+   từ đường dẫn của CHÍNH FILE NÀY (../../assets/...), không phải từ
+   index.html — xem giải thích đầy đủ ở đầu games/nong-trai-cua-be/farm.css. */
+
+/* Ảnh nền trang trí phía sau (Bước 20.2 trong PROMPT.md) — dùng chính
+   kitchen-bg.jpg để không bị lệch màu ở viền ngoài .kitchenstage (xem bên
+   dưới) khi ảnh chính không phủ hết màn hình. LƯU Ý (lỗi thật đã gặp ở
+   bill.css): background KHÔNG được viết "linear-gradient(...) url(...)"
+   liền nhau không dấu phẩy — chỉ 1 màu đặc làm nền dự phòng phía sau
+   url(), giống hệt mọi *.css game khác. */
+.world-bg.kitchenphoto{ background:#F5DCC3 url('../../assets/backgrounds/kitchen-bg.jpg') center/cover no-repeat; }
+
+/* ---------- "bàn cờ" chính: ảnh bếp + vùng bấm ---------- */
+/* KHÁC HẲN mọi game trước: bé bấm ĐÚNG TOẠ ĐỘ trong ảnh (xem HOTSPOTS
+   trong kitchen.js), nên ảnh KHÔNG được phép bị crop lệch theo tỉ lệ màn
+   hình thật (khác worldBg() mặc định vốn chỉ trang trí, cắt thoải mái).
+   Khoá cứng đúng tỉ lệ khung hình gốc (1536:2752 ≈ 0.5581) bằng
+   aspect-ratio + object-fit:cover trên 1 khung ĐÃ đúng sẵn tỉ lệ đó — nhờ
+   vậy cover không bao giờ phải crop bớt, % toạ độ của từng đồ vật luôn
+   khớp đúng vị trí thật bất kể kích thước màn hình. Chiều rộng lấy full
+   (100%) nhưng có trần chiều cao (calc dựa theo chiều cao còn lại của màn
+   hình, trừ khoảng cho topbar + nút loa) quy đổi ngược ra chiều rộng
+   tương ứng qua đúng tỉ lệ đó — đảm bảo ảnh không bao giờ tràn quá chiều
+   cao khả dụng dù vẫn giữ đúng tỉ lệ. */
+.kitchenstage{
+  position:relative; margin:4px auto 0; border-radius:18px; overflow:hidden;
+  box-shadow:0 8px 20px rgba(20,40,25,.3);
+  width:min(100%, calc((100vh - 210px) * 0.5581));
+  aspect-ratio:1536 / 2752;
+}
+.kitchenimg{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+
+/* Vùng bấm trong suốt đặt đúng % toạ độ của từng đồ vật — viền vàng nhấp
+   nháy mặc định để bé biết "1 trong 4 món này", đổi màu đúng/sai sau khi
+   bấm. border-radius vừa phải (không phải hình chữ nhật gắt) cho viền
+   sáng nhìn mềm mại hơn, không cần khít tuyệt đối theo hình dạng thật của
+   từng đồ vật. */
+.kitchenhotspot{
+  position:absolute; border:none; background:transparent; padding:0; cursor:pointer;
+  border-radius:16px;
+  animation:kitchenPulse 1.1s ease-in-out infinite;
+}
+@keyframes kitchenPulse{
+  0%,100%{ box-shadow:0 0 0 3px rgba(255,210,90,.8), 0 0 14px 4px rgba(255,210,90,.55); }
+  50%{ box-shadow:0 0 0 6px rgba(255,210,90,1), 0 0 24px 10px rgba(255,210,90,.85); }
+}
+.kitchenhotspot.correct{ animation:none; box-shadow:0 0 0 5px var(--success), 0 0 22px 8px rgba(47,143,91,.7); }
+.kitchenhotspot.wrong{ animation:none; box-shadow:0 0 0 5px #B24A43, 0 0 22px 8px rgba(178,74,67,.7); }
+
+/* ---------- mèo đầu bếp: góc dưới-phải khung ảnh ---------- */
+.kitchenmascotwrap{
+  position:absolute; right:2%; bottom:1%; width:26%; aspect-ratio:1/1;
+  z-index:2; pointer-events:none;
+}
+.kitchenmascotwrap img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 5px 4px rgba(20,40,25,.35)); }
+.kitchenfallback{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:11vw; line-height:1;
+}
+/* [hidden] không tự đủ ẩn phần tử đã có display:flex riêng — cùng lỗi/
+   cách sửa đã dùng cho .billfallback[hidden] trong games/bill/bill.css. */
+.kitchenfallback[hidden]{ display:none; }
+
+/* ---------- ô icon ở lưới chọn trò chơi (Trang chủ) ---------- */
+.gametile.kitchen-tile{
+  position:relative; overflow:hidden; border:1px solid var(--glass-border);
+  background:#F5DCC3 url('../../assets/backgrounds/kitchen-bg.jpg') 50% 38%/230% no-repeat;
+}
+.gametile.kitchen-tile::before{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(50,38,15,0) 45%, rgba(40,28,10,.45) 100%);
+}
+.gametile.kitchen-tile .name{ position:relative; z-index:1; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.55); }
+.kitchentile-face{
+  position:relative; z-index:1; display:block; width:78px; height:78px;
+  animation:tileSway 2.6s ease-in-out infinite;
+}
+.kitchentile-face img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 4px 3px rgba(20,40,25,.3)); }
+.kitchentile-fallback{ display:flex; align-items:center; justify-content:center; width:100%; height:100%; font-size:44px; }
+.kitchentile-fallback[hidden]{ display:none; }
+
+@media (prefers-reduced-motion: reduce){
+  .kitchentile-face,.kitchenhotspot{ animation:none !important; }
+  .kitchenhotspot{ box-shadow:0 0 0 4px rgba(255,210,90,.9), 0 0 16px 6px rgba(255,210,90,.7); }
+}

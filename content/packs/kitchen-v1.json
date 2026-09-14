@@ -1,0 +1,19 @@
+{
+  "pack_id": "english_kitchen_v1",
+  "subject": "english",
+  "category": "object",
+  "category_label_vi": "Đồ vật",
+  "category_icon": "🎒",
+  "items": [
+    { "id": "cabinet", "type": "vocab", "prompt_audio_text": "cabinet", "answer": { "text_en": "cabinet", "text_vi": "tủ bếp", "emoji": "🗄️" }, "difficulty": 1, "subcategory": "kitchen", "subcategory_label_vi": "Đồ vật nhà bếp" },
+    { "id": "stove", "type": "vocab", "prompt_audio_text": "stove", "answer": { "text_en": "stove", "text_vi": "bếp", "emoji": "🔥" }, "difficulty": 1, "subcategory": "kitchen", "subcategory_label_vi": "Đồ vật nhà bếp" },
+    { "id": "pot", "type": "vocab", "prompt_audio_text": "pot", "answer": { "text_en": "pot", "text_vi": "nồi", "emoji": "🍲" }, "difficulty": 1, "subcategory": "kitchen", "subcategory_label_vi": "Đồ vật nhà bếp" },
+    { "id": "rice_cooker", "type": "vocab", "prompt_audio_text": "rice cooker", "answer": { "text_en": "rice cooker", "text_vi": "nồi cơm điện", "emoji": "🍚" }, "difficulty": 1, "subcategory": "kitchen", "subcategory_label_vi": "Đồ vật nhà bếp" },
+    { "id": "sink", "type": "vocab", "prompt_audio_text": "sink", "answer": { "text_en": "sink", "text_vi": "bồn rửa", "emoji": "🚰" }, "difficulty": 1, "subcategory": "kitchen", "subcategory_label_vi": "Đồ vật nhà bếp" },
+    { "id": "bowl", "type": "vocab", "prompt_audio_text": "bowl", "answer": { "text_en": "bowl", "text_vi": "bát", "emoji": "🥣" }, "difficulty": 1, "subcategory": "kitchen", "subcategory_label_vi": "Đồ vật nhà bếp" },
+    { "id": "plate", "type": "vocab", "prompt_audio_text": "plate", "answer": { "text_en": "plate", "text_vi": "đĩa", "emoji": "🍽️" }, "difficulty": 1, "subcategory": "kitchen", "subcategory_label_vi": "Đồ vật nhà bếp" },
+    { "id": "fan", "type": "vocab", "prompt_audio_text": "fan", "answer": { "text_en": "fan", "text_vi": "quạt", "emoji": "🌀" }, "difficulty": 1, "subcategory": "kitchen", "subcategory_label_vi": "Đồ vật nhà bếp" },
+    { "id": "chair", "type": "vocab", "prompt_audio_text": "chair", "answer": { "text_en": "chair", "text_vi": "ghế", "emoji": "🪑" }, "difficulty": 1, "subcategory": "kitchen", "subcategory_label_vi": "Đồ vật nhà bếp" },
+    { "id": "table", "type": "vocab", "prompt_audio_text": "table", "answer": { "text_en": "table", "text_vi": "bàn", "emoji": "🪵" }, "difficulty": 1, "subcategory": "kitchen", "subcategory_label_vi": "Đồ vật nhà bếp" }
+  ]
+}
