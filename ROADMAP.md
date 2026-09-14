@@ -1849,3 +1849,50 @@ từ có nghĩa cụ thể, thay vì chỉ dừng ở mức "nghe tên chữ cá
   (vd K→Koala, N→notebook, D→Donkey), xác nhận chữ chưa có từ khớp (vd
   V/X) KHÔNG lật, luồng trả lời sai + chơi đủ 10 câu thắng cuộc vẫn đúng
   sau khi đổi timing. 29 unit test vẫn pass nguyên (không đụng `engine/`).
+
+## Vòng 42 — Game #7 "Kitchen" — bấm thẳng lên ảnh nền, cơ chế hoàn toàn mới
+
+Xây hoàn chỉnh game thứ 7, theo ảnh bếp thật của gia đình người dùng gửi
+làm cảm hứng vẽ nền. **Cơ chế khác hẳn 6 game trước**: không dùng thẻ/
+icon rời — cả 10 đồ vật (tủ bếp, bếp, nồi, nồi cơm điện, bồn rửa, bát,
+đĩa, quạt, ghế, bàn) đều nằm chung trong 1 ẢNH NỀN BẾP DUY NHẤT
+(`assets/backgrounds/kitchen-bg.jpg`). Mỗi câu hỏi, 4 trong 10 đồ vật đó
+SÁNG NHẤP NHÁY (viền vàng, animation `kitchenPulse`) ngay tại đúng vị trí
+của nó trong ảnh, nghe âm thanh đọc tên 1 món, bé bấm THẲNG vào đúng vị
+trí trong ảnh — không phải bấm vào ô thẻ như mọi game trước.
+
+- **Toạ độ (`HOTSPOTS` trong `games/kitchen/kitchen.js`)**: đo trực tiếp
+  bằng mắt sau khi nhận ảnh thật từ người dùng — viết 1 script Python vẽ
+  khung màu đè lên đúng ảnh thật, xem lại, chỉnh sửa toạ độ, vẽ lại tới
+  khi khớp hoàn toàn trước khi đưa vào code (2 lần lặp: lần 1 khớp gần
+  hết, chỉ chỉnh lại vùng ghế/bàn bị chồng lấn nhẹ). Quy trình này CHỈ áp
+  dụng được SAU khi có ảnh thật — khác các game thẻ rời (forest/farm/
+  bill/abcvui) vốn build code được trước khi có ảnh vì không phụ thuộc bố
+  cục cụ thể.
+- **`.kitchenstage` khoá đúng tỉ lệ khung hình gốc** (1536:2752, qua CSS
+  `aspect-ratio` + `object-fit:cover` trên khung đã đúng sẵn tỉ lệ đó) —
+  khác `worldBg()` mặc định (chỉ trang trí, cắt ảnh thoải mái theo tỉ lệ
+  màn hình thật). Nếu dùng `worldBg()` thông thường, ảnh sẽ bị crop khác
+  nhau tuỳ màn hình, làm toạ độ % không còn khớp đúng vị trí thật —
+  đây là lý do game này cần 1 kỹ thuật hiển thị ảnh riêng, không tái dùng
+  được các game trước.
+- Nội dung mới: `content/packs/kitchen-v1.json` — 10 đồ vật, `category:
+  "object"` cùng `objects-v1.json` (gộp chung 1 "Bộ từ" ở Trang phụ
+  huynh), `subcategory: "kitchen"` riêng để lọc đúng 10 món này
+  (`wordsInCat(WORDS,'object','kitchen')`). Không có ảnh riêng từng món
+  (đã nằm sẵn trong ảnh nền chung) — chỉ dùng `emoji` làm ảnh đại diện
+  cho dòng trong bảng báo cáo Trang phụ huynh.
+- Kỹ năng: Nghe (skill=listen) — dùng chung skill với forest/farm/bill/
+  abcvui, không cần sửa Learning Engine. Đích thắng cuộc = 10 (đúng bằng
+  cỡ vốn từ, giống "How Many?").
+- Nhân vật mèo đầu bếp 3 trạng thái — ảnh AI-ảnh-ngoài do người dùng gửi
+  (Bước 20 PROMPT.md), đã xử lý xoá nền + resize 900×900 xong ngay khi
+  build (khác Word Safari/ABC Vui trước đây phải build trước rồi chờ ảnh
+  sau — lần này người dùng gửi ảnh trước khi yêu cầu build).
+- Kiểm thử bằng Playwright: 4 vùng bấm hiện đúng vị trí + đúng nhãn, bấm
+  đúng/sai đều tính điểm đúng kỹ năng "Nghe", chơi đủ 10 câu ra màn thắng
+  cuộc. Đã chụp ảnh QA xác nhận 4 khung vàng nhấp nháy khớp CHÍNH XÁC vị
+  trí đồ vật thật trong ảnh (tủ bếp/nồi/bát/bàn). 7 ô Trang chủ vẫn đều
+  cỡ (`grid-auto-rows:1fr`, Vòng 39). Tính năng Sao lưu tiến độ (Vòng 38)
+  và game "ABC" (Vòng 41) kiểm thử lại vẫn hoạt động đúng. 29 unit test
+  hiện có vẫn pass nguyên (không đụng `engine/`).
