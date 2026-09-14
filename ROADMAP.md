@@ -1896,3 +1896,48 @@ trí trong ảnh — không phải bấm vào ô thẻ như mọi game trước.
   cỡ (`grid-auto-rows:1fr`, Vòng 39). Tính năng Sao lưu tiến độ (Vòng 38)
   và game "ABC" (Vòng 41) kiểm thử lại vẫn hoạt động đúng. 29 unit test
   hiện có vẫn pass nguyên (không đụng `engine/`).
+
+## Vòng 43 — "Kitchen": sửa 4 phản hồi người dùng sau bản đầu
+
+Người dùng chơi thử bản Vòng 42 và phản hồi 4 điểm cần sửa:
+
+1. **2 ảnh bếp đè lên nhau, lệch nhau ở viền**: `worldBg('kitchenphoto')`
+   (phủ kín màn hình theo `background-size:cover`, cắt ảnh theo tỉ lệ
+   MÀN HÌNH thật) và `.kitchenstage` (khoá đúng tỉ lệ ẢNH GỐC, xem Vòng
+   42) cùng hiện `kitchen-bg.jpg` nhưng crop khác nhau theo 2 tỉ lệ khác
+   nhau — tạo cảm giác "2 bản ảnh" lệch mép nhau. Sửa bằng cách bỏ hẳn
+   ảnh khỏi lớp nền trang trí, chỉ để 1 màu đặc ấm gần tông ảnh
+   (`.world-bg.kitchenphoto{background:#F5DCC3;}`) — chỉ `.kitchenstage`
+   mới hiện ảnh thật.
+2. **Khung vuông khoanh đồ vật xấu, cần viền phát sáng đúng hình dạng
+   thật**: đây là điểm khó nhất — đã thử `tools/remove_white_bg.py` (chỉ
+   xoá được nền TRẮNG, không dùng được cho nền màu bếp) rồi chuyển sang
+   thuật toán **GrabCut** (OpenCV, cài thêm `opencv-python-headless`):
+   cắt riêng 10 vùng ảnh (theo đúng toạ độ đã đo ở Vòng 42, có nới thêm
+   biên), chạy GrabCut xoá nền cho từng vùng → 10 ảnh PNG nền trong suốt
+   CẮT ĐÚNG HÌNH DẠNG thật của từng đồ vật (`assets/kitchen/<id>.png`),
+   đặt đè CHÍNH XÁC lên đúng vị trí gốc trong ảnh nền. Hiệu ứng phát sáng
+   đổi từ `box-shadow` (khung chữ nhật) sang `filter:drop-shadow` trên
+   chính ảnh trong suốt đó — drop-shadow chạy theo ĐÚNG VIỀN ALPHA của
+   ảnh, ôm sát viền thật. Vài đồ vật (quạt/ghế/bàn) segment lần đầu bị
+   dính thêm mép tủ bếp phía trên hoặc mất chân bàn/ghế mảnh — chỉnh lại
+   toạ độ crop (bớt biên trên) + tham số GrabCut (margin/số vòng lặp) cho
+   từng món tới khi sạch, xác nhận bằng cách ghép cả 10 ảnh trở lại đúng
+   vị trí trên ảnh gốc — khớp liền mạch, không thấy vết ghép.
+3. **Đúng/sai chỉ đổi màu xanh/đỏ, khó nhìn, cần thêm âm thanh**: thêm
+   `playBuzz()` (tiếng "bíp" trầm đi xuống, dùng Web Audio) cho câu SAI —
+   trước đây chỉ có tiếng "ting" lúc ĐÚNG, sai thì im lặng hoàn toàn.
+   Thêm dấu ✓/✗ to, nổi bật (nền tròn xanh/đỏ, viền trắng, hiệu ứng bung
+   ra) hiện ngay tại đúng vị trí vừa bấm — tín hiệu không phụ thuộc màu
+   sắc, rõ ràng hơn hẳn so với chỉ đổi viền phát sáng.
+4. **Mèo đầu bếp quá bé, nên to + ở giữa**: phóng to 26% → 40% chiều
+   rộng khung ảnh, chuyển từ góc dưới-phải ra đúng khoảng sàn trống giữa
+   quạt và bộ bàn ghế (không đè lên vùng bấm nào), thêm nhịp "nhún nhảy"
+   nhẹ tại chỗ liên tục (`kitchenMascotBob`) cho có sức sống — thay cho ý
+   tưởng gốc "nhảy lên bàn" (phức tạp hơn nhiều, dễ che mất vùng bấm khi
+   di chuyển qua nhiều vị trí, đơn giản hoá thành nhún tại chỗ).
+
+Kiểm thử lại toàn bộ bằng Playwright sau khi sửa: luồng đúng/sai/thắng
+cuộc vẫn hoạt động đúng, badge + màu phát sáng đúng vị trí, 7 ô Trang chủ
+vẫn đều cỡ, tính năng Sao lưu tiến độ không bị ảnh hưởng. 29 unit test
+vẫn pass nguyên.

@@ -9,23 +9,30 @@
 // .kitchenhotspot trong kitchen.css), nghe âm thanh đọc tên 1 món, bé bấm
 // THẲNG vào đúng vị trí món đó trong ảnh (không phải bấm vào ô thẻ).
 //
-// HOTSPOTS: toạ độ % (left/top/width/height) của từng đồ vật, đo trực
-// tiếp trên ảnh THẬT sau khi nhận từ người dùng (Bước 20 trong PROMPT.md)
-// — vẽ khung kiểm tra chồng lên ảnh thật nhiều lần cho khớp trước khi đưa
-// vào đây. Không thể đoán trước khi chưa có ảnh, khác hẳn các game thẻ
-// rời (forest/farm/bill/abcvui) vốn không phụ thuộc bố cục ảnh cụ thể.
-// Nếu sau này đổi ảnh nền khác, các toạ độ này PHẢI đo lại từ đầu.
-var HOTSPOTS = {
-  cabinet: { left: 3, top: 6, width: 94, height: 16 },
-  rice_cooker: { left: 1, top: 33, width: 23, height: 14 },
-  pot: { left: 41, top: 31, width: 23, height: 10 },
-  stove: { left: 30, top: 39, width: 39, height: 7 },
-  sink: { left: 72, top: 22, width: 28, height: 25 },
-  bowl: { left: 18, top: 45.5, width: 22, height: 8 },
-  plate: { left: 55, top: 47, width: 28, height: 6 },
-  fan: { left: 4, top: 56, width: 27, height: 28 },
-  chair: { left: 49, top: 57, width: 19, height: 27 },
-  table: { left: 66, top: 59, width: 34, height: 23 }
+// GLOW_ASSETS: mỗi đồ vật có 1 ảnh PNG nền trong suốt riêng
+// (assets/kitchen/<id>.png) — CẮT ĐÚNG hình dạng thật của món đó (dùng
+// GrabCut xoá nền, không phải hình chữ nhật) từ chính ảnh kitchen-bg.jpg,
+// đặt đè CHÍNH XÁC lên đúng vị trí gốc của nó trong ảnh nền (toạ độ %
+// left/top/width/height dưới đây = đúng khung đã cắt). Nhờ ảnh trong
+// suốt theo đúng hình, hiệu ứng "phát sáng" (filter:drop-shadow trong
+// kitchen.css) ôm sát viền thật của đồ vật thay vì 1 khung vuông — xem
+// yêu cầu người dùng phản hồi sau bản đầu (chỉ có khung vuông).
+//
+// Toạ độ đo trực tiếp trên ảnh THẬT sau khi nhận từ người dùng (Bước 20
+// trong PROMPT.md) — không thể đoán trước khi chưa có ảnh, khác hẳn các
+// game thẻ rời (forest/farm/bill/abcvui) vốn không phụ thuộc bố cục ảnh
+// cụ thể. Nếu sau này đổi ảnh nền khác, phải cắt + đo lại từ đầu.
+var GLOW_ASSETS = {
+  cabinet: { left: 0, top: 2.98, width: 100, height: 22.02 },
+  rice_cooker: { left: 0, top: 29.98, width: 26.95, height: 20.02 },
+  pot: { left: 37.96, top: 27.98, width: 29.04, height: 15.99 },
+  stove: { left: 26.95, top: 35.97, width: 44.99, height: 13.01 },
+  sink: { left: 70.96, top: 29, width: 29.04, height: 18.97 },
+  bowl: { left: 14.97, top: 42.48, width: 28, height: 13.99 },
+  plate: { left: 51.95, top: 43.97, width: 33.98, height: 12.03 },
+  fan: { left: 3, top: 56.98, width: 28.97, height: 29 },
+  chair: { left: 47.98, top: 63.99, width: 20.96, height: 21.98 },
+  table: { left: 64.97, top: 63.99, width: 35.03, height: 19.99 }
 };
 
 // Đúng đủ 10 đồ vật trong ảnh (không hơn không kém, theo yêu cầu người
@@ -110,15 +117,21 @@ export function createKitchenGame(ctx) {
     return row;
   }
 
-  // 4 vùng bấm trong suốt, đặt đúng toạ độ % của từng đồ vật (HOTSPOTS)
-  // theo ĐÚNG từ đang hiển thị ở slot đó — viền vàng nhấp nháy mặc định
-  // (CSS .kitchenhotspot), đổi màu đúng/sai sau khi bé bấm.
+  // 4 nút bấm, mỗi nút chứa ẢNH CẮT ĐÚNG HÌNH DẠNG của đúng đồ vật đang ở
+  // slot đó (assets/kitchen/<id>.png), đặt đè CHÍNH XÁC lên vị trí gốc
+  // của nó trong ảnh nền (toạ độ % theo GLOW_ASSETS) — khi chưa bấm, ảnh
+  // này trông y hệt phần ảnh nền bên dưới (không lộ vết ghép) nhưng có
+  // hiệu ứng phát sáng nhấp nháy ÔM SÁT VIỀN THẬT (CSS filter:drop-shadow
+  // trên .kitchenglow-img, không phải khung vuông) để báo "1 trong 4 món
+  // này". Đổi màu sáng đúng/sai sau khi bé bấm (.correct/.wrong).
   function hotspotsHtml() {
     return state.slots.map(function (w, i) {
-      var h = HOTSPOTS[w.id];
-      if (!h) return '';
-      var style = 'left:' + h.left + '%;top:' + h.top + '%;width:' + h.width + '%;height:' + h.height + '%;';
-      return '<button type="button" class="kitchenhotspot" data-idx="' + i + '" style="' + style + '" aria-label="' + w.en + '"></button>';
+      var g = GLOW_ASSETS[w.id];
+      if (!g) return '';
+      var style = 'left:' + g.left + '%;top:' + g.top + '%;width:' + g.width + '%;height:' + g.height + '%;';
+      return '<button type="button" class="kitchenhotspot" data-idx="' + i + '" style="' + style + '" aria-label="' + w.en + '">' +
+        '<img class="kitchenglow-img" src="assets/kitchen/' + w.id + '.png" alt="">' +
+        '</button>';
     }).join('');
   }
 
@@ -216,6 +229,42 @@ export function createKitchenGame(ctx) {
     } catch (e) { /* Web Audio không khả dụng — bỏ qua, không phá UI */ }
   }
 
+  // Tiếng "buzz" trầm khi bấm sai — bổ sung phản hồi âm thanh cho cả 2
+  // chiều đúng/sai (trước đây chỉ có tiếng "ting" lúc đúng, bấm sai hoàn
+  // toàn im lặng — theo phản hồi người dùng, chỉ đổi màu xanh/đỏ khó nhận
+  // ra, cần thêm âm thanh cho rõ ràng hơn).
+  function playBuzz() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    try {
+      if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      var ctxAudio = sharedAudioCtx;
+      var now = ctxAudio.currentTime;
+      var osc = ctxAudio.createOscillator();
+      var gain = ctxAudio.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.exponentialRampToValueAtTime(110, now + 0.35);
+      gain.gain.setValueAtTime(0.16, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+      osc.connect(gain).connect(ctxAudio.destination);
+      osc.start(now);
+      osc.stop(now + 0.4);
+    } catch (e) { /* Web Audio không khả dụng — bỏ qua, không phá UI */ }
+  }
+
+  // Dấu ✓/✗ to, nổi bật giữa đúng vị trí đồ vật vừa bấm — bổ sung thêm 1
+  // tín hiệu RÕ RÀNG không phụ thuộc màu sắc (trước đây chỉ đổi màu viền
+  // xanh/đỏ, khó nhận ra theo phản hồi người dùng).
+  function showBadge(idx, isCorrect) {
+    var hotspotEls = document.querySelectorAll('.kitchenhotspot');
+    var el = hotspotEls[idx];
+    if (!el) return;
+    var badge = document.createElement('div');
+    badge.className = 'kitchenbadge ' + (isCorrect ? 'good' : 'bad');
+    badge.textContent = isCorrect ? '✓' : '✗';
+    el.appendChild(badge);
+  }
+
   function handleKitchenAnswer(idx) {
     if (state.answered) return;
     state.answered = true;
@@ -233,6 +282,7 @@ export function createKitchenGame(ctx) {
       state.correct++;
       ctx.speak(targetWord.promptAudioText || targetWord.en);
       hotspotEls[idx].classList.add('correct');
+      showBadge(idx, true);
       playDing();
       setKitchenMood('happy');
 
@@ -246,6 +296,9 @@ export function createKitchenGame(ctx) {
       saveProgress(store);
       hotspotEls[idx].classList.add('wrong');
       hotspotEls[state.targetIdx].classList.add('correct');
+      showBadge(idx, false);
+      showBadge(state.targetIdx, true);
+      playBuzz();
       ctx.speak(targetWord.promptAudioText || targetWord.en);
       setKitchenMood('sad');
       setTimeout(function () { advanceKitchenRound(state.targetIdx); }, 3200);
