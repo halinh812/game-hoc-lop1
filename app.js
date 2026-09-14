@@ -45,7 +45,7 @@ var GAMES = [
   { id: 'bill', title: 'Help Bill!', emoji: '🎒', skill: 'listen', available: true },
   { id: 'howmany', title: 'How Many?', emoji: '🔢', skill: 'see', available: true },
   { id: 'wordsafari', title: 'Word Safari', emoji: '🔤', skill: 'read', available: true },
-  { id: 'abcvui', title: 'ABC Vui', emoji: '🐥', skill: 'listen', available: true },
+  { id: 'abcvui', title: 'ABC', emoji: '🐥', skill: 'listen', available: true },
   { id: 'g7', title: 'Sắp ra mắt', available: false },
   { id: 'g8', title: 'Sắp ra mắt', available: false }
 ];
