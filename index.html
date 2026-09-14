@@ -29,8 +29,22 @@
   button{ font-family:inherit; }
   img{ max-width:100%; }
 
-  .stage{ width:min(430px,100%); min-height:100vh; position:relative; }
-  .world{ position:relative; min-height:100vh; overflow:hidden; }
+  /* --app-vh: chiều cao thật đang NHÌN THẤY được của trình duyệt, tính
+     bằng JS (xem app.js) và ghi vào biến CSS này — "100vh" thuần CSS trên
+     trình duyệt di động tính theo chiều cao TOÀN PHẦN màn hình (coi như
+     đã ẩn hết thanh địa chỉ/thanh điều hướng), LỚN HƠN hẳn phần thực sự
+     nhìn thấy khi các thanh đó đang hiện ra — .stage/.world dùng "100vh"
+     nên bị ép cao hơn nội dung thật cần, để lại khoảng trống phía dưới
+     và bắt buộc phải cuộn cả trang mới thấy hết (lỗi thật người dùng gặp
+     phải trên điện thoại thật — không tái hiện được khi kiểm thử bằng
+     Playwright vì môi trường đó không có thanh trình duyệt che khuất nên
+     100vh ở đó vốn đã đúng bằng phần nhìn thấy). Dùng biến JS thay vì chỉ
+     dựa vào "100dvh" (dvh tuy đã hỗ trợ khá rộng nhưng vẫn có trình duyệt/
+     WebView cũ chưa hỗ trợ đúng) để chắc chắn khớp treen mọi máy — "100vh"
+     vẫn giữ làm giá trị dự phòng cho khoảnh khắc rất ngắn trước khi JS
+     kịp chạy. */
+  .stage{ width:min(430px,100%); min-height:100vh; min-height:var(--app-vh, 100vh); position:relative; }
+  .world{ position:relative; min-height:100vh; min-height:var(--app-vh, 100vh); overflow:hidden; }
 
   /* Nền "rừng" ghép từ 3 lớp CỐ ĐỊNH theo mép màn hình (không dùng 1 SVG to
      kéo giãn theo tỉ lệ — với nội dung cao thấp khác nhau giữa các màn,
@@ -66,14 +80,13 @@
      của trình duyệt di động chiếm mất 1 phần "100vh" thật sự nhìn thấy
      được, nên .content mặc định (padding-top:100px dành chỗ cho linh vật
      nổi ở CÁC MÀN CHƠI) quá thừa ở đây. .content.homepage ghi đè: bỏ hẳn
-     khoảng đệm lớn, khoá đúng 1 màn hình (100dvh — "dynamic viewport
-     height" tự trừ phần thanh trình duyệt che mất, trình duyệt cũ không
-     hỗ trợ thì rơi về 100vh khai báo trước) rồi chia theo flex column 3
-     phần: thanh hồ sơ (cao cố định) + lưới trò chơi (chiếm hết chỗ còn
-     lại, TỰ CUỘN riêng nếu nhiều hơn 2 hàng) + thanh dưới cùng (cao cố
-     định) — xem thêm .gamegrid-scroll/.homebottombar bên dưới. */
+     khoảng đệm lớn, khoá đúng phần MÀN HÌNH THẬT ĐANG NHÌN THẤY (biến
+     --app-vh, xem giải thích ở .stage phía trên) rồi chia theo flex
+     column 3 phần: thanh hồ sơ (cao cố định) + lưới trò chơi (chiếm hết
+     chỗ còn lại, TỰ CUỘN riêng nếu nhiều hơn 3 hàng) + thanh dưới cùng
+     (cao cố định) — xem thêm .gamegrid-scroll/.homebottombar bên dưới. */
   .content.homepage{
-    padding:14px 16px 10px; min-height:100vh; height:100vh; height:100dvh;
+    padding:10px 16px 8px; min-height:100vh; height:100vh; height:var(--app-vh, 100vh);
   }
 
   /* ---------- shared UI ---------- */
@@ -167,15 +180,15 @@
      các ô trò chơi nhìn không đều cỡ dù kích thước icon từng game không đổi
      (lỗi thật đã gặp: ô "Word Safari" nhìn nhỏ hơn hẳn "Help Bill!" dù 2
      icon này cùng cỡ 78px — chỉ vì đứng ở 2 hàng khác nhau). */
-  /* 3 cột (trước là 2) — càng nhiều game ra mắt, 2 cột càng khiến lưới
-     kéo dài quá 1 màn hình. .gamegrid-scroll bọc ngoài chiếm hết khoảng
-     trống còn lại của .content.homepage (flex:1) và TỰ CUỘN riêng
-     (overflow-y:auto) khi lưới bên trong cao hơn 2 hàng — bé vuốt lên để
+  /* Giữ đúng 2 cột như trước (KHÔNG đổi sang 3 cột) — chỉ giới hạn chiều
+     CAO hiển thị còn khoảng 3 hàng, .gamegrid-scroll bọc ngoài chiếm hết
+     khoảng trống còn lại của .content.homepage (flex:1) và TỰ CUỘN riêng
+     (overflow-y:auto) khi lưới bên trong cao hơn 3 hàng — bé vuốt lên để
      xem các trò ở hàng dưới, không cần cuộn cả trang. min-height:0 trên
      flex item là bắt buộc để overflow-y:auto có tác dụng (mặc định flex
      item không tự co nhỏ hơn nội dung của nó, sẽ đẩy tràn thay vì cuộn). */
   .gamegrid-scroll{ flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; }
-  .gamegrid{ display:grid; grid-template-columns:repeat(3,1fr); grid-auto-rows:1fr; gap:8px; }
+  .gamegrid{ display:grid; grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:10px; }
   /* Thanh dưới cùng LUÔN hiện (flex:none, đứng ngoài phần cuộn của lưới)
      — Cú mèo linh vật (thu nhỏ) + nút "Dành cho phụ huynh" xếp chung 1
      hàng để không chiếm thêm chiều cao riêng, đúng mục tiêu gọn trong 1
@@ -185,15 +198,15 @@
   .homemascot-mini svg{ animation:mascotFloat 3.4s ease-in-out infinite; }
   @keyframes mascotFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-5px); } }
   .gametile{
-    border:none; border-radius:16px; padding:10px 6px; cursor:pointer; text-align:center;
-    display:flex; flex-direction:column; align-items:center; gap:5px;
+    border:none; border-radius:18px; padding:12px 8px; cursor:pointer; text-align:center;
+    display:flex; flex-direction:column; align-items:center; gap:6px;
     background:var(--glass); border:1px solid var(--glass-border);
     box-shadow:0 4px 0 rgba(20,40,25,.14), 0 10px 18px rgba(20,40,25,.16);
     transition:transform .1s ease, box-shadow .1s ease;
   }
   .gametile:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(20,40,25,.14); }
-  .gametile .emoji{ font-size:1.6rem; }
-  .gametile .name{ font-family:'Baloo 2', sans-serif; font-weight:700; font-size:.68rem; color:var(--ink); line-height:1.2; }
+  .gametile .emoji{ font-size:1.9rem; }
+  .gametile .name{ font-family:'Baloo 2', sans-serif; font-weight:700; font-size:.78rem; color:var(--ink); line-height:1.22; }
   /* Icon riêng của ô từng game (vd .gametile.forest-tile/.foresttile-face,
      .gametile.farm-tile/.farmtile-face) định nghĩa trong games/<slug>/*.css
      của game đó. */

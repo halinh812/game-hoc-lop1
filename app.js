@@ -51,6 +51,25 @@ var GAMES = [
   { id: 'kitchen', title: 'Kitchen', emoji: '🍳', skill: 'listen', available: true }
 ];
 
+// Ghi chiều cao THẬT đang nhìn thấy được của trình duyệt vào biến CSS
+// --app-vh (dùng ở .stage/.world/.content.homepage trong index.html) —
+// "100vh" thuần CSS trên trình duyệt di động tính theo chiều cao TOÀN
+// PHẦN màn hình (coi như đã ẩn hết thanh địa chỉ/thanh điều hướng), LỚN
+// HƠN hẳn phần thực sự nhìn thấy khi các thanh đó đang hiện ra — khiến
+// Trang chủ bị ép cao hơn nội dung thật cần, để lại khoảng trống phía
+// dưới và bắt buộc phải cuộn cả trang (lỗi thật người dùng gặp phải trên
+// điện thoại). window.visualViewport (khi trình duyệt hỗ trợ) phản ánh
+// đúng vùng nhìn thấy hơn window.innerHeight — cập nhật lại mỗi khi đổi
+// kích thước/xoay màn hình/thanh trình duyệt ẩn-hiện.
+function updateAppVh() {
+  var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+  document.documentElement.style.setProperty('--app-vh', h + 'px');
+}
+updateAppVh();
+window.addEventListener('resize', updateAppVh);
+window.addEventListener('orientationchange', updateAppVh);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', updateAppVh);
+
 var audio = createAudioProvider();
 var root = document.getElementById('root');
 
