@@ -1941,3 +1941,48 @@ Kiểm thử lại toàn bộ bằng Playwright sau khi sửa: luồng đúng/sa
 cuộc vẫn hoạt động đúng, badge + màu phát sáng đúng vị trí, 7 ô Trang chủ
 vẫn đều cỡ, tính năng Sao lưu tiến độ không bị ảnh hưởng. 29 unit test
 vẫn pass nguyên.
+
+## Vòng 44 — Thiết kế lại Trang chủ: gọn trong 1 màn hình trình duyệt web
+
+7 game giờ đã vượt quá 1 màn hình khi chơi qua trình duyệt web (khác app
+cài đặt) — thanh địa chỉ + thanh điều hướng của trình duyệt di động chiếm
+mất 1 phần chiều cao thật nhìn thấy được, bé phải cuộn cả trang mới thấy
+hết. Người dùng yêu cầu thiết kế lại theo 3 điểm:
+
+1. **Đẩy "Chào Bòng!" + điểm số lên kịch trên**: `.content` mặc định có
+   `padding-top:100px` (dành chỗ cho linh vật nổi ở các MÀN CHƠI khác) —
+   quá thừa cho Trang chủ. Thêm class `.content.homepage` riêng, ghi đè
+   `padding-top` xuống còn 14px chỉ cho màn này, không ảnh hưởng màn khác
+   vẫn dùng `.content` gốc.
+2. **Lưới 3×2 (trước 2 cột không giới hạn hàng), cuộn riêng khi nhiều
+   hơn 6 game, bỏ hẳn ô "Sắp ra mắt"**: `.gamegrid` đổi
+   `grid-template-columns:1fr 1fr` → `repeat(3,1fr)`. Bọc thêm
+   `.gamegrid-scroll` (flex:1, `overflow-y:auto`, `min-height:0` — bắt
+   buộc phải có `min-height:0` thì flex item mới chịu co nhỏ hơn nội
+   dung của nó để cuộn được, thiếu dòng này flex item sẽ tự giãn ra theo
+   đúng chiều cao nội dung, đẩy tràn thay vì cuộn) — chỉ khối lưới này
+   cuộn riêng, không phải cuộn cả trang. Xoá ô "Sắp ra mắt" cuối cùng
+   khỏi mảng `GAMES` trong `app.js` (đủ 7 game thật, không còn placeholder
+   nào).
+3. **Cú thông thái + nút "Dành cho phụ huynh" gộp thành 1 thanh cố định ở
+   dưới cùng**: trước đây Cú chiếm nguyên 1 hàng riêng
+   (`flex:1;min-height:56px`) rồi mới tới nút phụ huynh đứng riêng bên
+   dưới — 2 khối cộng lại tốn khá nhiều chiều cao. Gộp lại thành 1 hàng
+   ngang `.homebottombar` (Cú thu nhỏ 72px→46px + nút phụ huynh nằm cạnh
+   nhau, nút giãn `flex:1` lấp hết chỗ còn lại) — luôn hiện cố định
+   (`flex:none`, đứng NGOÀI phần `.gamegrid-scroll` nên không bị cuộn
+   mất), đúng mục tiêu người dùng "toàn bộ hiển thị gọn trong 1 màn
+   hình".
+   - Đồng thời thu nhỏ padding/gap/icon/chữ của `.gametile` (16px→10px
+     padding, 2.1rem→1.6rem emoji, .86rem→.68rem tên) cho vừa 3 cột thay
+     vì 2 — icon riêng từng game (ảnh nền + nhân vật nổi) đa phần đã
+     dùng đơn vị % nên tự co giãn theo đúng tỉ lệ mà không cần sửa CSS
+     riêng của từng file `games/<slug>/*.css`.
+
+Kiểm thử bằng Playwright ở 2 kích thước viewport khác nhau (bình thường
+và "thấp" mô phỏng trình duyệt di động chiếm nhiều chỗ): xác nhận toàn bộ
+Trang chủ (thanh hồ sơ + lưới + thanh dưới) vừa đúng 1 màn hình ở viewport
+thường; ở viewport thấp, lưới tự cuộn lộ dần hàng 3 trong khi thanh hồ sơ
++ thanh dưới vẫn luôn hiện đúng vị trí. Bấm chọn game/nút phụ huynh vẫn
+hoạt động đúng, tính năng Sao lưu tiến độ không bị ảnh hưởng, 29 unit
+test vẫn pass nguyên.
