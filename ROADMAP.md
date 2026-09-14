@@ -1986,3 +1986,44 @@ thường; ở viewport thấp, lưới tự cuộn lộ dần hàng 3 trong khi
 + thanh dưới vẫn luôn hiện đúng vị trí. Bấm chọn game/nút phụ huynh vẫn
 hoạt động đúng, tính năng Sao lưu tiến độ không bị ảnh hưởng, 29 unit
 test vẫn pass nguyên.
+
+## Vòng 45 — Sửa lại Vòng 44 theo đúng phản hồi: 2 cột (không phải 3) + hết lỗi phải cuộn cả trang
+
+Người dùng phản hồi bản Vòng 44 làm SAI 2 điểm quan trọng:
+
+1. **Hiểu nhầm "3x2" thành 3 cột × 2 hàng** — ý người dùng là **3 HÀNG ×
+   2 CỘT** (giữ nguyên 2 cột như thiết kế gốc, chỉ giới hạn chiều CAO
+   hiển thị còn ~3 hàng). Đổi `.gamegrid` lại `grid-template-columns:1fr
+   1fr` (2 cột, không phải `repeat(3,1fr)`), khôi phục lại kích thước ô
+   `.gametile` gần với bản gốc (chỉ giảm nhẹ so với bản gốc, không giảm
+   mạnh như bản 3 cột).
+2. **Trang vẫn phải cuộn cả trang trên điện thoại thật, dù không tái
+   hiện được khi kiểm thử bằng Playwright** — nguyên nhân thật: `.stage`/
+   `.world` dùng `min-height:100vh` thuần CSS, còn `.content.homepage`
+   (Vòng 44) dùng `100dvh`. Trên trình duyệt di động, "100vh" tính theo
+   chiều cao TOÀN PHẦN màn hình (coi như đã ẩn hết thanh địa chỉ/thanh
+   điều hướng) — LỚN HƠN hẳn phần thực sự đang nhìn thấy khi các thanh đó
+   còn hiện. `.stage`/`.world` (lớn hơn) bọc ngoài `.content.homepage`
+   (vừa khít phần nhìn thấy) tạo ra khoảng trống thừa phía dưới, buộc
+   phải cuộn cả trang mới thấy hết — dù nội dung THẬT bên trong
+   `.content.homepage` đã vừa đúng khung hình. Không tái hiện được bằng
+   Playwright vì môi trường đó không có thanh trình duyệt che khuất, nên
+   "100vh" ở đó vốn đã đúng bằng phần nhìn thấy — chỉ lộ ra trên điện
+   thoại thật.
+   - Sửa triệt để bằng biến CSS `--app-vh`, tính bằng JS
+     (`window.visualViewport.height` ưu tiên hơn `window.innerHeight` vì
+     phản ánh đúng vùng nhìn thấy hơn) trong `app.js`, ghi lại mỗi khi
+     đổi kích thước/xoay màn hình/thanh trình duyệt ẩn-hiện
+     (`resize`/`orientationchange`/`visualViewport resize`). `.stage`/
+     `.world`/`.content.homepage` đều dùng `var(--app-vh, 100vh)` —
+     không còn lệch nhau giữa 2 đơn vị đo khác nhau nữa. Chắc chắn hơn
+     hẳn chỉ dựa vào `100dvh` (dvh tuy hỗ trợ khá rộng nhưng WebView/
+     trình duyệt cũ có thể chưa đúng).
+
+Kiểm thử lại bằng Playwright ở viewport mô phỏng "chiều cao thật nhìn
+thấy nhỏ hơn" (390×700): xác nhận `--app-vh` đúng bằng viewport,
+`document.documentElement.scrollHeight` KHÔNG vượt quá viewport (trang
+không cần cuộn), lưới 2 cột × 3 hàng hiện đủ + hàng 4 (Kitchen) tự cuộn
+lộ ra khi vuốt lên trong đúng khối `.gamegrid-scroll`. Bấm chọn game/nút
+phụ huynh vẫn hoạt động đúng, tính năng Sao lưu tiến độ + kích thước 7 ô
+vẫn nhất quán, 29 unit test vẫn pass nguyên.
