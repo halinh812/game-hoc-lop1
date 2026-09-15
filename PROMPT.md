@@ -1600,3 +1600,96 @@ trước (đã biết trước toạ độ vì dùng thẻ/icon rời, không ph
 lên ảnh nền). Nếu ảnh AI ra không đúng bố cục 3 tầng như mô tả (vd 2 món
 bị chồng lên nhau), cứ gửi qua tôi xem thử — có thể vẫn xác định được
 toạ độ, hoặc sẽ nhờ bạn tạo lại prompt với chỉnh sửa cụ thể hơn.
+
+<a id="buoc-21"></a>
+## Bước 21 — Nhân vật cho game #8 "Butterfly Garden" (Màu sắc)
+
+Game #8 dạy 6 màu cơ bản (đỏ/xanh dương/vàng/xanh lá/đen/trắng) — nghe
+tên màu tiếng Anh, bấm đúng 1 trong 6 con bướm màu hiện sẵn trên màn.
+**Khác mọi game trước**: 6 con bướm KHÔNG cần ảnh AI — vẽ thẳng bằng
+code (SVG), tô ĐÚNG mã màu của từng từ, để chắc chắn "con bướm đỏ" phải
+THẬT SỰ là màu đỏ (ảnh AI khó đảm bảo đúng tuyệt đối như vậy). Vì vậy
+game đã chạy được đầy đủ ngay từ hôm nay, chỉ còn thiếu 1 nhóm ảnh duy
+nhất: **linh vật dẫn đường** (3 trạng thái cảm xúc, đúng cơ chế đã làm ở
+Bước 12/16/18/19/20) — đây là hạng mục NÂNG CẤP THÊM (không bắt buộc để
+chơi được, hiện đang dùng tạm 1 emoji 🦋 chung cho cả 3 trạng thái).
+
+Chủ đề chọn: **bướm dẫn đường** — khác hẳn 7 linh vật đã có (hổ/chó/bạn
+nhỏ/cú/chồn đất/gà con/mèo đầu bếp). Vì 6 con bướm màu trong game đã
+dùng đúng 6 màu cơ bản (đỏ/xanh dương/vàng/xanh lá/đen/trắng), linh vật
+dẫn đường nên có cánh **nhiều màu sắc/hoạ tiết** (kiểu bướm chúa
+monarch: cam + đen + đốm trắng) để không trùng với bất kỳ màu nào trong
+6 màu đang được hỏi, tránh gây nhầm lẫn cho bé.
+
+### 21.1 — Nhân vật bướm dẫn đường (3 trạng thái)
+
+#### Khung phong cách (dán trước, dùng chung cho cả 3 trạng thái)
+
+```
+Cute chibi-style baby butterfly character illustration for a children's
+mobile learning game, flat vector cartoon art style with soft
+cel-shading and gentle gradient highlights, oversized round fluffy head
+with a much smaller compact round body (chibi/baby proportions),
+extremely large glossy round eyes with a bright white catchlight
+sparkle, two large decorative wings spread behind the head like a cape
+(monarch-butterfly pattern: warm orange with bold black vein lines and
+small white spot dots along the black wing edges), two thin curled
+antennae on top of the head, tiny stub arms/legs, smooth rounded shapes
+with no sharp edges, thin clean dark outline around the whole character
+and around each wing, saturated warm and cheerful color palette,
+standing/hovering pose facing slightly to the side, centered on a plain
+solid white (#FFFFFF) background, no ground shadow, no scenery, no
+other characters, no text, no watermark, no logo, square 1:1
+composition, character fills about 75-85% of the frame.
+Avoid: realistic or photographic proportions, photographic texture,
+scary or fierce look, background scenery, multiple characters in
+frame, cropped body parts, text or watermark.
+```
+
+#### Prompt riêng: chờ đợi (ảnh mặc định — cũng dùng làm icon Trang chủ)
+
+```
+The butterfly hovering calmly upright in a relaxed neutral pose, wings
+held gently open and still, head tilted slightly to one side as if
+thinking, a soft closed-mouth content smile, calm patient and attentive
+expression — like it's waiting to show the way to the next flower.
+```
+
+Lưu thành `butterfly-idle.png`.
+
+#### Prompt riêng: vui (bé chọn đúng)
+
+```
+The butterfly hovering with wings spread wide and fluttering with
+excitement (motion-blur hint at the very wing tips only), big bright
+sparkling eyes, a cheerful wide open-mouth happy expression, rosy cheek
+blush marks, as if it just found the sweetest flower.
+```
+
+Lưu thành `butterfly-happy.png`.
+
+#### Prompt riêng: buồn (bé chọn sai)
+
+```
+The butterfly hovering with wings drooping low and half-closed, big
+sparkling eyes now looking slightly downcast with a small furrowed
+brow, antennae drooping a little, a gentle disappointed but still cute
+and sympathetic (not scary) expression.
+```
+
+Lưu thành `butterfly-sad.png`.
+
+Lưu cả 3 ảnh vào `assets/_raw_incoming/` với đúng 3 tên trên, gửi qua
+Git theo đúng quy trình ở Bước 11 — tôi sẽ xoá nền + tối ưu + lưu vào
+`assets/characters/`, sau đó cập nhật `games/butterfly-garden/
+butterflygarden.js` để dùng ảnh thật thay cho emoji tạm 🦋 (không cần
+sửa gì khác — `<img>` đã trỏ sẵn đúng 3 tên file này, ảnh về là tự động
+hiện, không còn rơi về fallback nữa).
+
+**Ảnh nền vườn hoa riêng (tuỳ chọn, không bắt buộc)**: game hiện dùng
+tạm nền cỏ cây/trời xanh dùng chung ở Trang chủ (`worldBg()` không tham
+số). Nếu muốn nâng cấp thêm 1 ảnh nền "vườn hoa" riêng theo đúng phong
+cách các game khác, báo tôi — vì 6 con bướm trong game định vị theo toạ
+độ cố định không phụ thuộc ảnh nào, việc thêm ảnh nền sau này chỉ cần
+đổi 1 dòng CSS (`worldBg()` → `worldBg('butterflyphoto')` + khai báo ảnh
+trong `butterflygarden.css`), không cần đo lại toạ độ như kitchen-bg.jpg.
