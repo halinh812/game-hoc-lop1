@@ -1686,10 +1686,47 @@ butterflygarden.js` để dùng ảnh thật thay cho emoji tạm 🦋 (không c
 sửa gì khác — `<img>` đã trỏ sẵn đúng 3 tên file này, ảnh về là tự động
 hiện, không còn rơi về fallback nữa).
 
-**Ảnh nền vườn hoa riêng (tuỳ chọn, không bắt buộc)**: game hiện dùng
-tạm nền cỏ cây/trời xanh dùng chung ở Trang chủ (`worldBg()` không tham
-số). Nếu muốn nâng cấp thêm 1 ảnh nền "vườn hoa" riêng theo đúng phong
-cách các game khác, báo tôi — vì 6 con bướm trong game định vị theo toạ
-độ cố định không phụ thuộc ảnh nào, việc thêm ảnh nền sau này chỉ cần
-đổi 1 dòng CSS (`worldBg()` → `worldBg('butterflyphoto')` + khai báo ảnh
-trong `butterflygarden.css`), không cần đo lại toạ độ như kitchen-bg.jpg.
+### 21.2 — Ảnh nền "vườn hoa"
+
+Tỉ lệ khung hình **dọc (portrait) 9:16**, giống mọi ảnh nền khác. Khác
+Kitchen (bấm thẳng lên ảnh, phải đúng bố cục 3 tầng cụ thể để đo toạ
+độ): ảnh này CHỈ trang trí — 6 con bướm trong game định vị theo toạ độ
+% cố định (`BUTTERFLY_SPOTS` trong `butterflygarden.js`), không phụ
+thuộc bố cục ảnh — nên KHÔNG cần theo layout chính xác nào, chỉ cần
+tránh quá rối ở vùng giữa/trên (nơi linh vật dẫn đường + vòng bướm nằm
+đè lên).
+
+```
+Vibrant, cheerful flat-vector cartoon illustration of a sunny flower
+garden/meadow, background art for a children's mobile learning game, in
+the same cute soft cel-shaded style as a chibi character illustration
+(smooth rounded shapes, no sharp or scary edges, thin clean outlines,
+warm saturated pastel colors, gentle gradient lighting, bright even
+daytime lighting). Portrait orientation, 9:16 aspect ratio, full-bleed
+edge-to-edge illustration filling the entire frame. A soft gradient sky
+in the upper background (warm pale yellow fading into soft mint green),
+a few fluffy white clouds. Lush green grass covering the lower half of
+the frame with gentle rolling hills. Colorful flowers (daisies, tulips,
+sunflowers, roses in mixed bright colors) scattered mostly along the
+LEFT and RIGHT edges and the very BOTTOM edge of the frame, growing
+thicker and denser toward the corners — leave the CENTER and UPPER-
+MIDDLE area of the frame calm, open and uncluttered (low flower density,
+mostly plain grass/sky there), since this open space is reserved for
+game characters that will be placed on top later. A couple of small
+butterflies and a ladybug may be scattered decoratively among the
+flowers near the edges only. No people, no readable text, no logo, no
+watermark anywhere in the image.
+Avoid: photographic or realistic rendering, 3D render look, dark or
+moody lighting, cluttered or busy center composition, any human
+character, any text/letters/watermark, cropped or off-center
+composition.
+```
+
+Không cần xoá nền — giữ nguyên làm 1 ảnh nền đầy khung. Gửi thẳng vào
+`assets/backgrounds/butterfly-bg.jpg` qua Git (không qua
+`_raw_incoming/`, giống cách làm ở Bước 7/9/14/18.2/19.2/20.2 — ảnh nền
+full-bleed không cần xử lý gì thêm). Sau khi có ảnh, tôi chỉ cần đổi 1
+dòng CSS (`worldBg()` → `worldBg('butterflyphoto')` trong
+`butterflygarden.js` + khai báo `.world-bg.butterflyphoto` trong
+`butterflygarden.css`) — không cần đo lại toạ độ nào cả vì 6 con bướm đã
+định vị cố định sẵn, khác hẳn kitchen-bg.jpg.
