@@ -64,12 +64,22 @@ export function createButterflyGardenGame(ctx) {
   var root = document.getElementById('root');
   var state = ctx.state;
 
-  // Ảnh linh vật có thể CHƯA tồn tại (đang chờ người dùng tự tạo bằng AI
-  // theo Bước 21 trong PROMPT.md) — bắt sự kiện "error" của <img> để tự
-  // chuyển sang fallback emoji, y hệt bill.js/kitchen.js.
+  // Ảnh linh vật + 6 ảnh con bướm màu có thể CHƯA tồn tại (đang chờ người
+  // dùng tự tạo bằng AI theo Bước 21/22 trong PROMPT.md) — bắt sự kiện
+  // "error" của <img> để tự chuyển sang fallback (emoji cho linh vật, SVG
+  // vẽ tay cho con bướm — xem butterflySvg()), y hệt bill.js/kitchen.js.
+  // 6 ảnh con bướm dùng chung 1 class (không phải id riêng như mascot) vì
+  // có 6 cái cùng lúc trên màn — tìm fallback bằng nextElementSibling
+  // thay vì getElementById theo id cố định.
   window.addEventListener('error', function (e) {
     var t = e.target;
     if (!t || t.tagName !== 'IMG') return;
+    if (t.classList.contains('butterflyimg')) {
+      t.hidden = true;
+      var svgFallback = t.nextElementSibling;
+      if (svgFallback && svgFallback.classList.contains('butterflysvgfallback')) svgFallback.hidden = false;
+      return;
+    }
     if (t.id === 'butterflyMascotImg' || t.id === 'butterflyTileImg') {
       t.hidden = true;
       var fbId = t.id === 'butterflyMascotImg' ? 'butterflyFallback' : 'butterflyTileFallback';
@@ -123,7 +133,11 @@ export function createButterflyGardenGame(ctx) {
 
   // 1 con bướm = 1 SVG nội tuyến tô đúng mã màu của từ đó (BUTTERFLY_HEX)
   // — 4 cánh (2 cánh trên to, 2 cánh dưới nhỏ) + thân + 2 râu, viền đậm
-  // quanh cánh để con bướm màu trắng vẫn nhìn rõ trên nền sáng.
+  // quanh cánh để con bướm màu trắng vẫn nhìn rõ trên nền sáng. Đây là
+  // ảnh FALLBACK — mặc định hotspotsHtml() vẫn ưu tiên hiện ảnh AI thật
+  // (assets/butterflies/<id>.png, xem Bước 22 trong PROMPT.md) nếu đã có,
+  // svg này chỉ hiện khi ảnh đó chưa tồn tại (lỗi tải, bắt ở window
+  // 'error' phía trên).
   function butterflySvg(hex) {
     return '<svg viewBox="0 0 100 100" width="100%" height="100%" aria-hidden="true">' +
       '<g stroke="#33261C" stroke-width="3" stroke-linejoin="round">' +
@@ -145,7 +159,10 @@ export function createButterflyGardenGame(ctx) {
       var hex = BUTTERFLY_HEX[w.id] || '#8A8A8A';
       var style = 'left:' + spot.left + '%;top:' + spot.top + '%;';
       return '<button type="button" class="butterflyhotspot" data-idx="' + i + '" style="' + style + '" aria-label="' + w.en + '">' +
-        butterflySvg(hex) +
+        '<span class="butterflyvisual">' +
+        '<img class="butterflyimg" src="assets/butterflies/' + w.id + '.png" alt="">' +
+        '<span class="butterflysvgfallback" hidden>' + butterflySvg(hex) + '</span>' +
+        '</span>' +
         '</button>';
     }).join('');
   }

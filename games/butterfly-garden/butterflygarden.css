@@ -10,22 +10,43 @@
 .butterflystage{ position:relative; flex:1; margin:4px 0 0; }
 .butterflyfield{ position:absolute; inset:0; }
 
-/* 6 con bướm SVG nội tuyến (màu tô đúng mã màu thật của từ, xem
-   BUTTERFLY_HEX trong butterflygarden.js) — đứng yên ở toạ độ % cố định
-   (BUTTERFLY_SPOTS), không di chuyển (xem lý do ở đầu butterflygarden.js:
-   cơ chế "bắt vật di chuyển" đã bị bỏ khỏi app từ lâu). Vẫn có nhịp "vỗ
-   cánh" nhẹ liên tục (xoay + phóng to nhẹ qua lại) để không đứng chết,
-   khác hẳn kiểu chỉ nhấp nháy viền của kitchen.js. */
+/* 6 con bướm — ƯU TIÊN ảnh AI thật lấp lánh theo màu (assets/butterflies/
+   <id>.png, xem Bước 22 trong PROMPT.md), rơi về SVG vẽ tay tô đúng mã
+   màu (BUTTERFLY_HEX trong butterflygarden.js) nếu ảnh đó CHƯA tồn tại
+   (.butterflysvgfallback, ẩn/hiện qua thuộc tính "hidden" — bắt lỗi tải
+   ảnh ở window 'error' trong butterflygarden.js). Đứng yên ở toạ độ %
+   cố định (BUTTERFLY_SPOTS), không di chuyển (xem lý do ở đầu
+   butterflygarden.js: cơ chế "bắt vật di chuyển" đã bị bỏ khỏi app từ
+   lâu). QUAN TRỌNG: hiệu ứng vỗ cánh/đúng/sai (xoay/phóng to) gắn vào
+   `.butterflyvisual` (lớp BÊN TRONG nút bấm), KHÔNG gắn trực tiếp lên
+   chính `.butterflyhotspot` (nút bấm) — nếu gắn animation transform lên
+   thẳng nút bấm, vùng bấm thật của nó (bounding box) sẽ liên tục đổi
+   theo animation, khiến việc bấm trúng kém ổn định hơn (Playwright coi
+   phần tử "not stable" và không bấm được cho tới khi animation dừng —
+   dấu hiệu thật của rủi ro tương tự trên tay bé bấm thật). Tách lớp
+   trong/ngoài giữ nút bấm luôn đứng yên, chỉ phần NHÌN THẤY động đậy. */
 .butterflystage .butterflyhotspot{
   position:absolute; width:22vw; height:22vw; max-width:92px; max-height:92px;
   border:none; background:transparent; padding:0; cursor:pointer;
 }
 .butterflystage .butterflyhotspot:active{ transform:scale(.94); }
-.butterflystage .butterflyhotspot svg{
-  width:100%; height:100%; display:block;
+.butterflystage .butterflyhotspot .butterflyvisual{
+  display:block; width:100%; height:100%;
   filter:drop-shadow(0 4px 3px rgba(20,40,25,.25));
   animation:butterflyFlutter 2.4s ease-in-out infinite;
 }
+.butterflystage .butterflyhotspot .butterflyimg,
+.butterflystage .butterflyhotspot .butterflysvgfallback,
+.butterflystage .butterflyhotspot .butterflysvgfallback svg{
+  width:100%; height:100%; display:block; object-fit:contain;
+}
+/* [hidden] không tự đủ ẩn phần tử đã có display:block riêng (ảnh lỗi
+   vẫn hiện icon "ảnh vỡ" dù đã set hidden=true trong JS nếu thiếu dòng
+   này) — cùng lỗi/cách sửa đã dùng cho .billfallback[hidden]/
+   .kitchenfallback[hidden]. Áp dụng cho CẢ 2 chiều: ảnh lỗi cần ẩn khi
+   hidden, SVG dự phòng cần ẩn khi CHƯA hidden=false (mặc định). */
+.butterflystage .butterflyhotspot .butterflyimg[hidden],
+.butterflystage .butterflyhotspot .butterflysvgfallback[hidden]{ display:none; }
 @keyframes butterflyFlutter{
   0%,100%{ transform:rotate(0deg) scale(1); }
   50%{ transform:rotate(-4deg) scale(1.03); }
@@ -35,7 +56,7 @@
    (không chỉ đổi màu viền — cùng bài học rút ra từ phản hồi người dùng ở
    Kitchen, xem Vòng 43 trong ROADMAP.md) + phát sáng đúng/sai màu xanh/đỏ
    giống kitchen.js/bill.js. */
-.butterflystage .butterflyhotspot.correct svg{
+.butterflystage .butterflyhotspot.correct .butterflyvisual{
   animation:butterflyCorrectPop .5s ease;
   filter:drop-shadow(0 0 6px var(--success)) drop-shadow(0 0 14px rgba(47,143,91,.75));
 }
@@ -44,7 +65,7 @@
   45%{ transform:scale(1.3) rotate(10deg); }
   100%{ transform:scale(1.1) rotate(0deg); }
 }
-.butterflystage .butterflyhotspot.wrong svg{
+.butterflystage .butterflyhotspot.wrong .butterflyvisual{
   animation:butterflyWrongShake .45s ease;
   filter:drop-shadow(0 0 6px #B24A43) drop-shadow(0 0 14px rgba(178,74,67,.75));
 }
@@ -117,6 +138,6 @@
 .butterflytile-fallback[hidden]{ display:none; }
 
 @media (prefers-reduced-motion: reduce){
-  .butterflystage .butterflyhotspot svg,.butterflymascotwrap,.butterflytile-face{ animation:none !important; }
+  .butterflystage .butterflyhotspot .butterflyvisual,.butterflymascotwrap,.butterflytile-face{ animation:none !important; }
   .butterflybadge{ transform:translate(-50%,-50%) scale(1); }
 }
