@@ -1730,3 +1730,103 @@ dòng CSS (`worldBg()` → `worldBg('butterflyphoto')` trong
 `butterflygarden.js` + khai báo `.world-bg.butterflyphoto` trong
 `butterflygarden.css`) — không cần đo lại toạ độ nào cả vì 6 con bướm đã
 định vị cố định sẵn, khác hẳn kitchen-bg.jpg.
+
+<a id="buoc-22"></a>
+## Bước 22 — 6 con bướm màu lấp lánh cho Butterfly Garden
+
+Người dùng phản hồi: 6 con bướm hiện tại (vẽ tạm bằng code/SVG cho game
+chạy được ngay, xem Vòng 46 trong ROADMAP.md) "đơn điệu và không đẹp",
+muốn có ảnh AI đẹp hơn, có **hiệu ứng lấp lánh** (con thích phong cách
+này). Code đã sẵn sàng dùng ảnh thật ngay khi có — chỉ cần đúng tên file
+dưới đây, không cần báo lại hay sửa gì thêm.
+
+**Mỗi con bướm ứng với ĐÚNG 1 trong 6 màu bé đang học** (đỏ/xanh dương/
+vàng/xanh lá/đen/trắng, xem `content/packs/colors-v1.json`) — màu cánh
+CHỦ ĐẠO phải rõ ràng, dễ nhận ra ngay là đúng màu đó (mục tiêu là DẠY
+MÀU, lấp lánh chỉ là hiệu ứng phụ trang trí thêm, không được để hiệu ứng
+lấn át khiến màu chính khó nhận ra — nhất là con bướm đen, dễ bị
+"lấp lánh" biến thành màu khác nếu làm quá tay).
+
+### Khung phong cách (dán trước, dùng chung cho cả 6 con)
+
+```
+Cute, sparkly, magical cartoon butterfly icon for a children's mobile
+learning game, flat vector illustration with soft cel-shading, glossy
+gradient highlights, and delicate glittering sparkle accents scattered
+over the wings (small four-pointed star-shaped sparkles and tiny
+glowing light dots, concentrated near the wing edges, NOT covering the
+whole wing so the main wing color still reads clearly at a glance).
+Two large rounded symmetric upper wings and two smaller rounded lower
+wings, a thin delicate lace-like scalloped pattern along the outer wing
+edge, a small round fuzzy body, two thin curled antennae with tiny
+round glowing tips, thin clean dark outline around the whole silhouette
+and around each wing. Symmetrical wings spread open flat, viewed
+straight-on from the front/top (NOT a side profile view) so the full
+shape reads clearly at small sizes. No face, no eyes on the butterfly
+itself (pure decorative wing-icon shape, not a character). Centered on
+a plain solid white (#FFFFFF) background, no shadow, no scenery, no
+other elements, no text, no watermark, no logo, square 1:1 composition,
+butterfly fills about 80-90% of the frame.
+Avoid: photographic texture, realistic moth/insect anatomy,
+asymmetrical wings, side-profile view, cropped wings, a face or eyes on
+the butterfly, text or watermark, dull or muddy colors, sparkle effect
+so heavy it hides the main wing color.
+```
+
+### Prompt riêng cho từng màu
+
+```
+Đỏ (red):
+The wings are a rich, vivid ruby red as the clearly dominant color,
+with warm gold sparkle accents and a few tiny pink-gold glitter dots
+near the wing tips, a soft warm pink glow along the scalloped edge.
+
+Xanh dương (blue):
+The wings are a bright, vivid sapphire blue as the clearly dominant
+color, with silvery-white sparkle accents and a few tiny icy-blue
+glitter dots near the wing tips, a soft pale cyan glow along the
+scalloped edge.
+
+Vàng (yellow):
+The wings are a bright, vivid sunshine yellow as the clearly dominant
+color, with warm golden-orange sparkle accents and a few tiny amber
+glitter dots near the wing tips, a soft warm gold glow along the
+scalloped edge.
+
+Xanh lá (green):
+The wings are a bright, vivid emerald green as the clearly dominant
+color, with lime-gold sparkle accents and a few tiny yellow-green
+glitter dots near the wing tips, a soft fresh lime glow along the
+scalloped edge.
+
+Đen (black):
+The wings are a deep, rich black as the clearly dominant color (the
+black must stay clearly readable as black, not faded into grey or
+purple), with extra-generous silvery-white star sparkle accents and a
+subtle cool violet-blue iridescent sheen along the very edge only (like
+a real black butterfly's wing shimmer), a soft cool white glow along
+the scalloped edge.
+
+Trắng (white):
+The wings are a soft pearlescent white as the clearly dominant color,
+with a gentle rainbow/opal iridescent shimmer and extra-generous
+silvery sparkle accents so the white wings stay clearly visible against
+a white background, plus a thin pale gold-tan outline around the whole
+silhouette (slightly warmer/darker than pure white) so the shape reads
+clearly.
+```
+
+**Lưu ý quan trọng — tạo trong 1 cuộc trò chuyện MỚI**, tách riêng khỏi
+đoạn chat vừa tạo ảnh nền vườn hoa (Bước 21.2) hay bất kỳ ảnh nào khác:
+nhiều công cụ AI ảnh (kể cả Google Flow) sẽ "nhớ" màu/phong cách của ảnh
+vừa tạo trước đó rồi lặp lại hoặc pha trộn vào ảnh tiếp theo dù prompt
+không hề nhắc tới (đúng lỗi đã gặp với ảnh bút chì ở Bước 13) — với 6
+con bướm cần màu THẬT KHÁC NHAU rõ ràng, lỗi "dính màu" giữa các lần tạo
+liên tiếp sẽ rất dễ nhận ra và làm hỏng cả bộ.
+
+Lưu 6 file PNG theo đúng tên: `red.png`, `blue.png`, `yellow.png`,
+`green.png`, `black.png`, `white.png`, vào `assets/_raw_incoming/`, gửi
+qua Git theo đúng quy trình ở Bước 11 (có thể gửi cùng 1 lần với ảnh nền
+vườn hoa ở Bước 21.2) — tôi sẽ xoá nền + tối ưu + lưu vào
+`assets/butterflies/`, ảnh sẽ tự động hiện lên thay cho 6 con bướm SVG
+tạm, không cần sửa gì thêm ở code.
