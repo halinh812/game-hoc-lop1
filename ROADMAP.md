@@ -2027,3 +2027,58 @@ không cần cuộn), lưới 2 cột × 3 hàng hiện đủ + hàng 4 (Kitchen
 lộ ra khi vuốt lên trong đúng khối `.gamegrid-scroll`. Bấm chọn game/nút
 phụ huynh vẫn hoạt động đúng, tính năng Sao lưu tiến độ + kích thước 7 ô
 vẫn nhất quán, 29 unit test vẫn pass nguyên.
+
+## Vòng 46 — Game #8 "Butterfly Garden" (Màu sắc)
+
+Game mới dạy 6 màu cơ bản tiếng Anh (red/blue/yellow/green/black/white —
+vốn từ `content/packs/colors-v1.json` đã có sẵn từ trước nhưng chưa game
+nào dùng tới). Người dùng chọn linh vật **bướm**, ban đầu đề xuất cơ chế
+"bắt bướm đúng màu đang bay" nhưng sau khi kiểm tra lại code thì phát
+hiện app KHÔNG còn cơ chế "bắt vật di chuyển" nào để tái dùng nữa — lịch
+sử trước đây (Mystic Jungle/My Little Farm) từng làm animal chạy/bay tự
+do nhưng đã bị chủ động bỏ hẳn vì lý do ổn định + độ chính xác chạm trên
+điện thoại (xem Vòng 25-29). Trình bày lại rủi ro này cho người dùng,
+chốt lại thành bản TĨNH: 6 con bướm đứng yên ở vị trí cố định, có nhịp
+"vỗ cánh" nhẹ tại chỗ (xoay + phóng to nhẹ qua lại) để không đứng chết.
+
+**Khác mọi game trước — không cần ảnh AI mới để chơi được ngay:**
+- Vốn từ chỉ có đúng 6 màu (nhỏ hơn hẳn 10+ của các game khác) nên hiện
+  ĐỦ CẢ 6 con bướm mỗi vòng (không phải 4 trong N từ lớn hơn như forest/
+  farm/bill/kitchen) — đúng tinh thần "tìm đúng giữa nhiều lựa chọn cùng
+  hiện" mà không cần chuyển động thật.
+- 6 con bướm vẽ bằng **SVG nội tuyến** (không phải ảnh PNG) — tô ĐÚNG mã
+  màu hex của từng từ (`BUTTERFLY_HEX` trong `butterflygarden.js`), đảm
+  bảo "con bướm đỏ" chắc chắn là màu đỏ thật, việc ảnh AI khó cam kết
+  tuyệt đối. Vị trí 6 "chỗ đậu" (`BUTTERFLY_SPOTS`) cũng là số liệu cố
+  định (dàn vòng quanh linh vật dẫn đường ở giữa), không cần đo trên ảnh
+  thật như `GLOW_ASSETS` của Kitchen.
+- Màn chơi dùng tạm nền cỏ cây/trời xanh dùng chung ở Trang chủ
+  (`worldBg()` không tham số) thay vì ảnh nền riêng — ảnh nền vườn hoa
+  riêng đưa sang hạng mục NÂNG CẤP SAU (không bắt buộc), xem Bước 21
+  trong PROMPT.md.
+- Linh vật dẫn đường (3 trạng thái cảm xúc) CHƯA có ảnh thật, dùng tạm 1
+  emoji chung 🦋 cho cả 3 trạng thái (Unicode không có sẵn bộ emoji bướm
+  vui/buồn riêng như bộ mèo 🐱/😻/😿 của Kitchen) — người dùng có thể tự
+  tạo ảnh theo đúng 3 prompt ở Bước 21 khi rảnh, code đã trỏ sẵn đúng 3
+  tên file, ảnh về là tự hiện luôn không cần sửa gì thêm.
+
+Nhờ vậy game đã CHẠY ĐƯỢC ĐẦY ĐỦ ngay hôm nay — không phải chờ thêm 1
+vòng tạo ảnh mới có game chơi được, khác hẳn Kitchen (bắt buộc phải có
+ảnh nền thật mới đo được toạ độ mới viết được code).
+
+Cơ chế phản hồi đúng/sai tái dùng gần nguyên vẹn kỹ thuật đã kiểm chứng
+ở Kitchen (Vòng 43): dấu ✓/✗ to rõ ràng + tiếng "ting"/"buzz" + phát sáng
+viền xanh/đỏ — chỉ thêm 1 hiệu ứng riêng cho game này (bật/tắt nhịp vỗ
+cánh, phóng to xoay nhẹ lúc đúng, lắc ngang lúc sai). Khác Kitchen/Bill:
+KHÔNG cần thay slot/tái tạo DOM khi qua vòng mới (đủ cả 6 màu cố định
+suốt lượt chơi) — chỉ cần xoá lớp đúng/sai + dấu ✓/✗ cũ rồi chọn lại từ
+mục tiêu trong đúng 6 từ đang có, đơn giản hơn hẳn.
+
+Kiểm thử bằng Playwright (viewport 390×780, giả lập TTS để tự động chơi):
+xác nhận đủ 6 con bướm hiện đúng nhãn màu, chơi hết 10 vòng trả lời đúng
+tới màn thắng cuộc; riêng luồng trả lời sai xác nhận đúng con bị bấm sai
+sáng viền đỏ + dấu ✗, con đúng sáng viền xanh + dấu ✓, linh vật chuyển
+tâm trạng buồn, qua vòng mới thì toàn bộ lớp/dấu cũ được dọn sạch đúng
+như thiết kế. Trang chủ hiện đúng ô game mới (nền gradient pastel tạm +
+mặt bướm lắc lư, rơi về fallback emoji đúng như dự kiến vì ảnh linh vật
+chưa tồn tại). 29 unit test vẫn pass nguyên.
