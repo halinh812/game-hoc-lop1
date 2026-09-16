@@ -22,7 +22,9 @@
 //   VS_ENGINE=            để trống = engine mặc định (omnivoice, chạy GPU).
 //                         Đặt "kittentts" để dùng 8 giọng preset tiếng Anh
 //                         chạy CPU (VS_PROFILE kiểu expr-voice-2-f).
-//   VS_SEED=1234          giữ cố định để mọi câu nghe cùng 1 giọng
+//   VS_SEED=1234          seed lần sinh đầu. Câu nào ra file rỗng tiếng thì tự
+//                         thử lại với seed khác (giọng clone lấy từ file mẫu
+//                         nên đổi seed KHÔNG làm đổi giọng)
 //   VS_NO_PERIOD=1        tắt việc tự thêm dấu chấm (xem speechTextFor)
 //   VS_OUT=assets/audio/en  thư mục ghi ra
 //
@@ -104,7 +106,13 @@ function rmsDb(buf) {
   return 20 * Math.log10(Math.sqrt(sum / count) + 1e-12);
 }
 
-async function generate(text) {
+// attempt = 1 thì dùng đúng SEED đã đặt; các lần thử lại đổi seed.
+// Với giọng CLONE, seed KHÔNG quyết định giọng nói là ai — giọng lấy từ file
+// mẫu (ref_audio) của profile, seed chỉ đổi phần nhiễu khi sinh. Nên đổi seed
+// không làm lệch giọng giữa các câu, mà lại cứu được đúng kiểu lỗi đã đo
+// được: "O." ra file rỗng tiếng ở seed 1234 và 2, nhưng bình thường ở seed
+// 1, 3, 7, 99. Thử lại mà giữ nguyên seed thì lần nào cũng hỏng y hệt.
+async function generate(text, attempt = 1) {
   const form = new FormData();
   form.append('text', speechTextFor(text));
   if (ENGINE) form.append('engine', ENGINE);
@@ -113,7 +121,7 @@ async function generate(text) {
   if (INSTRUCT) form.append('instruct', INSTRUCT);
   else form.append('profile_id', PROFILE);
   form.append('language', 'English');
-  form.append('seed', SEED);
+  form.append('seed', attempt === 1 ? SEED : String(Number(SEED) + attempt));
   if (SPEED) form.append('speed', SPEED);
   if (NUM_STEP) form.append('num_step', NUM_STEP);
   if (EFFECT) form.append('effect_preset', EFFECT);
@@ -146,9 +154,9 @@ for (const item of items) {
   if (fs.existsSync(dest) && isValidWav(fs.readFileSync(dest))) { skipped++; continue; }
 
   let ok = false;
-  for (let attempt = 1; attempt <= 3 && !ok; attempt++) {
+  for (let attempt = 1; attempt <= 5 && !ok; attempt++) {
     try {
-      const buf = await generate(item.text);
+      const buf = await generate(item.text, attempt);
       if (!isValidWav(buf)) throw new Error('trả về không phải WAV hợp lệ (' + buf.length + ' bytes)');
       const db = rmsDb(buf);
       if (db < SILENCE_DB) throw new Error('file rỗng tiếng (' + db.toFixed(1) + ' dB) — giọng này không ổn định với câu ngắn');
@@ -157,8 +165,8 @@ for (const item of items) {
       made++;
       console.log('[' + (made + skipped) + '/' + items.length + '] ' + item.slug + '.wav  (' + db.toFixed(1) + ' dB)');
     } catch (err) {
-      console.log('  ! ' + item.slug + ' lần ' + attempt + '/3 lỗi: ' + err.message);
-      if (attempt === 3) failed.push({ slug: item.slug, text: item.text, error: err.message });
+      console.log("  ! " + item.slug + " lần " + attempt + "/5 lỗi: " + err.message);
+      if (attempt === 5) failed.push({ slug: item.slug, text: item.text, error: err.message });
       else await new Promise(r => setTimeout(r, 2000 * attempt));
     }
   }
