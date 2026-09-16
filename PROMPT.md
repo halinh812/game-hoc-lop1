@@ -1843,97 +1843,162 @@ trên máy tính (Mac/Windows/Linux), miễn phí mã nguồn mở, có chế đ
 để gắn thẳng vào Claude Desktop — để tự tạo trước 1 bộ file âm thanh cố
 định cho mọi từ trong game.
 
-**Quan trọng — việc này làm trên MÁY TÍNH THẬT của bạn, không phải
-trong phiên làm việc đang trò chuyện với tôi hiện tại**: phiên này chạy
-trong 1 môi trường đám mây tách biệt để sửa code repo, không phải ứng
-dụng Claude Desktop cài trên máy bạn — tôi không có quyền truy cập file
-cấu hình Claude Desktop thật hay cài phần mềm lên máy bạn. Toàn bộ các
-bước dưới đây bạn tự làm trên máy tính của mình; xong việc thì gửi file
-âm thanh qua Git giống hệt cách gửi ảnh (Bước 11).
+> **ĐÃ LÀM XONG trên máy Windows của bạn (16/09/2026).** Phần dưới đã
+> được cập nhật theo đúng những gì thực sự chạy được trên máy này —
+> khác vài chỗ so với bản nháp ban đầu (bản nháp viết theo kiểu cài từ
+> mã nguồn; ở đây cài bằng bộ cài .msi nên cách gắn MCP khác). Toàn bộ
+> 122 file `.wav` đã nằm trong `assets/audio/en/` và `manifest.json` đã
+> được cập nhật — không cần làm lại, giữ phần này để sau cài lại máy
+> hoặc đổi giọng thì có đường đi sẵn.
 
-### 23.1 — Cài VoiceStudio
+### 23.1 — Cài VoiceStudio (Windows)
 
-Theo tài liệu cài đặt chính thức (chọn đúng hệ điều hành của bạn):
-- macOS/Linux: `curl -fsSL https://voicestudio.sh/install | sh`
-- Windows: xem hướng dẫn PowerShell tại
-  [docs cài đặt của VoiceStudio](https://github.com/debpalash/VoiceStudio/blob/main/docs/install)
-- Hoặc tải bộ cài sẵn (.dmg/.msi/.AppImage) từ trang
-  [Releases](https://github.com/debpalash/VoiceStudio/releases)
+Tải bộ cài từ trang
+[Releases](https://github.com/debpalash/VoiceStudio/releases/latest) —
+có 2 bản:
 
-Sau khi cài xong, mở VoiceStudio ít nhất 1 lần để app tải model giọng
-đọc mặc định (OmniVoice) — cần có mạng cho lần đầu này.
+| File | Phạm vi | Cần quyền admin |
+|---|---|---|
+| `VoiceStudio_<ver>_x64_en-US.msi` | Cả máy | Có |
+| `VoiceStudio_Current_User_<ver>_x64_en-US.msi` | Chỉ user hiện tại | **Không** |
+
+Máy này dùng bản **Current User** (không cần admin), cài vào
+`%LOCALAPPDATA%\VoiceStudio (Current User)`. Nên đối chiếu SHA256 của
+file tải về với `SHA256SUMS-Windows.x64.txt` trong cùng trang Releases
+trước khi chạy.
+
+Không cần cài sẵn Python/CUDA gì cả — lần mở app đầu tiên nó tự dựng môi
+trường Python riêng (qua `uv`) và tự tải model. Cần chuẩn bị:
+- **~10 GB trống** trên ổ C (riêng cache của `uv` đã hơn 7 GB).
+- Mạng ổn định cho lần đầu (tải PyTorch CUDA + model ~0.8 GB).
+- GPU NVIDIA thì tự nhận CUDA (máy này: RTX 3060 → sinh 1 câu ~1 giây).
+  Không có GPU NVIDIA vẫn chạy được bằng CPU, chỉ chậm hơn.
+
+Mở app, bấm qua 2 màn hình đầu (**System check** → **Models & engines**),
+tải model bắt buộc **VoiceStudio TTS (k2-fsa/OmniVoice)**.
+
+> **Bẫy đã gặp — tải model đứng giữa chừng:** nếu lúc kiểm tra mạng mà
+> DNS tới `huggingface.co` chập chờn 1 nhịp, app sẽ tự chuyển sang mirror
+> `hf-mirror.com` (mirror dành cho Trung Quốc) và từ đó tải hỏng liên
+> tục, báo lỗi kiểu *"cannot find the requested files in the local
+> cache"*. Chữa: vào **Settings → mục HF mirror** chọn lại
+> *Hugging Face (official)*, hoặc gọi thẳng API của app:
+> ```bash
+> curl -X PUT http://127.0.0.1:3900/api/settings/hf-mirror -H "Content-Type: application/json" -d "{\"url\":\"\",\"mode\":\"manual\"}"
+> ```
+> rồi bấm Download lại (nó tải tiếp phần dở, không mất công tải lại từ đầu).
 
 ### 23.2 — Gắn VoiceStudio làm MCP server vào Claude Desktop
 
-Backend VoiceStudio phải đang CHẠY trước khi Claude Desktop kết nối tới
-(mở app VoiceStudio lên, để chạy nền). Sau đó mở file cấu hình Claude
-Desktop trên máy bạn:
-- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+Backend VoiceStudio phải đang CHẠY thì Claude Desktop mới nối vào được —
+tức là **cứ mở app VoiceStudio lên và để đó** mỗi khi muốn dùng.
 
-Thêm vào mục `mcpServers` (giữ nguyên các server khác nếu đã có sẵn):
+Bản cài .msi KHÔNG có sẵn mã nguồn nên **không dùng được** cách
+`python -m backend.mcp_shim` mà tài liệu gốc của VoiceStudio mô tả (cách
+đó chỉ đúng khi bạn clone repo về build từ nguồn). Thay vào đó nối
+thẳng qua HTTP — backend đã tự gắn sẵn MCP tại `/mcp/`.
+
+Mở `%APPDATA%\Claude\claude_desktop_config.json`, thêm vào (giữ nguyên
+các phần khác đang có):
 
 ```json
 {
   "mcpServers": {
     "voicestudio": {
-      "command": "python",
-      "args": ["-m", "backend.mcp_shim"],
-      "cwd": "/đường-dẫn-tới/VoiceStudio",
-      "env": {
-        "OMNIVOICE_PORT": "3900",
-        "OMNIVOICE_CLIENT_ID": "claude-desktop",
-        "OMNIVOICE_MCP_OUTPUT_MODE": "files"
+      "type": "http",
+      "url": "http://127.0.0.1:3900/mcp/",
+      "headers": {
+        "X-VoiceStudio-Client-Id": "claude-desktop"
       }
     }
   }
 }
 ```
 
-Đổi `"cwd"` thành đúng thư mục bạn đã cài VoiceStudio. Lưu file, khởi
-động lại Claude Desktop — nếu đúng, Claude Desktop sẽ liệt kê được các
-công cụ MCP của VoiceStudio (`generate_speech`, `list_voices`,
-`check_health`...). Chi tiết đầy đủ (kể cả cách giới hạn thư mục file
-được ghi ra) xem thêm tại
-[docs/mcp.md của VoiceStudio](https://github.com/debpalash/VoiceStudio/blob/main/docs/mcp.md).
+> **Nhớ dấu `/` ở cuối `/mcp/`.** Viết `http://127.0.0.1:3900/mcp`
+> (thiếu dấu gạch chéo) thì server trả về lỗi `405 Method Not Allowed`
+> và Claude Desktop sẽ báo không kết nối được.
 
-### 23.3 — Tạo bộ âm thanh cho game (làm trong Claude Desktop thật trên máy bạn)
+Lưu file, **khởi động lại Claude Desktop**. Khi đúng, Claude Desktop sẽ
+liệt kê 7 công cụ: `generate_speech`, `list_voices`, `list_personalities`,
+`list_languages`, `transcribe`, `check_health`, `clone_voice`.
 
-Mở repo `game-hoc-lop1` (clone về máy nếu chưa có) trong 1 cuộc trò
-chuyện MỚI với Claude Desktop (đã gắn MCP VoiceStudio ở bước trên), rồi
-nhờ Claude Desktop:
+Repo cũng có sẵn `.mcp.json` ở thư mục gốc — Claude Code khi mở đúng
+thư mục repo này sẽ tự đọc và nối vào cùng server đó, không cần cấu hình
+thêm.
 
-1. Gọi `list_voices` (hoặc `list_personalities`), CHỌN CỐ ĐỊNH đúng 1
-   giọng tiếng Anh tự nhiên, dùng xuyên suốt cho MỌI file — không đổi
-   giọng giữa các lần gọi, để nghe nhất quán từ đầu tới cuối game (khác
-   với ảnh, ở đây "1 giọng duy nhất" là bắt buộc, không phải tuỳ chọn).
-2. Đọc TOÀN BỘ trường `"prompt_audio_text"` trong mọi file
-   `content/packs/*.json` của repo (mỗi từ/câu 1 giá trị — vd có cả từ
-   đơn như `"red"` lẫn cả câu như `"I want a pencil."` ở
-   `bill-v1.json`).
-3. Với MỖI giá trị `prompt_audio_text` đó, gọi `generate_speech` với
-   ĐÚNG giọng đã chọn ở bước 1, lưu file WAV kết quả với tên: chuyển câu
-   đó về chữ thường, thay toàn bộ khoảng trắng/dấu câu bằng dấu gạch
-   dưới `_`, bỏ gạch dưới thừa ở đầu/cuối. Ví dụ: `"red"` →
-   `red.wav`, `"rice cooker"` → `rice_cooker.wav`, `"I want a pencil."`
-   → `i_want_a_pencil.wav`.
-4. Gom hết các file `.wav` đó vào 1 thư mục cục bộ tên `audio_en/`.
+Kiểm tra nhanh bằng tay (không cần Claude):
 
-(Đây đúng là quy tắc đặt tên hàm `slugifyAudioText()` trong
-`engine/audio-provider.js` đã cài sẵn — bạn không cần hiểu code, chỉ cần
-Claude Desktop làm đúng theo mô tả ở bước 3 là khớp.)
+```bash
+curl -X POST http://127.0.0.1:3900/mcp/ -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2025-06-18\",\"capabilities\":{},\"clientInfo\":{\"name\":\"test\",\"version\":\"1\"}}}"
+```
 
-### 23.4 — Gửi bộ âm thanh qua Git
+Trả về `"serverInfo":{"name":"VoiceStudio"...}` là ngon.
 
-Gửi cả thư mục `audio_en/` qua Git theo đúng cách đã làm với ảnh (Bước
-11) — tôi sẽ:
-- Copy toàn bộ file `.wav` vào `assets/audio/en/` trong repo.
-- Cập nhật `assets/audio/en/manifest.json` (hiện đang là mảng rỗng `[]`)
-  thành danh sách đúng những câu đã có file thật.
+> **Lưu ý về `generate_speech` qua MCP:** mặc định nó trả file WAV dạng
+> base64 nhét thẳng vào cuộc trò chuyện — rất tốn token, làm cả trăm câu
+> thì không kham nổi. Vì vậy bộ âm thanh hiện tại KHÔNG tạo bằng MCP mà
+> tạo bằng REST API của chính backend đó (xem 23.3), file ghi thẳng ra
+> đĩa. MCP để dành cho việc lẻ tẻ (thử 1-2 câu, hỏi xem có giọng gì).
 
-Sau đó **KHÔNG cần sửa gì thêm ở code** — `engine/audio-provider.js` đã
-được viết sẵn để tự động ưu tiên phát file thật cho những câu có trong
-`manifest.json`, câu nào chưa có file thì tự rơi về Web Speech như hiện
-tại (xem `createFileFirstAudioProvider()`) — nghĩa là bạn có thể gửi
-TỪNG PHẦN (vd gửi trước vài chục từ hay dùng nhất) thay vì phải đợi đủ
-hết ~150 từ mới gửi được, game vẫn chạy đúng ở cả 2 trạng thái.
+### 23.3 — Tạo bộ âm thanh cho game
+
+Việc này KHÔNG làm qua MCP (lý do ở cuối 23.2: trả base64 vào chat thì
+tốn token khủng khiếp), mà chạy 1 script gọi thẳng REST API của
+VoiceStudio, ghi file ra đĩa:
+
+```bash
+node tools/gen-audio-voicestudio.mjs
+```
+
+Script tự làm đủ các việc mà 23.2 bản nháp mô tả:
+
+1. Dùng **ĐÚNG 1 giọng cố định + 1 seed cố định** cho MỌI câu, để nghe
+   nhất quán từ đầu tới cuối game. Mặc định là `demo0001`
+   ("VoiceStudio Demo Voice") chạy trên engine OmniVoice.
+2. Đọc TOÀN BỘ `"prompt_audio_text"` trong mọi `content/packs/*.json`
+   (bỏ trùng lặp) — hiện là **122 câu**, gồm cả chữ cái đơn (`"A"`), từ
+   (`"rice cooker"`) lẫn cả câu (`"I want a pencil."`).
+3. Đặt tên file đúng quy tắc `slugifyAudioText()` trong
+   `engine/audio-provider.js`: chữ thường, mọi ký tự không phải chữ/số
+   thành `_`, bỏ `_` thừa ở hai đầu. `"rice cooker"` → `rice_cooker.wav`,
+   `"I want a pencil."` → `i_want_a_pencil.wav`.
+4. Ghi thẳng vào `assets/audio/en/` rồi cập nhật luôn `manifest.json`.
+
+Chạy lại được nhiều lần: câu nào đã có file `.wav` hợp lệ thì bỏ qua, nên
+dừng giữa chừng rồi chạy tiếp cũng không sao.
+
+**Muốn đổi giọng khác:** xoá hết `assets/audio/en/*.wav` rồi chạy lại với
+biến môi trường `VS_PROFILE` (và `VS_ENGINE` nếu đổi engine). Xem giọng
+đang có:
+
+```bash
+curl http://127.0.0.1:3900/profiles
+```
+
+Engine `kittentts` (cài thêm ~0.1 GB trong Model Catalogue) cho 8 giọng
+preset tiếng Anh chạy CPU: `expr-voice-2-m/f`, `expr-voice-3-m/f`,
+`expr-voice-4-m/f`, `expr-voice-5-m/f`. Ví dụ:
+
+```bash
+VS_ENGINE=kittentts VS_PROFILE=expr-voice-3-f node tools/gen-audio-voicestudio.mjs
+```
+
+Tốc độ tham khảo trên máy này (RTX 3060): ~1 giây/câu → cả 122 câu mất
+khoảng **2 phút**. Lần gọi ĐẦU TIÊN sau khi mở app lâu hơn nhiều (vài
+phút) vì phải nạp model lên GPU — đừng tưởng bị treo.
+
+### 23.4 — Kết quả trong repo
+
+Đã có sẵn trong repo, không cần làm gì thêm:
+- `assets/audio/en/*.wav` — 122 file, WAV 24 kHz mono, tổng ~7,4 MB.
+- `assets/audio/en/manifest.json` — danh sách 122 slug đã có file thật.
+- `tools/gen-audio-voicestudio.mjs` — script tạo lại/đổi giọng.
+- `.mcp.json` — cấu hình MCP VoiceStudio cho Claude Code.
+
+**KHÔNG cần sửa gì ở code** — `engine/audio-provider.js` đã được viết sẵn
+để ưu tiên phát file thật cho những câu có trong `manifest.json`, câu nào
+chưa có file thì tự rơi về Web Speech (xem `createFileFirstAudioProvider()`).
+Nghĩa là có thể bổ sung từng phần: thêm từ mới vào `content/packs/`, chạy
+lại script, chỉ những câu mới được sinh thêm — game vẫn chạy đúng ở cả 2
+trạng thái.
