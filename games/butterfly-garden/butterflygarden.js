@@ -23,9 +23,12 @@
 // phải đo trên đúng ảnh bếp thật) — chỉ cần dàn đều, tránh đè lên linh vật
 // dẫn đường ở giữa, nên có thể chốt trước bằng số liệu cố định.
 //
-// Nền dùng NỀN CHUNG (worldBg() không tham số — cùng khung cảnh cỏ cây/
-// trời xanh ở Trang chủ) thay vì ảnh nền vườn hoa riêng — vườn hoa riêng
-// là hạng mục NÂNG CẤP THÊM sau này (không bắt buộc để chơi được).
+// Màn CHƠI dùng ảnh nền "vườn hoa" riêng (worldBg('butterflyphoto') —
+// assets/backgrounds/butterfly-bg.jpg, xem Bước 21.2 trong PROMPT.md),
+// giống cách kitchen/abc-vui/bill gắn ảnh nền của riêng game mình. Màn KẾT
+// QUẢ vẫn để NỀN CHUNG (worldBg() không tham số) — cũng đúng như các game
+// kia: màn kết quả là bảng tổng kết, không cần bối cảnh riêng, và nền
+// chung nhẹ hơn nên hiện ra ngay.
 //
 // KHÔNG có linh vật dẫn đường đứng giữa màn chơi (khác forest/farm/bill/
 // kitchen) — bản đầu có thử 1 con bướm mascot đứng giữa (dùng emoji 🦋
@@ -178,7 +181,7 @@ export function createButterflyGardenGame(ctx) {
   function renderButterflyGarden() {
     state.cardShownAt = Date.now();
 
-    root.innerHTML = worldBg() +
+    root.innerHTML = worldBg('butterflyphoto') +
       '<div class="content">' +
       '<div class="topbar">' +
       '<button class="iconbtn" id="homeBtn" aria-label="Về trang chủ">' + CLOSE_SVG + '</button>' +

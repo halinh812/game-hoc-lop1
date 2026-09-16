@@ -6,6 +6,14 @@
    NÀY (../../assets/...), không phải từ index.html — xem giải thích đầy
    đủ ở đầu games/nong-trai-cua-be/farm.css. */
 
+/* Ảnh nền "vườn hoa" (Bước 21.2 trong PROMPT.md). Ảnh cố ý chừa 1 khoảng
+   cỏ xanh TRỐNG ở giữa — đúng chỗ 6 con bướm đứng (BUTTERFLY_SPOTS trong
+   butterflygarden.js), nên hoa lá hai bên không làm rối vùng bé phải nhìn
+   và bấm. Màu nền đặc #C7EDB8 lấy đúng màu vùng giữa ảnh, để lúc ảnh chưa
+   tải xong (hoặc tải lỗi) màn hình vẫn ra màu cỏ hợp tông chứ không chớp
+   trắng. */
+.world-bg.butterflyphoto{ background:#C7EDB8 url('../../assets/backgrounds/butterfly-bg.jpg') center/cover no-repeat; }
+
 /* ---------- màn chơi: 6 con bướm màu, lưới 3 cột × 2 hàng ---------- */
 .butterflystage{ position:relative; flex:1; margin:4px 0 0; }
 .butterflyfield{ position:absolute; inset:0; }
@@ -93,7 +101,10 @@
 /* Chưa có ảnh nền vườn hoa riêng — dùng gradient pastel (xanh lá nhạt ->
    vàng kem -> hồng nhạt) gợi cảm giác "vườn hoa nhiều màu" tạm thời,
    khác cách forest-tile/bill-tile/kitchen-tile (đều crop 1 góc ảnh nền
-   photo thật của chính game đó) vì game này chưa có ảnh nền photo. Chữ
+   photo thật của chính game đó) — giữ nguyên gradient CHO CHỦ Ý, dù giờ
+   game đã có ảnh nền vườn hoa: ảnh đó chừa khoảng trống ở giữa nên crop
+   một góc ra ô tile 70px chỉ còn mảng cỏ xanh trơn, không nhận ra là
+   vườn hoa. Muốn đổi thì phải crop trúng dải hoa ở rìa ảnh. Chữ
    dùng màu chữ thường (--ink) thay vì trắng+đổ bóng như các tile kia vì
    nền sáng, không cần lớp gradient tối phía dưới để chữ nổi lên. */
 .gametile.butterfly-tile{
