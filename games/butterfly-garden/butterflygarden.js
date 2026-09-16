@@ -23,11 +23,17 @@
 // phải đo trên đúng ảnh bếp thật) — chỉ cần dàn đều, tránh đè lên linh vật
 // dẫn đường ở giữa, nên có thể chốt trước bằng số liệu cố định.
 //
-// Nhân vật dẫn đường "bướm chỉ đường" (3 trạng thái, xem Bước 21 trong
-// PROMPT.md) hiện DÙNG NỀN CHUNG (worldBg() không tham số — cùng khung
-// cảnh cỏ cây/trời xanh ở Trang chủ) thay vì ảnh nền vườn hoa riêng —
-// vườn hoa riêng là hạng mục NÂNG CẤP THÊM sau này (không bắt buộc để
-// chơi được), tránh phải chờ thêm 1 vòng tạo ảnh mới có game chơi được.
+// Nền dùng NỀN CHUNG (worldBg() không tham số — cùng khung cảnh cỏ cây/
+// trời xanh ở Trang chủ) thay vì ảnh nền vườn hoa riêng — vườn hoa riêng
+// là hạng mục NÂNG CẤP THÊM sau này (không bắt buộc để chơi được).
+//
+// KHÔNG có linh vật dẫn đường đứng giữa màn chơi (khác forest/farm/bill/
+// kitchen) — bản đầu có thử 1 con bướm mascot đứng giữa (dùng emoji 🦋
+// tạm vì chưa có ảnh 3 trạng thái), nhưng người dùng phản hồi: giữa màn
+// có 1 con bướm không bấm được (không phải đáp án, chỉ là linh vật) gây
+// hiểu nhầm dễ tưởng là 1 lựa chọn thứ 7 — không cần thiết, đã bỏ hẳn.
+// Phản hồi đúng/sai vẫn đủ rõ ràng qua badge ✓/✗ + tiếng ting/buzz (không
+// phụ thuộc vào mascot đổi tâm trạng để báo hiệu).
 import { wordsInCat } from '../../engine/content-loader.js';
 import { buildRound, applyAnswer, classifyAnswer, getSkillProgress, wrongRate, shuffle } from '../../engine/learning-engine.js';
 import { saveProgress } from '../../engine/progress-store.js';
@@ -47,30 +53,27 @@ var BUTTERFLY_HEX = {
   white: '#FFFFFF'
 };
 
-// Toạ độ % cố định của 6 "chỗ đậu" — dàn thành 1 vòng quanh khu vực giữa
-// (nơi linh vật dẫn đường đứng, xem .butterflymascotwrap trong
-// butterflygarden.css), không chồng lên nhau, không phụ thuộc ảnh nền cụ
+// Toạ độ % cố định của 6 "chỗ đậu" — lưới 3 cột × 2 hàng đều đặn, chiếm
+// trọn khu chơi (trước đây dàn thành vòng né khu giữa dành cho linh vật
+// dẫn đường — nay đã bỏ mascot đó nên đổi sang lưới đều cho đẹp và tận
+// dụng hết không gian). Không chồng lên nhau, không phụ thuộc ảnh nền cụ
 // thể nào (xem giải thích ở đầu file).
 var BUTTERFLY_SPOTS = [
-  { left: 2, top: 8 },
-  { left: 76, top: 4 },
-  { left: 2, top: 46 },
-  { left: 76, top: 42 },
-  { left: 16, top: 76 },
-  { left: 60, top: 78 }
+  { left: 4, top: 10 }, { left: 37, top: 10 }, { left: 70, top: 10 },
+  { left: 4, top: 50 }, { left: 37, top: 50 }, { left: 70, top: 50 }
 ];
 
 export function createButterflyGardenGame(ctx) {
   var root = document.getElementById('root');
   var state = ctx.state;
 
-  // Ảnh linh vật + 6 ảnh con bướm màu có thể CHƯA tồn tại (đang chờ người
-  // dùng tự tạo bằng AI theo Bước 21/22 trong PROMPT.md) — bắt sự kiện
-  // "error" của <img> để tự chuyển sang fallback (emoji cho linh vật, SVG
-  // vẽ tay cho con bướm — xem butterflySvg()), y hệt bill.js/kitchen.js.
-  // 6 ảnh con bướm dùng chung 1 class (không phải id riêng như mascot) vì
-  // có 6 cái cùng lúc trên màn — tìm fallback bằng nextElementSibling
-  // thay vì getElementById theo id cố định.
+  // 6 ảnh con bướm màu + ảnh linh vật nhỏ ở ô Trang chủ có thể CHƯA tồn
+  // tại (đang chờ người dùng tự tạo bằng AI theo Bước 21/22 trong
+  // PROMPT.md) — bắt sự kiện "error" của <img> để tự chuyển sang fallback
+  // (SVG vẽ tay cho con bướm — xem butterflySvg(), emoji cho ô Trang chủ),
+  // y hệt bill.js/kitchen.js. 6 ảnh con bướm dùng chung 1 class (không
+  // phải id riêng) vì có 6 cái cùng lúc trên màn — tìm fallback bằng
+  // nextElementSibling thay vì getElementById theo id cố định.
   window.addEventListener('error', function (e) {
     var t = e.target;
     if (!t || t.tagName !== 'IMG') return;
@@ -80,10 +83,9 @@ export function createButterflyGardenGame(ctx) {
       if (svgFallback && svgFallback.classList.contains('butterflysvgfallback')) svgFallback.hidden = false;
       return;
     }
-    if (t.id === 'butterflyMascotImg' || t.id === 'butterflyTileImg') {
+    if (t.id === 'butterflyTileImg') {
       t.hidden = true;
-      var fbId = t.id === 'butterflyMascotImg' ? 'butterflyFallback' : 'butterflyTileFallback';
-      var fb = document.getElementById(fbId);
+      var fb = document.getElementById('butterflyTileFallback');
       if (fb) fb.hidden = false;
     }
   }, true);
@@ -116,7 +118,6 @@ export function createButterflyGardenGame(ctx) {
     state.targetIdx = pickTargetIndex(state.slots);
     state.correct = 0;
     state.answered = false;
-    state.butterflyMood = 'idle';
     state.screen = 'butterflygarden';
     ctx.render();
   }
@@ -167,24 +168,6 @@ export function createButterflyGardenGame(ctx) {
     }).join('');
   }
 
-  var BUTTERFLY_MOOD_IMG = { idle: 'butterfly-idle.png', happy: 'butterfly-happy.png', sad: 'butterfly-sad.png' };
-  // Chưa có ảnh 3 trạng thái riêng (đang chờ Bước 21 trong PROMPT.md) —
-  // dùng tạm 1 emoji chung 🦋 cho cả 3 trạng thái (Unicode không có sẵn
-  // bộ emoji bướm vui/buồn riêng như bộ mèo 🐱/😻/😿 của kitchen.js) tới
-  // khi có ảnh thật.
-  function butterflyMascotHtml(mood) {
-    var file = BUTTERFLY_MOOD_IMG[mood] || BUTTERFLY_MOOD_IMG.idle;
-    return '<img src="assets/characters/' + file + '" alt="Bướm dẫn đường" id="butterflyMascotImg">' +
-      '<span class="butterflyfallback" id="butterflyFallback" hidden>🦋</span>';
-  }
-
-  function setButterflyMood(mood) {
-    state.butterflyMood = mood;
-    var wrap = document.getElementById('butterflyMascotWrap');
-    if (!wrap) return;
-    wrap.innerHTML = butterflyMascotHtml(mood);
-  }
-
   // Chỉ bắt đầu tính "thời gian trả lời" của bé từ lúc câu đọc XONG (qua
   // onEnd) — cùng nguyên lý với speakBillTarget()/speakKitchenTarget().
   function speakButterflyTarget() {
@@ -203,7 +186,6 @@ export function createButterflyGardenGame(ctx) {
       '<span style="width:38px;"></span>' +
       '</div>' +
       '<div class="butterflystage" id="butterflyStage">' +
-      '<div class="butterflymascotwrap" id="butterflyMascotWrap">' + butterflyMascotHtml(state.butterflyMood || 'idle') + '</div>' +
       '<div class="butterflyfield" id="butterflyField">' + hotspotsHtml() + '</div>' +
       '</div>' +
       '<button class="soundbtn" id="speakBtn" aria-label="Nghe lại">' + SPEAK_SVG + '</button>' +
@@ -311,7 +293,6 @@ export function createButterflyGardenGame(ctx) {
       hotspotEls[idx].classList.add('correct');
       showBadge(idx, true);
       playDing();
-      setButterflyMood('happy');
 
       var isDone = state.correct >= BUTTERFLY_WIN_TARGET;
       setTimeout(function () {
@@ -327,7 +308,6 @@ export function createButterflyGardenGame(ctx) {
       showBadge(state.targetIdx, true);
       playBuzz();
       ctx.speak(targetWord.promptAudioText || targetWord.en);
-      setButterflyMood('sad');
       setTimeout(function () { advanceButterflyRound(); }, 3000);
     }
   }
@@ -347,7 +327,6 @@ export function createButterflyGardenGame(ctx) {
     });
 
     document.getElementById('butterflyStars').innerHTML = butterflyStarsRow();
-    setButterflyMood('idle');
     state.cardShownAt = Date.now();
     speakButterflyTarget();
   }

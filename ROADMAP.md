@@ -2237,3 +2237,40 @@ nhật lại Bước 23.3 trong PROMPT.md cho khớp — không còn ví dụ ch
 trần trụi không kèm `VS_PROFILE` nữa.
 
 29 unit test vẫn pass nguyên qua cả 2 việc.
+
+## Vòng 50 — Butterfly Garden: bỏ hẳn linh vật dẫn đường giữa màn
+
+Người dùng phản hồi: giữa màn chơi có 1 con bướm KHÔNG bấm được (linh
+vật dẫn đường, hiện tạm bằng emoji 🦋 vì chưa có ảnh 3 trạng thái) — dễ
+gây hiểu nhầm là 1 lựa chọn thứ 7, không cần thiết. Hỏi luôn "loại bỏ
+được không, hay cần ảnh nền mới thay thế" — xác nhận đây thuần là vấn đề
+code (linh vật là 1 phần tử UI riêng, không liên quan gì tới ảnh nền),
+không cần thêm ảnh gì cả, xử lý gọn bằng cách bỏ hẳn linh vật:
+
+- Xoá `butterflyMascotHtml()`, `setButterflyMood()`, `BUTTERFLY_MOOD_IMG`,
+  `.butterflymascotwrap`/`.butterflyfallback` trong `butterflygarden.js`/
+  `.css`, cùng mọi lời gọi `setButterflyMood('idle'/'happy'/'sad')` ở
+  `startButterflyGardenGame()`/`handleButterflyAnswer()`/
+  `advanceButterflyRound()` — phản hồi đúng/sai vẫn đủ rõ ràng qua badge
+  ✓/✗ + tiếng ting/buzz, không phụ thuộc mascot đổi tâm trạng.
+- Nhân dịp bỏ mascot (trước đây 6 con bướm phải dàn thành 1 vòng NÉ
+  vùng giữa dành cho mascot), dàn lại `BUTTERFLY_SPOTS` thành lưới 3
+  cột × 2 hàng đều đặn, tận dụng hết không gian trống ở giữa — đồng thời
+  tăng kích thước mỗi ô (22vw/92px → 26vw/108px) vì giờ không còn phải
+  chừa chỗ cho mascot.
+- Giữ nguyên icon linh vật nhỏ (fallback 🦋) ở ô chọn game trên Trang chủ
+  (`gameTileHtml()`) — đây là chỗ KHÁC, không phải thứ người dùng phàn
+  nàn, dùng chung pattern với mọi game khác nên không đụng vào.
+
+Kiểm thử bằng Playwright: xác nhận `.butterflymascotwrap` không còn tồn
+tại trong DOM, đo toạ độ thật của lưới 3×2 (đúng vị trí, không chồng
+lấn, nằm gọn trong khung `.butterflystage`), chụp ảnh xác nhận 6 con
+bướm AI thật hiện đầy đủ và đẹp mắt (ảnh chụp đầu tiên ở mốc 600ms sau
+khi vào màn bị dính lỗi chụp giữa lúc ảnh đang paint — chụp lại ở 2s xác
+nhận không phải lỗi thật, chỉ là ảnh chưa kịp vẽ xong lúc chụp). Chơi
+thử luồng trả lời sai (viền đỏ+✗ đúng vị trí bấm sai, viền xanh+✓ đúng
+vị trí đáp án) và chơi hết trọn 10 vòng trả lời đúng tới màn thắng cuộc
+(dùng kỹ thuật chặn `new Audio()` để dò đúng từ đang phát, vì giờ game
+phát audio thật thay vì Web Speech nên cách giả lập `speechSynthesis` cũ
+không còn bắt được nữa) — tất cả đúng như thiết kế, không lỗi console.
+29 unit test vẫn pass nguyên.
