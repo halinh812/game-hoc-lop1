@@ -1824,12 +1824,38 @@ không hề nhắc tới (đúng lỗi đã gặp với ảnh bút chì ở Bư�
 con bướm cần màu THẬT KHÁC NHAU rõ ràng, lỗi "dính màu" giữa các lần tạo
 liên tiếp sẽ rất dễ nhận ra và làm hỏng cả bộ.
 
-Lưu 6 file PNG theo đúng tên: `red.png`, `blue.png`, `yellow.png`,
-`green.png`, `black.png`, `white.png`, vào `assets/_raw_incoming/`, gửi
-qua Git theo đúng quy trình ở Bước 11 (có thể gửi cùng 1 lần với ảnh nền
-vườn hoa ở Bước 21.2) — tôi sẽ xoá nền + tối ưu + lưu vào
-`assets/butterflies/`, ảnh sẽ tự động hiện lên thay cho 6 con bướm SVG
-tạm, không cần sửa gì thêm ở code.
+Lưu 6 file theo đúng tên `red`, `blue`, `yellow`, `green`, `black`,
+`white` vào `assets/_raw_incoming/`, rồi chạy:
+
+```bash
+node tools/process-incoming-images.mjs assets/butterflies
+```
+
+Script tự co nhỏ về 900px, xoá nền thành trong suốt và xuất `.png` vào
+`assets/butterflies/`; ảnh sẽ tự động hiện lên thay cho 6 con bướm SVG
+tạm, không cần sửa gì thêm ở code. File gốc trong `_raw_incoming/` không
+bị đụng tới, giữ lại để sau này muốn xử lý lại (đổi ngưỡng xoá nền...)
+thì không phải tạo ảnh lại từ đầu.
+
+> **ĐÃ LÀM XONG (16/09/2026), tạo bằng Google Flow, model Nano Banana 2,
+> tỉ lệ 1:1, x2 ảnh mỗi màu rồi chọn con tốt hơn.** Vài điều rút ra:
+>
+> - **Flow tải về file `.jpeg`, KHÔNG phải `.png`** như mục này viết ban
+>   đầu. Không sao — script trên nhận cả `.jpeg`/`.jpg`/`.webp` và xuất
+>   ra `.png` trong suốt. Đừng mất công đổi đuôi bằng tay.
+> - **Chọn bản "1K (kích thước gốc)" khi tải**, đừng chọn 2K — 2K là ảnh
+>   phóng to nội suy, mà game resize về 900px nên chỉ tổ nặng thêm.
+> - Mỗi màu tạo trong **1 project Flow riêng** đúng như lưu ý ở trên. Đo
+>   lại màu chủ đạo của cả 6 ảnh bằng máy thì không con nào dính màu của
+>   con trước.
+> - Trong 2 ảnh mỗi lần tạo, con **không có quầng sáng** quanh người thì
+>   xoá nền sạch hơn hẳn. Quầng sáng loang dần ra nền trắng làm thuật
+>   toán tô loang khó biết dừng ở đâu.
+> - Con **trắng** phụ thuộc hoàn toàn vào cái viền vàng-nâu mà prompt yêu
+>   cầu: không có viền đó thì cánh trắng dính liền nền trắng và sẽ bị xoá
+>   mất luôn. Nếu tạo lại, kiểm tra kỹ ảnh trắng trước khi xử lý.
+> - Google có lúc trả về lỗi *"Chúng tôi nhận thấy có hoạt động bất
+>   thường"* cho 1 trong 2 ảnh (không bị trừ tín dụng). Tạo lại là được.
 
 <a id="buoc-23"></a>
 ## Bước 23 — Tạo âm thanh thu sẵn bằng VoiceStudio (thay cho giọng máy)
