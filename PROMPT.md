@@ -1830,3 +1830,110 @@ qua Git theo đúng quy trình ở Bước 11 (có thể gửi cùng 1 lần v�
 vườn hoa ở Bước 21.2) — tôi sẽ xoá nền + tối ưu + lưu vào
 `assets/butterflies/`, ảnh sẽ tự động hiện lên thay cho 6 con bướm SVG
 tạm, không cần sửa gì thêm ở code.
+
+<a id="buoc-23"></a>
+## Bước 23 — Tạo âm thanh thu sẵn bằng VoiceStudio (thay cho giọng máy)
+
+**Bối cảnh:** hiện tại app đọc từ bằng Web Speech API — giọng đọc do
+trình duyệt/hệ điều hành của TỪNG máy tự chọn, chất lượng không kiểm
+soát được (đã gặp trường hợp đọc lạ, vd "rice cooker" nghe như "rice cờ
+cờ"). Người dùng muốn dùng
+[VoiceStudio](https://github.com/debpalash/VoiceStudio) — app TTS chạy
+trên máy tính (Mac/Windows/Linux), miễn phí mã nguồn mở, có chế độ MCP
+để gắn thẳng vào Claude Desktop — để tự tạo trước 1 bộ file âm thanh cố
+định cho mọi từ trong game.
+
+**Quan trọng — việc này làm trên MÁY TÍNH THẬT của bạn, không phải
+trong phiên làm việc đang trò chuyện với tôi hiện tại**: phiên này chạy
+trong 1 môi trường đám mây tách biệt để sửa code repo, không phải ứng
+dụng Claude Desktop cài trên máy bạn — tôi không có quyền truy cập file
+cấu hình Claude Desktop thật hay cài phần mềm lên máy bạn. Toàn bộ các
+bước dưới đây bạn tự làm trên máy tính của mình; xong việc thì gửi file
+âm thanh qua Git giống hệt cách gửi ảnh (Bước 11).
+
+### 23.1 — Cài VoiceStudio
+
+Theo tài liệu cài đặt chính thức (chọn đúng hệ điều hành của bạn):
+- macOS/Linux: `curl -fsSL https://voicestudio.sh/install | sh`
+- Windows: xem hướng dẫn PowerShell tại
+  [docs cài đặt của VoiceStudio](https://github.com/debpalash/VoiceStudio/blob/main/docs/install)
+- Hoặc tải bộ cài sẵn (.dmg/.msi/.AppImage) từ trang
+  [Releases](https://github.com/debpalash/VoiceStudio/releases)
+
+Sau khi cài xong, mở VoiceStudio ít nhất 1 lần để app tải model giọng
+đọc mặc định (OmniVoice) — cần có mạng cho lần đầu này.
+
+### 23.2 — Gắn VoiceStudio làm MCP server vào Claude Desktop
+
+Backend VoiceStudio phải đang CHẠY trước khi Claude Desktop kết nối tới
+(mở app VoiceStudio lên, để chạy nền). Sau đó mở file cấu hình Claude
+Desktop trên máy bạn:
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+Thêm vào mục `mcpServers` (giữ nguyên các server khác nếu đã có sẵn):
+
+```json
+{
+  "mcpServers": {
+    "voicestudio": {
+      "command": "python",
+      "args": ["-m", "backend.mcp_shim"],
+      "cwd": "/đường-dẫn-tới/VoiceStudio",
+      "env": {
+        "OMNIVOICE_PORT": "3900",
+        "OMNIVOICE_CLIENT_ID": "claude-desktop",
+        "OMNIVOICE_MCP_OUTPUT_MODE": "files"
+      }
+    }
+  }
+}
+```
+
+Đổi `"cwd"` thành đúng thư mục bạn đã cài VoiceStudio. Lưu file, khởi
+động lại Claude Desktop — nếu đúng, Claude Desktop sẽ liệt kê được các
+công cụ MCP của VoiceStudio (`generate_speech`, `list_voices`,
+`check_health`...). Chi tiết đầy đủ (kể cả cách giới hạn thư mục file
+được ghi ra) xem thêm tại
+[docs/mcp.md của VoiceStudio](https://github.com/debpalash/VoiceStudio/blob/main/docs/mcp.md).
+
+### 23.3 — Tạo bộ âm thanh cho game (làm trong Claude Desktop thật trên máy bạn)
+
+Mở repo `game-hoc-lop1` (clone về máy nếu chưa có) trong 1 cuộc trò
+chuyện MỚI với Claude Desktop (đã gắn MCP VoiceStudio ở bước trên), rồi
+nhờ Claude Desktop:
+
+1. Gọi `list_voices` (hoặc `list_personalities`), CHỌN CỐ ĐỊNH đúng 1
+   giọng tiếng Anh tự nhiên, dùng xuyên suốt cho MỌI file — không đổi
+   giọng giữa các lần gọi, để nghe nhất quán từ đầu tới cuối game (khác
+   với ảnh, ở đây "1 giọng duy nhất" là bắt buộc, không phải tuỳ chọn).
+2. Đọc TOÀN BỘ trường `"prompt_audio_text"` trong mọi file
+   `content/packs/*.json` của repo (mỗi từ/câu 1 giá trị — vd có cả từ
+   đơn như `"red"` lẫn cả câu như `"I want a pencil."` ở
+   `bill-v1.json`).
+3. Với MỖI giá trị `prompt_audio_text` đó, gọi `generate_speech` với
+   ĐÚNG giọng đã chọn ở bước 1, lưu file WAV kết quả với tên: chuyển câu
+   đó về chữ thường, thay toàn bộ khoảng trắng/dấu câu bằng dấu gạch
+   dưới `_`, bỏ gạch dưới thừa ở đầu/cuối. Ví dụ: `"red"` →
+   `red.wav`, `"rice cooker"` → `rice_cooker.wav`, `"I want a pencil."`
+   → `i_want_a_pencil.wav`.
+4. Gom hết các file `.wav` đó vào 1 thư mục cục bộ tên `audio_en/`.
+
+(Đây đúng là quy tắc đặt tên hàm `slugifyAudioText()` trong
+`engine/audio-provider.js` đã cài sẵn — bạn không cần hiểu code, chỉ cần
+Claude Desktop làm đúng theo mô tả ở bước 3 là khớp.)
+
+### 23.4 — Gửi bộ âm thanh qua Git
+
+Gửi cả thư mục `audio_en/` qua Git theo đúng cách đã làm với ảnh (Bước
+11) — tôi sẽ:
+- Copy toàn bộ file `.wav` vào `assets/audio/en/` trong repo.
+- Cập nhật `assets/audio/en/manifest.json` (hiện đang là mảng rỗng `[]`)
+  thành danh sách đúng những câu đã có file thật.
+
+Sau đó **KHÔNG cần sửa gì thêm ở code** — `engine/audio-provider.js` đã
+được viết sẵn để tự động ưu tiên phát file thật cho những câu có trong
+`manifest.json`, câu nào chưa có file thì tự rơi về Web Speech như hiện
+tại (xem `createFileFirstAudioProvider()`) — nghĩa là bạn có thể gửi
+TỪNG PHẦN (vd gửi trước vài chục từ hay dùng nhất) thay vì phải đợi đủ
+hết ~150 từ mới gửi được, game vẫn chạy đúng ở cả 2 trạng thái.

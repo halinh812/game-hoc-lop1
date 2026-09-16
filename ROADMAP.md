@@ -2082,3 +2082,67 @@ tâm trạng buồn, qua vòng mới thì toàn bộ lớp/dấu cũ được d�
 như thiết kế. Trang chủ hiện đúng ô game mới (nền gradient pastel tạm +
 mặt bướm lắc lư, rơi về fallback emoji đúng như dự kiến vì ảnh linh vật
 chưa tồn tại). 29 unit test vẫn pass nguyên.
+
+## Vòng 47 — Butterfly Garden: ảnh bướm AI thật + chuẩn bị âm thanh thu sẵn (VoiceStudio)
+
+Hai nhánh việc liên tiếp từ phản hồi người dùng:
+
+**1. "Con bướm bạn làm đơn điệu và không đẹp"** — 6 con bướm SVG vẽ tạm
+ở Vòng 46 bị chê đơn điệu, người dùng muốn ảnh AI đẹp hơn, có hiệu ứng
+lấp lánh (con thích phong cách này). Đã viết prompt tạo ảnh riêng cho
+từng màu ở Bước 22 trong PROMPT.md (nhấn mạnh màu cánh chủ đạo phải rõ
+ràng, lấp lánh chỉ là phụ — tránh lấn át mục tiêu dạy màu, nhất là con
+đen dễ bị lấp lánh biến thành màu khác). Đồng thời sửa trước
+`hotspotsHtml()` trong `butterflygarden.js` để ưu tiên hiện ảnh thật
+`assets/butterflies/<id>.png`, rơi về SVG cũ nếu ảnh chưa tồn tại —
+người dùng gửi ảnh qua Git là tự động lên, không cần báo lại.
+
+Trong lúc sửa, phát hiện + sửa luôn 2 lỗi: (1) animation xoay/phóng to
+gắn thẳng lên nút bấm khiến vùng bấm liên tục đổi theo animation, kém ổn
+định khi chạm (Playwright báo phần tử "not stable" — dấu hiệu thật của
+rủi ro tương tự trên tay bé) — tách animation ra 1 lớp con
+`.butterflyvisual` bên trong, giữ nút bấm đứng yên; (2) thiếu CSS
+`[hidden]{ display:none }` cho `.butterflyimg` khiến icon "ảnh vỡ" vẫn
+hiện dù đã set `hidden=true` trong JS (cùng lỗi/cách sửa đã gặp với
+`.billfallback[hidden]`/`.kitchenfallback[hidden]` trước đây).
+
+**2. Muốn dùng VoiceStudio (app TTS chạy máy tính, có MCP) để tạo âm
+thanh chất lượng cao thay cho giọng Web Speech API hiện tại** (vốn phụ
+thuộc giọng máy, từng gây lỗi đọc lạ như "rice cooker" — xem Vòng 43).
+Người dùng ban đầu hiểu nhầm phiên làm việc đang trò chuyện = máy tính/
+Claude Desktop thật của họ, muốn nhờ cài VoiceStudio + gắn MCP "thẳng
+vào Claude app trên desktop này" — đã giải thích rõ đây là môi trường
+đám mây tách biệt, không có quyền truy cập máy/Claude Desktop thật của
+người dùng, và người dùng xác nhận chọn hướng tự cài trên máy thật (qua
+AskUserQuestion).
+
+Chuẩn bị sẵn phía code trước khi có file âm thanh thật, đúng tinh thần
+đã làm với ảnh — viết `createFileFirstAudioProvider()` trong
+`engine/audio-provider.js` (đúng điểm mở rộng đã ghi chú sẵn từ trước:
+"1 provider trả file audio thu sẵn... cùng interface để có thể hoán đổi
+mà không đổi code gọi nó"):
+- `slugifyAudioText(text)`: rút gọn CHÍNH CÂU đang đọc (không phải "id"
+  của từ) thành tên file an toàn — khoá theo câu vì đó mới là thứ cần
+  phát ra loa, nhất quán dù ở game nào.
+- `assets/audio/en/manifest.json` (khởi tạo mảng rỗng `[]`): danh sách
+  câu đã có file thật — tra trong bộ nhớ (Set), KHÔNG dò từng câu qua
+  mạng (speak() gọi rất thường xuyên, dò lỗi 404 liên tục sẽ chậm).
+  Manifest rỗng/chưa tồn tại thì game chạy y hệt bản Web Speech thuần
+  hiện tại, không lỗi gì.
+- Câu có trong manifest: phát `assets/audio/en/<slug>.wav` (đúng định
+  dạng VoiceStudio xuất sẵn, không cần đổi định dạng); lỗi phát thật
+  (hiếm) hoặc bị chặn autoplay thì rơi về Web Speech, không im lặng.
+  Câu chưa có: đi thẳng qua Web Speech như cũ.
+
+Viết hướng dẫn đầy đủ ở Bước 23 trong PROMPT.md: cài VoiceStudio, cấu
+hình MCP vào Claude Desktop THẬT trên máy người dùng (ví dụ JSON cấu
+hình cụ thể), rồi nhờ CHÍNH Claude Desktop đó đọc `prompt_audio_text`
+trong mọi `content/packs/*.json`, chọn CỐ ĐỊNH 1 giọng duy nhất, tạo file
+theo đúng quy tắc đặt tên của `slugifyAudioText()`, gửi qua Git — có thể
+gửi từng phần (không cần đủ hết ~150 từ mới gửi) vì cơ chế ưu tiên/rơi về
+đã xử lý đúng cho cả 2 trạng thái.
+
+Kiểm thử bằng Playwright (giả lập TTS + phát bướm màu qua đủ 10 vòng
+đúng/sai, riêng luồng âm thanh xác nhận vẫn phát đúng qua Web Speech khi
+manifest rỗng, không lỗi console): tất cả pass. 29 unit test vẫn pass
+nguyên.
