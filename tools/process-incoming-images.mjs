@@ -50,7 +50,20 @@ try {
     const cur = byStem.get(stem);
     if (!cur || path.extname(cur).toLowerCase() === '.png') byStem.set(stem, f);
   }
-  files = [...byStem.values()].sort();
+  files = [...byStem.values()];
+
+  // Lỗi thật đã gặp (16/09/2026): gõ nguồn = đích = assets/howmany để xử lý
+  // 1 ảnh .jpeg mới thêm vào, nhưng dedup ở trên chỉ loại được trường hợp 2
+  // ĐUÔI CÙNG STEM — 4 ảnh .png ĐƠN LẺ khác đã xử lý xong từ trước
+  // (daisy/rose/sunflower/tulip, không có bản .jpg/.jpeg/.webp đi kèm) vẫn
+  // lọt qua, bị xử lý lại vô ích (và làm ảnh xấu dần vì xoá nền/co nhỏ
+  // nhiều lần mất chi tiết). Khi nguồn=đích, bỏ hẳn file .png ĐƠN LẺ khỏi
+  // danh sách — không có gì mới để làm với nó. Nguồn khác đích (vd
+  // _raw_incoming -> assets/kitchen) thì .png vẫn hợp lệ như file mới.
+  if (path.resolve(SRC_DIR) === path.resolve(DEST_DIR)) {
+    files = files.filter(f => path.extname(f).toLowerCase() !== '.png');
+  }
+  files = files.sort();
 } catch {
   console.error('Không thấy thư mục ' + SRC_DIR);
   process.exit(1);

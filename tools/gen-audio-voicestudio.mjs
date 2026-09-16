@@ -1,9 +1,20 @@
 // Sinh toàn bộ file âm thanh tiếng Anh cho game bằng VoiceStudio chạy trên máy.
 //
 // Cách dùng (mở app VoiceStudio lên trước, để nó chạy nền):
-//   node tools/gen-audio-voicestudio.mjs
+//   VS_PROFILE=<id giọng đang dùng thật> node tools/gen-audio-voicestudio.mjs
 //
-// Đổi giọng / nhịp đọc bằng biến môi trường:
+// QUAN TRỌNG — PHẢI truyền VS_PROFILE (hoặc VS_INSTRUCT) mỗi lần chạy, KHÔNG
+// còn giá trị mặc định nữa (trước đây mặc định "demo0001" — đúng lúc mới viết
+// script, nhưng 122 file .wav ĐANG CÓ trong assets/audio/en/ đã được thu lại
+// bằng 1 giọng nữ CLONE từ mẫu ElevenLabs, không phải demo0001 nữa, xem Vòng
+// 47/48 trong ROADMAP.md). Giữ mặc định ngầm sẽ rất dễ dính lỗi thật: thêm 1
+// từ mới vào content pack, quên truyền VS_PROFILE, script vẫn chạy được bình
+// thường (không báo lỗi gì) nhưng ra 1 file lệch hẳn giọng so với 122 file
+// còn lại mà không ai để ý cho tới khi mở game lên nghe thử. Bắt buộc truyền
+// tay để LUÔN phải tự hỏi "giọng nào đang dùng thật" trước khi sinh thêm —
+// xem giọng đã lưu bằng: curl http://127.0.0.1:3900/profiles
+//
+// Biến môi trường khác (giữ nguyên nếu không cần đổi):
 //   VS_PROFILE=demo0001   id giọng đã lưu (xem: curl localhost:3900/profiles)
 //   VS_INSTRUCT="..."     mô tả giọng, DÙNG THAY cho VS_PROFILE. Chỉ nhận thuộc
 //                         tính, không nhận câu lệnh kiểu "đọc chậm":
@@ -40,7 +51,7 @@ const BASE = 'http://127.0.0.1:3900';
 const PACKS = 'content/packs';
 const OUT = process.env.VS_OUT || path.join('assets', 'audio', 'en');
 const ENGINE = process.env.VS_ENGINE || '';
-const PROFILE = process.env.VS_PROFILE || 'demo0001';
+const PROFILE = process.env.VS_PROFILE || '';
 const INSTRUCT = process.env.VS_INSTRUCT || '';
 const SPEED = process.env.VS_SPEED || '';
 const NUM_STEP = process.env.VS_NUM_STEP || '';
@@ -128,6 +139,17 @@ async function generate(text, attempt = 1) {
   const res = await fetch(BASE + '/generate', { method: 'POST', body: form });
   if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + (await res.text()).slice(0, 200));
   return Buffer.from(await res.arrayBuffer());
+}
+
+if (!PROFILE && !INSTRUCT) {
+  console.error(
+    'Thiếu VS_PROFILE (hoặc VS_INSTRUCT) — không còn giọng mặc định ngầm nữa.\n' +
+    '122 file .wav hiện có trong assets/audio/en/ dùng 1 giọng nữ CLONE từ\n' +
+    'mẫu ElevenLabs (không phải "demo0001"). Xem giọng đã lưu trên máy này:\n' +
+    '  curl http://127.0.0.1:3900/profiles\n' +
+    'rồi chạy lại: VS_PROFILE=<id đúng giọng đang dùng> node tools/gen-audio-voicestudio.mjs'
+  );
+  process.exit(1);
 }
 
 const health = await fetch(BASE + '/health').then(r => r.json()).catch(() => null);

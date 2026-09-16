@@ -1974,14 +1974,33 @@ tốn token khủng khiếp), mà chạy 1 script gọi thẳng REST API của
 VoiceStudio, ghi file ra đĩa:
 
 ```bash
-node tools/gen-audio-voicestudio.mjs
+VS_PROFILE=<id giọng đang dùng thật> node tools/gen-audio-voicestudio.mjs
 ```
+
+> **Cập nhật quan trọng (Vòng 48 trong ROADMAP.md):** script KHÔNG còn
+> giọng mặc định ngầm nữa — bắt buộc phải truyền `VS_PROFILE` (hoặc
+> `VS_INSTRUCT`) mỗi lần chạy, thiếu thì script báo lỗi rõ ràng ngay từ
+> đầu thay vì âm thầm chạy. Lý do: 122 file `.wav` ĐANG CÓ trong
+> `assets/audio/en/` không còn dùng giọng `demo0001` (giọng demo có sẵn
+> của VoiceStudio) nữa — đã đổi sang 1 giọng nữ **CLONE từ mẫu
+> ElevenLabs** (đọc chậm rãi hơn, hợp để bé tập nghe từng từ, xem lý do
+> đổi ở Vòng 47/48). Nếu giữ giọng mặc định ngầm như bản nháp ban đầu,
+> lỡ quên truyền `VS_PROFILE` khi thêm từ mới sau này thì từ đó sẽ bị
+> đọc lệch hẳn giọng so với 122 từ cũ mà không có cảnh báo gì — bắt buộc
+> truyền tay để LUÔN phải tự kiểm tra đúng giọng trước khi sinh thêm.
+>
+> Xem danh sách giọng đã lưu trên máy này (tìm đúng ID giọng clone kể
+> trên — **tự ghi chú lại ID này ở đây khi bạn xác định được**, để lần
+> sau khỏi phải tra lại):
+> ```bash
+> curl http://127.0.0.1:3900/profiles
+> ```
 
 Script tự làm đủ các việc mà 23.2 bản nháp mô tả:
 
-1. Dùng **ĐÚNG 1 giọng cố định + 1 seed cố định** cho MỌI câu, để nghe
-   nhất quán từ đầu tới cuối game. Mặc định là `demo0001`
-   ("VoiceStudio Demo Voice") chạy trên engine OmniVoice.
+1. Dùng **ĐÚNG 1 giọng cố định + 1 seed cố định** cho MỌI câu (giọng do
+   `VS_PROFILE` chỉ định, xem lưu ý trên), để nghe nhất quán từ đầu tới
+   cuối game.
 2. Đọc TOÀN BỘ `"prompt_audio_text"` trong mọi `content/packs/*.json`
    (bỏ trùng lặp) — hiện là **122 câu**, gồm cả chữ cái đơn (`"A"`), từ
    (`"rice cooker"`) lẫn cả câu (`"I want a pencil."`).
@@ -1992,15 +2011,11 @@ Script tự làm đủ các việc mà 23.2 bản nháp mô tả:
 4. Ghi thẳng vào `assets/audio/en/` rồi cập nhật luôn `manifest.json`.
 
 Chạy lại được nhiều lần: câu nào đã có file `.wav` hợp lệ thì bỏ qua, nên
-dừng giữa chừng rồi chạy tiếp cũng không sao.
+dừng giữa chừng rồi chạy tiếp cũng không sao — vẫn cần truyền đúng
+`VS_PROFILE` mỗi lần chạy dù chỉ để sinh thêm vài từ mới.
 
-**Muốn đổi giọng khác:** xoá hết `assets/audio/en/*.wav` rồi chạy lại với
-biến môi trường `VS_PROFILE` (và `VS_ENGINE` nếu đổi engine). Xem giọng
-đang có:
-
-```bash
-curl http://127.0.0.1:3900/profiles
-```
+**Muốn đổi hẳn sang giọng khác:** xoá hết `assets/audio/en/*.wav` rồi
+chạy lại với đúng `VS_PROFILE` mới (và `VS_ENGINE` nếu đổi engine).
 
 Engine `kittentts` (cài thêm ~0.1 GB trong Model Catalogue) cho 8 giọng
 preset tiếng Anh chạy CPU: `expr-voice-2-m/f`, `expr-voice-3-m/f`,
