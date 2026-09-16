@@ -2274,3 +2274,59 @@ vị trí đáp án) và chơi hết trọn 10 vòng trả lời đúng tới m�
 phát audio thật thay vì Web Speech nên cách giả lập `speechSynthesis` cũ
 không còn bắt được nữa) — tất cả đúng như thiết kế, không lỗi console.
 29 unit test vẫn pass nguyên.
+
+## Vòng 51 — Sửa lỗi hệ thống: câu đọc lại bị cắt ngang khi chuyển màn quá nhanh
+
+Người dùng phát hiện lỗi thật ở TẤT CẢ các game: sau khi bé chọn đáp án
+(đúng hoặc sai), app đọc lại câu/từ đó — nhưng màn chuyển sang câu tiếp
+theo quá nhanh, cắt ngang audio đang đọc dở. Ví dụ cụ thể: "Help Bill!"
+đọc "I want a notebook", bé bấm đúng notebook, đọc lại chỉ nghe được "I
+want a note" rồi mất tiếng vì đã chuyển câu. Đúng như người dùng đoán —
+nguyên nhân là mọi game đều dùng 1 mốc `setTimeout` THỜI GIAN CỐ ĐỊNH
+(700-3200ms tuỳ game/tuỳ đúng-sai) để quyết định lúc nào chuyển màn,
+hoàn toàn không liên quan gì tới audio ĐANG PHÁT thật sự dài bao lâu —
+mốc đó được ước lượng theo câu NGẮN nên câu dài (nhất là các câu đầy đủ
+"I want a ___." ở Bill, hoặc bất kỳ audio thật nào đọc lâu hơn ước
+lượng) bị cắt ngang.
+
+**Sửa tận gốc, áp dụng cho TẤT CẢ 8 game** (forest/farm/bill/kitchen/
+butterflygarden/abcvui/wordsafari/howmany): thêm hàm dùng chung
+`speakThenProceed(speakFn, text, minDelayMs, callback)` trong
+`engine/ui-shared.js` — chờ ĐỒNG THỜI 2 điều kiện trước khi gọi
+callback (chuyển màn): (1) audio đọc THẬT SỰ đọc xong (qua tham số
+`onEnd` sẵn có của `speak()`, xem `engine/audio-provider.js`), và (2)
+đã trôi qua đủ 1 mốc thời gian TỐI THIỂU (giữ nguyên các giá trị cũ làm
+sàn, không phải trần) — để giữ nhịp xem hợp lý cho câu quá ngắn (không
+chuyển màn ngay tắp lự chỉ vì audio đọc xong trong tích tắc). Có thêm
+lưới an toàn 8 giây phòng trường hợp `onEnd` vì lý do nào đó không được
+gọi (chưa gặp thật, nhưng thà cắt ngang muộn còn hơn treo màn mãi mãi).
+
+Thay mọi cặp `ctx.speak(text); ... setTimeout(fn, N);` (fire-and-forget,
+đua tranh với timer riêng) bằng `speakThenProceed(ctx.speak, text, N,
+fn);` ở đúng cả 2 nhánh đúng/sai của từng game. Riêng 2 trường hợp đặc
+biệt:
+- **`abcvui.js`** (có 2 lần đọc liên tiếp khi lật thẻ lộ từ mới): tên
+  chữ cái vẫn đọc NGAY không cần chờ (câu ngắn, không phải điểm gây lỗi)
+  — chỉ gate việc chuyển màn vào audio đọc SAU CÙNG (tên từ lật ra).
+- **`howmany.js`** (không có audio xác nhận ở nhánh đúng, chỉ nhánh sai
+  đọc lại câu đúng sau 1200ms trễ để tránh chồng câu vừa nghe lúc bấm
+  hoa): giữ nguyên độ trễ 1200ms, gate phần chuyển màn còn lại vào
+  `speakThenProceed`.
+
+Kiểm thử bằng Playwright — dựng lại ĐÚNG kịch bản lỗi người dùng báo:
+giả lập giọng đọc "chậm" (buộc `onEnd` chỉ gọi sau 2000ms, mô phỏng câu
+dài đọc lâu hơn mốc cố định cũ), vào Help Bill!, bấm đúng "notebook":
+- Ở mốc 900ms (đúng mốc cố định CŨ của nhánh đúng — nếu còn bug thì màn
+  đã chuyển rồi) — xác nhận màn CHƯA chuyển, badge còn nguyên.
+- Ở mốc 2200ms (sau khi audio giả lập đọc xong) — xác nhận màn ĐÃ
+  chuyển đúng lúc, câu vòng mới bắt đầu phát ngay sau, không chồng
+  audio.
+
+Chạy thêm smoke test qua cả 7/8 game còn lại (forest/farm/bill/kitchen/
+butterflygarden/abcvui/howmany — riêng wordsafari cần đủ tiến độ từ
+vựng mới mở khoá nên bỏ qua ở hồ sơ test trống, nhưng dùng chung đúng 1
+hàm `speakThenProceed` đã kiểm chứng đúng ở 7 game kia): bấm 1 đáp án,
+đợi 4-4.2 giây, xác nhận không game nào bị "treo" ở màn phản hồi (dấu
+hiệu callback không bao giờ được gọi) và không lỗi console. Chạy lại
+toàn bộ luồng thắng cuộc 10 vòng của Butterfly Garden (dùng audio thật)
+— vẫn đúng như trước. 29 unit test vẫn pass nguyên.

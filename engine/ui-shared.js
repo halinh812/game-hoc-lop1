@@ -2,6 +2,38 @@
 // game". Không thuộc riêng game nào (khác với games/<slug>/*.css, *.js
 // vốn chỉ chứa thứ riêng của 1 game).
 
+// Đọc xong 1 câu/từ MỚI được chuyển màn — thay cho kiểu cũ "đọc xong thì
+// kệ, cứ đợi đúng N mili-giây cố định rồi chuyển" (mọi game đều làm vậy từ
+// trước). Lỗi thật đã gặp: N cố định đó được tính theo ước lượng từ NGẮN
+// (vd "red", "stove"), nhưng câu DÀI (vd "I want a notebook." ở Bill, hay
+// bất kỳ audio thật nào đọc lâu hơn ước lượng) chưa kịp đọc hết đã bị cắt
+// ngang vì màn đã chuyển sang câu tiếp theo — bé chỉ nghe được "I want a
+// note" rồi mất tiếng. Sửa bằng cách CHỜ ĐÚNG lúc audio báo đọc xong (qua
+// tham số onEnd sẵn có của speak(), xem engine/audio-provider.js) rồi mới
+// gọi callback, kết hợp thêm 1 mốc thời gian TỐI THIỂU (minDelayMs) để giữ
+// nhịp xem hợp lý cho câu quá ngắn (không chuyển màn ngay tắp lự chỉ vì
+// audio đã đọc xong trong tích tắc) — chuyển màn khi CẢ HAI điều kiện đã
+// xong (lấy mốc nào tới sau). Có thêm 1 lưới an toàn 8 giây phòng trường
+// hợp onEnd vì lý do nào đó không được gọi (chưa gặp thật) — thà cắt ngang
+// muộn còn hơn treo màn mãi mãi.
+export function speakThenProceed(speakFn, text, minDelayMs, callback) {
+  var proceeded = false;
+  var minTimerDone = false;
+  var speechDone = false;
+  function tryProceed() {
+    if (proceeded || !minTimerDone || !speechDone) return;
+    proceeded = true;
+    callback();
+  }
+  setTimeout(function () { minTimerDone = true; tryProceed(); }, minDelayMs);
+  speakFn(text, function () { speechDone = true; tryProceed(); });
+  setTimeout(function () {
+    if (proceeded) return;
+    proceeded = true;
+    callback();
+  }, 8000);
+}
+
 export function starIcon(fill, size, stroke) {
   return '<svg viewBox="0 0 24 24" width="' + (size || 16) + '" height="' + (size || 16) + '" aria-hidden="true"><path d="M12 2l2.9 6.1 6.7.7-5 4.5 1.4 6.6L12 16.9l-6 3.5 1.4-6.6-5-4.5 6.7-.7z" fill="' + fill + '" stroke="' + (stroke || 'none') + '" stroke-width="1.2"/></svg>';
 }

@@ -37,7 +37,7 @@
 import { wordsInCat } from '../../engine/content-loader.js';
 import { buildRound, applyAnswer, classifyAnswer, getSkillProgress, wrongRate, shuffle } from '../../engine/learning-engine.js';
 import { saveProgress } from '../../engine/progress-store.js';
-import { starIcon, CLOSE_SVG, SPEAK_SVG, worldBg } from '../../engine/ui-shared.js';
+import { starIcon, CLOSE_SVG, SPEAK_SVG, worldBg, speakThenProceed } from '../../engine/ui-shared.js';
 
 var BUTTERFLY_WIN_TARGET = 10;
 
@@ -289,16 +289,15 @@ export function createButterflyGardenGame(ctx) {
       applyAnswer(store.words, targetWord.id, 'listen', outcome);
       saveProgress(store);
       state.correct++;
-      ctx.speak(targetWord.promptAudioText || targetWord.en);
       hotspotEls[idx].classList.add('correct');
       showBadge(idx, true);
       playDing();
 
       var isDone = state.correct >= BUTTERFLY_WIN_TARGET;
-      setTimeout(function () {
+      speakThenProceed(ctx.speak, targetWord.promptAudioText || targetWord.en, isDone ? 700 : 1200, function () {
         if (isDone) { state.screen = 'butterflygardenSummary'; ctx.render(); }
         else advanceButterflyRound();
-      }, isDone ? 700 : 1200);
+      });
     } else {
       applyAnswer(store.words, targetWord.id, 'listen', 'wrong');
       saveProgress(store);
@@ -307,8 +306,7 @@ export function createButterflyGardenGame(ctx) {
       showBadge(idx, false);
       showBadge(state.targetIdx, true);
       playBuzz();
-      ctx.speak(targetWord.promptAudioText || targetWord.en);
-      setTimeout(function () { advanceButterflyRound(); }, 3000);
+      speakThenProceed(ctx.speak, targetWord.promptAudioText || targetWord.en, 3000, function () { advanceButterflyRound(); });
     }
   }
 

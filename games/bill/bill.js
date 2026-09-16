@@ -22,7 +22,7 @@
 import { wordsInCat } from '../../engine/content-loader.js';
 import { buildRound, applyAnswer, classifyAnswer, getSkillProgress, wrongRate } from '../../engine/learning-engine.js';
 import { saveProgress } from '../../engine/progress-store.js';
-import { starIcon, CLOSE_SVG, SPEAK_SVG, worldBg } from '../../engine/ui-shared.js';
+import { starIcon, CLOSE_SVG, SPEAK_SVG, worldBg, speakThenProceed } from '../../engine/ui-shared.js';
 
 var BILL_WIN_TARGET = 10;
 
@@ -275,29 +275,27 @@ export function createBillGame(ctx) {
       applyAnswer(store.words, targetWord.id, 'listen', outcome);
       saveProgress(store);
       state.correct++;
-      ctx.speak(targetWord.promptAudioText || targetWord.en);
       tileEls[idx].classList.add('correct');
       playDing();
       setBillMood('happy');
       flyItemToMascot(tileEls[idx], targetWord, function () { showHeldItem(targetWord); });
 
       var isDone = state.correct >= BILL_WIN_TARGET;
-      setTimeout(function () {
+      speakThenProceed(ctx.speak, targetWord.promptAudioText || targetWord.en, isDone ? 700 : 900, function () {
         if (isDone) { state.screen = 'billSummary'; ctx.render(); }
         else advanceBillRound(state.targetIdx);
-      }, isDone ? 700 : 900);
+      });
     } else {
       applyAnswer(store.words, targetWord.id, 'listen', 'wrong');
       saveProgress(store);
       tileEls[idx].classList.add('wrong');
       tileEls[state.targetIdx].classList.add('correct');
-      ctx.speak(targetWord.promptAudioText || targetWord.en);
       setBillMood('sad');
       // Đồ ĐÚNG vẫn bay về cạnh Bill dù bé chọn sai (Bill buồn nhưng bé
       // vẫn thấy rõ đáp án đúng là ô nào) — khác ô bé vừa bấm (đang có
       // quầng đỏ "wrong"), bay từ đúng vị trí ô target trong 4 ô.
       flyItemToMascot(tileEls[state.targetIdx], targetWord, function () { showHeldItem(targetWord); });
-      setTimeout(function () { advanceBillRound(state.targetIdx); }, 3000);
+      speakThenProceed(ctx.speak, targetWord.promptAudioText || targetWord.en, 3000, function () { advanceBillRound(state.targetIdx); });
     }
   }
 
