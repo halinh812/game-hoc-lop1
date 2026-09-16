@@ -2146,3 +2146,56 @@ Kiểm thử bằng Playwright (giả lập TTS + phát bướm màu qua đủ 1
 đúng/sai, riêng luồng âm thanh xác nhận vẫn phát đúng qua Web Speech khi
 manifest rỗng, không lỗi console): tất cả pass. 29 unit test vẫn pass
 nguyên.
+
+## Vòng 48 — Nhận bàn giao từ máy người dùng: 122 file âm thanh thật + 6 ảnh bướm AI
+
+Người dùng đã tự làm xong Bước 21-23 trên máy Windows thật (VoiceStudio
++ MCP gắn vào cả Claude Desktop lẫn Claude Code) và push thẳng lên
+`main` (không qua tôi) — bao gồm cả việc RÀ SOÁT/SỬA LẠI Bước 23 trong
+PROMPT.md cho đúng thực tế cài bằng bản `.msi` trên Windows (khác bản
+nháp ban đầu viết theo kiểu cài từ mã nguồn), viết mới
+`tools/gen-audio-voicestudio.mjs` (script sinh audio gọi thẳng REST API
+của VoiceStudio, không qua MCP vì `generate_speech` qua MCP trả base64
+tốn token), và `.mcp.json` (cấu hình MCP dùng chung cho Claude Code khi
+mở đúng thư mục repo). Việc của tôi ở vòng này là RÀ SOÁT lại toàn bộ
+trước khi báo đã xong, theo đúng yêu cầu "kiểm tra lại và update tiến
+trình công việc".
+
+**Đã xác minh:**
+- `assets/audio/en/manifest.json` (122 slug) khớp CHÍNH XÁC với 122 file
+  `.wav` thật đang có trong `assets/audio/en/` — không thiếu không thừa.
+- Đối chiếu với TOÀN BỘ trường `prompt_audio_text` trong mọi
+  `content/packs/*.json` (viết script Python so khớp qua `slugifyAudioText`
+  y hệt logic trong `engine/audio-provider.js`): phủ đúng 100% — 122/122
+  câu trong content pack đều có file, không câu nào bị bỏ sót, cũng
+  không có slug thừa (rác từ nội dung cũ đã xoá).
+- Kiểm thử bằng Playwright thật (chặn `speechSynthesis` để phát hiện có
+  rơi về Web Speech hay không, theo dõi request mạng tới
+  `assets/audio/en/`): vào Butterfly Garden phát đúng file
+  `white.wav`/`blue.wav`, vào Help Bill! phát đúng file
+  `i_want_a_ball.wav` (câu dài, không phải từ đơn) — CẢ HAI đều 0 lần
+  rơi về Web Speech. 6 ảnh bướm AI (Bước 22, tạo bằng Google Flow) hiện
+  đúng qua `<img>` thật (900×900, không rơi về fallback SVG) — nhìn đẹp
+  và lấp lánh rõ rệt hơn hẳn bản SVG cũ. 29 unit test vẫn pass nguyên.
+- Chất lượng giọng: người dùng đã tự phát hiện giọng mặc định
+  `demo0001` (giọng kể chuyện điện ảnh có sẵn) đọc "lướt", không hợp để
+  bé tập nghe từng từ — tự đo đạc kỹ (âm lượng dB, phát hiện file rỗng
+  tiếng) rồi chuyển sang giọng nữ clone từ 1 mẫu ElevenLabs 19,7 giây,
+  đọc chậm hơn (speed 0.85). Kết quả đo lại: 0/122 file rỗng tiếng, âm
+  lượng đều hơn (-23,4..-12,0 dB so với -29,1..-17,5 dB của bộ cũ).
+
+**2 điểm cần lưu ý, đã báo lại người dùng thay vì tự xử lý:**
+1. `tools/gen-audio-voicestudio.mjs` vẫn có `PROFILE = ... || 'demo0001'`
+   làm mặc định — nếu sau này thêm từ mới vào content pack rồi chạy lại
+   script mà QUÊN truyền `VS_PROFILE=<id giọng đã clone>`, từ mới sẽ bị
+   đọc bằng giọng demo0001 cũ, lệch giọng với 122 từ hiện có. Tài liệu
+   Bước 23 chưa cập nhật lại theo đúng giọng mới đang dùng thật trong
+   repo — cần người dùng tự bổ sung ID giọng đã clone vào ghi chú khi
+   rảnh (tôi không có quyền truy cập danh sách giọng trên máy họ).
+2. `assets/howmany/calculator.jpeg` (ảnh gốc máy tính bấm tay cho nút
+   xác nhận "How Many?", Bước 16.4) đã được gửi lên nhưng CHƯA xử lý —
+   `games/how-many/howmany.js` vẫn đang trỏ tới `calculator.png` cũ, chưa
+   bị ảnh hưởng gì. Xử lý ảnh này (xoá nền + xuất .png, ghi đè lên
+   `calculator.png` đã tồn tại sẵn trong repo) thuộc diện phải hỏi xác
+   nhận trước theo đúng quy tắc trong CLAUDE.md ("Bắt buộc hỏi trước khi
+   chỉnh sửa ảnh có sẵn") — chưa tự ý làm, chờ người dùng xác nhận.
