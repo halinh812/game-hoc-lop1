@@ -2199,3 +2199,41 @@ trình công việc".
    `calculator.png` đã tồn tại sẵn trong repo) thuộc diện phải hỏi xác
    nhận trước theo đúng quy tắc trong CLAUDE.md ("Bắt buộc hỏi trước khi
    chỉnh sửa ảnh có sẵn") — chưa tự ý làm, chờ người dùng xác nhận.
+
+## Vòng 49 — Xử lý 2 việc còn tồn ở Vòng 48
+
+Người dùng xác nhận xử lý cả 2 điểm tồn đọng.
+
+**1. `calculator.png`** — chạy `tools/process-incoming-images.mjs
+assets/howmany assets/howmany --yes` để xoá nền `calculator.jpeg` mới
+gửi, xuất `calculator.png` (900×900, nền trong suốt, đã kiểm alpha=0 ở
+4 góc). Trong lúc chạy phát hiện NGAY 1 lỗi thật: vì nguồn=đích cùng là
+`assets/howmany`, script xử lý LUÔN CẢ 4 ẢNH CŨ đã xong từ trước
+(daisy/rose/sunflower/tulip) dù người dùng chỉ xác nhận cho đúng 1 ảnh
+calculator — cơ chế dedup cũ (thêm ở Vòng 48 trước, xem commit
+`d671500`) chỉ loại được trường hợp 2 file cùng stem khác đuôi
+(`calculator.jpeg` + `calculator.png` cũ), không loại được 4 file `.png`
+ĐƠN LẺ (không có bản gốc `.jpg/.jpeg/.webp` đi kèm) đã qua xử lý từ
+trước — các file này vẫn lọt qua bộ lọc và bị xử lý lại vô ích, có nguy
+cơ xấu dần do xoá nền/co nhỏ nhiều lần mất chi tiết (đúng rủi ro mà
+chính script đã ghi chú ở lần sửa trước). Phát hiện qua `git status`
+ngay sau khi chạy (thấy 5 file đổi thay vì đúng 1), khôi phục lại 4 ảnh
+không liên quan bằng `git restore` trước khi commit gì cả — không có ảnh
+nào bị mất/hỏng thật sự vì đã bắt kịp trước khi push.
+
+Sửa tận gốc: khi nguồn=đích, bỏ hẳn file `.png` ĐƠN LẺ khỏi danh sách xử
+lý (không có gì mới để làm với nó) — chỉ giữ lại các trường hợp có bản
+gốc non-png thật sự mới cần xử lý. Chạy lại xác nhận đúng 1 file
+(calculator) được xử lý. Kiểm bằng Playwright vào "How Many?": nút xác
+nhận hiện đúng, không lỗi console.
+
+**2. `VS_PROFILE` mặc định ngầm trong `gen-audio-voicestudio.mjs`** —
+bỏ giá trị mặc định `'demo0001'`, thêm kiểm tra bắt buộc ngay đầu script
+(trước cả bước gọi mạng tới VoiceStudio): thiếu cả `VS_PROFILE` lẫn
+`VS_INSTRUCT` thì thoát ngay với thông báo rõ ràng, nhắc đúng lý do
+(giọng thật đang dùng là giọng clone ElevenLabs, không phải demo0001) và
+cách tra ID giọng đã lưu (`curl http://127.0.0.1:3900/profiles`). Cập
+nhật lại Bước 23.3 trong PROMPT.md cho khớp — không còn ví dụ chạy lệnh
+trần trụi không kèm `VS_PROFILE` nữa.
+
+29 unit test vẫn pass nguyên qua cả 2 việc.
