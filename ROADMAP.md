@@ -2330,3 +2330,34 @@ hàm `speakThenProceed` đã kiểm chứng đúng ở 7 game kia): bấm 1 đá
 hiệu callback không bao giờ được gọi) và không lỗi console. Chạy lại
 toàn bộ luồng thắng cuộc 10 vòng của Butterfly Garden (dùng audio thật)
 — vẫn đúng như trước. 29 unit test vẫn pass nguyên.
+
+## Vòng 52 — "Mystic Jungle": bỏ audio thật cho 20 từ động vật hoang dã, rơi về giọng API
+
+Người dùng phản hồi: game "Mystic Jungle" (Khu rừng kỳ bí) nghe lạ —
+câu mở đầu ("Catch the tiger!", luôn dùng Web Speech API vì không có
+file thu sẵn cho cả câu) nghe bình thường, nhưng tên con vật đọc lại
+sau khi bé chọn (vd "tiger", dùng file `.wav` thu sẵn vì có trong
+manifest) nghe không tốt. Xác nhận qua AskUserQuestion: đúng là lần đọc
+2 (câu xác nhận) bị, muốn chuyển về giọng API cho toàn bộ game này.
+
+Đã phân tích waveform 20 file `.wav` liên quan (tiger/lion/elephant/
+giraffe/zebra/monkey/bear/kangaroo/panda/crocodile/penguin/raccoon/
+squirrel/peacock/koala/rhino/hippo/deer/fox/wolf) — không phát hiện bất
+thường về âm lượng/rè/vỡ tiếng qua số liệu (RMS, peak, số mẫu bị clip),
+nhưng không tự nghe được nên không thể loại trừ hoàn toàn — tin theo
+đúng nhận định bằng tai của người dùng.
+
+**Cách sửa**: xoá đúng 20 slug động vật hoang dã đó khỏi
+`assets/audio/en/manifest.json` (kiểm tra trước: 20 từ này CHỈ dùng cho
+riêng nhóm "wild" trong `animals-v1.json`, không đụng tới game nào
+khác) — không cần sửa code gì cả, `createFileFirstAudioProvider()`
+(Vòng 47) đã có sẵn cơ chế rơi về Web Speech cho câu không có trong
+manifest, đúng ngay cơ chế cần dùng ở đây. File `.wav` vẫn giữ nguyên
+trong `assets/audio/en/` (không xoá) phòng khi sau này muốn dùng lại
+(vd thu lại bằng giọng khác).
+
+Kiểm thử bằng Playwright (theo dõi request mạng tới
+`assets/audio/en/` + số lần gọi Web Speech): vào Mystic Jungle, cả câu
+mở đầu LẪN câu xác nhận sau khi chọn đều đi qua Web Speech, không còn
+request file `.wav` nào cho từ động vật hoang dã. 29 unit test vẫn pass
+nguyên.
