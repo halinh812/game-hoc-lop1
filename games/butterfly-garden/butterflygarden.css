@@ -1,0 +1,126 @@
+/* CSS RIÊNG của game "Butterfly Garden" — phần cơ chế chấm điểm/thanh
+   sao/nút nghe lại/màn kết quả dùng chung với các game khác nằm ở
+   engine/catch-game.css (xem .starsrow/.soundbtn/.summary-*). Nạp qua
+   <link> trong index.html (games/butterfly-garden/butterflygarden.css),
+   nên MỌI url() ảnh trong file này phải tính từ đường dẫn của CHÍNH FILE
+   NÀY (../../assets/...), không phải từ index.html — xem giải thích đầy
+   đủ ở đầu games/nong-trai-cua-be/farm.css. */
+
+/* Ảnh nền "vườn hoa" (Bước 21.2 trong PROMPT.md). Ảnh cố ý chừa 1 khoảng
+   cỏ xanh TRỐNG ở giữa — đúng chỗ 6 con bướm đứng (BUTTERFLY_SPOTS trong
+   butterflygarden.js), nên hoa lá hai bên không làm rối vùng bé phải nhìn
+   và bấm. Màu nền đặc #C7EDB8 lấy đúng màu vùng giữa ảnh, để lúc ảnh chưa
+   tải xong (hoặc tải lỗi) màn hình vẫn ra màu cỏ hợp tông chứ không chớp
+   trắng. */
+.world-bg.butterflyphoto{ background:#C7EDB8 url('../../assets/backgrounds/butterfly-bg.jpg') center/cover no-repeat; }
+
+/* ---------- màn chơi: 6 con bướm màu, lưới 3 cột × 2 hàng ---------- */
+.butterflystage{ position:relative; flex:1; margin:4px 0 0; }
+.butterflyfield{ position:absolute; inset:0; }
+
+/* 6 con bướm — ƯU TIÊN ảnh AI thật lấp lánh theo màu (assets/butterflies/
+   <id>.png, xem Bước 22 trong PROMPT.md), rơi về SVG vẽ tay tô đúng mã
+   màu (BUTTERFLY_HEX trong butterflygarden.js) nếu ảnh đó CHƯA tồn tại
+   (.butterflysvgfallback, ẩn/hiện qua thuộc tính "hidden" — bắt lỗi tải
+   ảnh ở window 'error' trong butterflygarden.js). Đứng yên ở toạ độ %
+   cố định (BUTTERFLY_SPOTS), không di chuyển (xem lý do ở đầu
+   butterflygarden.js: cơ chế "bắt vật di chuyển" đã bị bỏ khỏi app từ
+   lâu). QUAN TRỌNG: hiệu ứng vỗ cánh/đúng/sai (xoay/phóng to) gắn vào
+   `.butterflyvisual` (lớp BÊN TRONG nút bấm), KHÔNG gắn trực tiếp lên
+   chính `.butterflyhotspot` (nút bấm) — nếu gắn animation transform lên
+   thẳng nút bấm, vùng bấm thật của nó (bounding box) sẽ liên tục đổi
+   theo animation, khiến việc bấm trúng kém ổn định hơn (Playwright coi
+   phần tử "not stable" và không bấm được cho tới khi animation dừng —
+   dấu hiệu thật của rủi ro tương tự trên tay bé bấm thật). Tách lớp
+   trong/ngoài giữ nút bấm luôn đứng yên, chỉ phần NHÌN THẤY động đậy. */
+.butterflystage .butterflyhotspot{
+  position:absolute; width:26vw; height:26vw; max-width:108px; max-height:108px;
+  border:none; background:transparent; padding:0; cursor:pointer;
+}
+.butterflystage .butterflyhotspot:active{ transform:scale(.94); }
+.butterflystage .butterflyhotspot .butterflyvisual{
+  display:block; width:100%; height:100%;
+  filter:drop-shadow(0 4px 3px rgba(20,40,25,.25));
+  animation:butterflyFlutter 2.4s ease-in-out infinite;
+}
+.butterflystage .butterflyhotspot .butterflyimg,
+.butterflystage .butterflyhotspot .butterflysvgfallback,
+.butterflystage .butterflyhotspot .butterflysvgfallback svg{
+  width:100%; height:100%; display:block; object-fit:contain;
+}
+/* [hidden] không tự đủ ẩn phần tử đã có display:block riêng (ảnh lỗi
+   vẫn hiện icon "ảnh vỡ" dù đã set hidden=true trong JS nếu thiếu dòng
+   này) — cùng lỗi/cách sửa đã dùng cho .billfallback[hidden]/
+   .kitchenfallback[hidden]. Áp dụng cho CẢ 2 chiều: ảnh lỗi cần ẩn khi
+   hidden, SVG dự phòng cần ẩn khi CHƯA hidden=false (mặc định). */
+.butterflystage .butterflyhotspot .butterflyimg[hidden],
+.butterflystage .butterflyhotspot .butterflysvgfallback[hidden]{ display:none; }
+@keyframes butterflyFlutter{
+  0%,100%{ transform:rotate(0deg) scale(1); }
+  50%{ transform:rotate(-4deg) scale(1.03); }
+}
+
+/* Đúng/sai: dừng nhịp vỗ cánh nền, đổi hẳn sang 1 hiệu ứng RÕ RÀNG riêng
+   (không chỉ đổi màu viền — cùng bài học rút ra từ phản hồi người dùng ở
+   Kitchen, xem Vòng 43 trong ROADMAP.md) + phát sáng đúng/sai màu xanh/đỏ
+   giống kitchen.js/bill.js. */
+.butterflystage .butterflyhotspot.correct .butterflyvisual{
+  animation:butterflyCorrectPop .5s ease;
+  filter:drop-shadow(0 0 6px var(--success)) drop-shadow(0 0 14px rgba(47,143,91,.75));
+}
+@keyframes butterflyCorrectPop{
+  0%{ transform:scale(1) rotate(0deg); }
+  45%{ transform:scale(1.3) rotate(10deg); }
+  100%{ transform:scale(1.1) rotate(0deg); }
+}
+.butterflystage .butterflyhotspot.wrong .butterflyvisual{
+  animation:butterflyWrongShake .45s ease;
+  filter:drop-shadow(0 0 6px #B24A43) drop-shadow(0 0 14px rgba(178,74,67,.75));
+}
+@keyframes butterflyWrongShake{
+  0%,100%{ transform:translateX(0); }
+  25%{ transform:translateX(-7px); }
+  75%{ transform:translateX(7px); }
+}
+
+/* Dấu ✓/✗ to, nổi bật giữa đúng con bướm vừa bấm — y hệt .kitchenbadge
+   trong games/kitchen/kitchen.css (mỗi game tự giữ 1 bản sao riêng theo
+   đúng quy ước đã có). */
+.butterflybadge{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) scale(0);
+  width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-size:18px; font-weight:800; color:#fff; z-index:5; pointer-events:none;
+  box-shadow:0 4px 10px rgba(0,0,0,.3), 0 0 0 3px rgba(255,255,255,.85);
+  animation:butterflyBadgePop .45s cubic-bezier(.34,1.56,.64,1) forwards;
+}
+.butterflybadge.good{ background:var(--success); }
+.butterflybadge.bad{ background:#B24A43; }
+@keyframes butterflyBadgePop{ to{ transform:translate(-50%,-50%) scale(1); } }
+
+/* ---------- ô icon ở lưới chọn trò chơi (Trang chủ) ---------- */
+/* Chưa có ảnh nền vườn hoa riêng — dùng gradient pastel (xanh lá nhạt ->
+   vàng kem -> hồng nhạt) gợi cảm giác "vườn hoa nhiều màu" tạm thời,
+   khác cách forest-tile/bill-tile/kitchen-tile (đều crop 1 góc ảnh nền
+   photo thật của chính game đó) — giữ nguyên gradient CHO CHỦ Ý, dù giờ
+   game đã có ảnh nền vườn hoa: ảnh đó chừa khoảng trống ở giữa nên crop
+   một góc ra ô tile 70px chỉ còn mảng cỏ xanh trơn, không nhận ra là
+   vườn hoa. Muốn đổi thì phải crop trúng dải hoa ở rìa ảnh. Chữ
+   dùng màu chữ thường (--ink) thay vì trắng+đổ bóng như các tile kia vì
+   nền sáng, không cần lớp gradient tối phía dưới để chữ nổi lên. */
+.gametile.butterfly-tile{
+  position:relative; overflow:hidden; border:1px solid var(--glass-border);
+  background:linear-gradient(160deg, #D7F3DE 0%, #FFF3C9 55%, #FBD9E6 100%);
+}
+.gametile.butterfly-tile .name{ position:relative; z-index:1; color:var(--ink); }
+.butterflytile-face{
+  position:relative; z-index:1; display:block; width:70px; height:70px;
+  animation:tileSway 2.6s ease-in-out infinite;
+}
+.butterflytile-face img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 4px 3px rgba(20,40,25,.25)); }
+.butterflytile-fallback{ display:flex; align-items:center; justify-content:center; width:100%; height:100%; font-size:44px; }
+.butterflytile-fallback[hidden]{ display:none; }
+
+@media (prefers-reduced-motion: reduce){
+  .butterflystage .butterflyhotspot .butterflyvisual,.butterflytile-face{ animation:none !important; }
+  .butterflybadge{ transform:translate(-50%,-50%) scale(1); }
+}

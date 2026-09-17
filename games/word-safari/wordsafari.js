@@ -26,7 +26,7 @@
 
 import { buildRound, applyAnswer, classifyAnswer, pickOptions, getSkillProgress, SKILLS } from '../../engine/learning-engine.js';
 import { saveProgress } from '../../engine/progress-store.js';
-import { starIcon, CLOSE_SVG, SPEAK_SVG, worldBg } from '../../engine/ui-shared.js';
+import { starIcon, CLOSE_SVG, SPEAK_SVG, worldBg, speakThenProceed } from '../../engine/ui-shared.js';
 
 var WORD_SAFARI_WIN_TARGET = 10;
 
@@ -247,8 +247,7 @@ export function createWordSafariGame(ctx) {
       optionEls[idx].classList.add('wrong');
       optionEls[round.correctIdx].classList.add('correct');
       setMeerkatMood('sad');
-      ctx.speak(round.target.en);
-      setTimeout(function () { renderWordSafari(); }, 3000);
+      speakThenProceed(ctx.speak, round.target.en, 3000, function () { renderWordSafari(); });
     }
   }
 

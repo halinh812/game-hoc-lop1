@@ -49,7 +49,7 @@ var KITCHEN_WIN_TARGET = 10;
 import { wordsInCat } from '../../engine/content-loader.js';
 import { buildRound, applyAnswer, classifyAnswer, getSkillProgress, wrongRate } from '../../engine/learning-engine.js';
 import { saveProgress } from '../../engine/progress-store.js';
-import { starIcon, CLOSE_SVG, SPEAK_SVG, worldBg } from '../../engine/ui-shared.js';
+import { starIcon, CLOSE_SVG, SPEAK_SVG, worldBg, speakThenProceed } from '../../engine/ui-shared.js';
 
 export function createKitchenGame(ctx) {
   var root = document.getElementById('root');
@@ -316,17 +316,16 @@ export function createKitchenGame(ctx) {
       applyAnswer(store.words, targetWord.id, 'listen', outcome);
       saveProgress(store);
       state.correct++;
-      ctx.speak(targetWord.promptAudioText || targetWord.en);
       hotspotEls[idx].classList.add('correct');
       showBadge(idx, true);
       playDing();
       setKitchenMood('happy');
 
       var isDone = state.correct >= KITCHEN_WIN_TARGET;
-      setTimeout(function () {
+      speakThenProceed(ctx.speak, targetWord.promptAudioText || targetWord.en, isDone ? 700 : 1300, function () {
         if (isDone) { state.screen = 'kitchenSummary'; ctx.render(); }
         else advanceKitchenRound(state.targetIdx);
-      }, isDone ? 700 : 1300);
+      });
     } else {
       applyAnswer(store.words, targetWord.id, 'listen', 'wrong');
       saveProgress(store);
@@ -335,9 +334,8 @@ export function createKitchenGame(ctx) {
       showBadge(idx, false);
       showBadge(state.targetIdx, true);
       playBuzz();
-      ctx.speak(targetWord.promptAudioText || targetWord.en);
       setKitchenMood('sad');
-      setTimeout(function () { advanceKitchenRound(state.targetIdx); }, 3200);
+      speakThenProceed(ctx.speak, targetWord.promptAudioText || targetWord.en, 3200, function () { advanceKitchenRound(state.targetIdx); });
     }
   }
 

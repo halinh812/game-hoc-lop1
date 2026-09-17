@@ -137,9 +137,87 @@ export function createWebSpeechProvider() {
   return provider;
 }
 
-// Điểm mở rộng cho tương lai: 1 provider trả file audio thu sẵn / TTS đám
-// mây, cùng interface { name, isSupported(), speak(text, opts) } để có thể
-// hoán đổi mà không đổi code gọi nó.
+// Rút gọn 1 câu tiếng Anh thành tên file an toàn: chữ thường, khoảng
+// trắng/dấu câu -> gạch dưới, bỏ gạch dưới thừa ở 2 đầu. "I want a book."
+// -> "i_want_a_book", "red" -> "red", "rice cooker" -> "rice_cooker". Khoá
+// theo ĐÚNG CÂU đang đọc (không phải theo "id" của từ trong content pack)
+// vì đây mới là thứ cần phát ra loa — 1 câu giống hệt nhau ở 2 game khác
+// nhau (hiếm khi xảy ra) vẫn dùng chung đúng 1 file, không cần tạo trùng.
+function slugifyAudioText(text) {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
+// Provider "ưu tiên file thu sẵn, rơi về Web Speech" — đúng điểm mở rộng
+// đã ghi chú từ trước. File thật do người dùng tự tạo bằng công cụ TTS
+// ngoài (vd VoiceStudio) rồi gửi qua Git, lưu ở assets/audio/en/<slug>.wav
+// (đúng định dạng WAV mà VoiceStudio xuất ra sẵn — không cần đổi định
+// dạng gì thêm, trình duyệt phát WAV qua thẻ <audio> bình thường)
+// (xem Bước 23 trong PROMPT.md). manifest.json liệt kê ĐÚNG những câu đã
+// có file thật — tra cứu trong bộ nhớ (Set), KHÔNG dò từng câu qua mạng
+// (mỗi lần đọc gọi rất thường xuyên, dò lỗi 404 liên tục sẽ chậm/tốn
+// mạng) — câu nào chưa có trong manifest thì đi thẳng qua Web Speech như
+// trước giờ, không cần chờ gì thêm. manifest.json CHƯA tồn tại (trước khi
+// có file âm thanh đầu tiên) thì coi như rỗng, không báo lỗi gì — game vẫn
+// chạy y hệt bản Web Speech thuần hiện tại.
+function createFileFirstAudioProvider() {
+  var webSpeech = createWebSpeechProvider();
+  var manifestSlugs = null; // null = chưa tải xong, Set = đã tải xong (có thể rỗng)
+  var latestSpeakId = 0;
+  var currentAudioEl = null;
+
+  fetch('assets/audio/en/manifest.json')
+    .then(function (res) { return res.ok ? res.json() : []; })
+    .then(function (list) { manifestSlugs = new Set(Array.isArray(list) ? list : []); })
+    .catch(function () { manifestSlugs = new Set(); });
+
+  function stopCurrentAudio() {
+    if (currentAudioEl) {
+      currentAudioEl.pause();
+      currentAudioEl.onended = null;
+      currentAudioEl.onerror = null;
+      currentAudioEl = null;
+    }
+  }
+
+  return {
+    name: 'file-first',
+    isSupported: function () { return true; },
+    speak: function (text, opts) {
+      opts = opts || {};
+      var myId = ++latestSpeakId;
+      stopCurrentAudio();
+
+      var slug = slugifyAudioText(text);
+      var hasFile = manifestSlugs && manifestSlugs.has(slug);
+      if (!hasFile) { webSpeech.speak(text, opts); return; }
+
+      var doneCalled = false;
+      function done() {
+        if (doneCalled || myId !== latestSpeakId) return;
+        doneCalled = true;
+        if (opts.onEnd) opts.onEnd();
+      }
+
+      var audioEl = new Audio('assets/audio/en/' + slug + '.wav');
+      currentAudioEl = audioEl;
+      audioEl.onended = done;
+      // File có tên trong manifest nhưng lỗi tải/phát thật (hiếm — file bị
+      // hỏng, sai định dạng...) — rơi về Web Speech thay vì im lặng, bé vẫn
+      // nghe được gì đó thay vì mất tiếng hoàn toàn.
+      audioEl.onerror = function () { webSpeech.speak(text, opts); };
+      audioEl.play().catch(function () {
+        // 1 số trình duyệt (đặc biệt Safari iOS) chặn autoplay trước khi có
+        // tương tác người dùng — cùng giới hạn với Web Speech, xem try/catch
+        // trong createWebSpeechProvider() ở trên.
+        webSpeech.speak(text, opts);
+      });
+    }
+  };
+}
+
 export function createAudioProvider() {
-  return createWebSpeechProvider();
+  return createFileFirstAudioProvider();
 }

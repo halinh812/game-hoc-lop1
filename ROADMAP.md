@@ -2069,3 +2069,337 @@ gốc 0.5581 (vùng bấm không bị lệch vị trí). Resize sang kích thư�
 chơi Kitchen (trả lời đúng lẫn sai đủ 10 vòng): thứ tự vùng sáng, nhãn
 audio, badge ✓/✗, đổi tâm trạng mèo đầu bếp, màn thắng cuộc — tất cả vẫn
 hoạt động đúng như trước. 29 unit test vẫn pass nguyên.
+
+## Vòng 47 — Game #8 "Butterfly Garden" (Màu sắc)
+
+Game mới dạy 6 màu cơ bản tiếng Anh (red/blue/yellow/green/black/white —
+vốn từ `content/packs/colors-v1.json` đã có sẵn từ trước nhưng chưa game
+nào dùng tới). Người dùng chọn linh vật **bướm**, ban đầu đề xuất cơ chế
+"bắt bướm đúng màu đang bay" nhưng sau khi kiểm tra lại code thì phát
+hiện app KHÔNG còn cơ chế "bắt vật di chuyển" nào để tái dùng nữa — lịch
+sử trước đây (Mystic Jungle/My Little Farm) từng làm animal chạy/bay tự
+do nhưng đã bị chủ động bỏ hẳn vì lý do ổn định + độ chính xác chạm trên
+điện thoại (xem Vòng 25-29). Trình bày lại rủi ro này cho người dùng,
+chốt lại thành bản TĨNH: 6 con bướm đứng yên ở vị trí cố định, có nhịp
+"vỗ cánh" nhẹ tại chỗ (xoay + phóng to nhẹ qua lại) để không đứng chết.
+
+**Khác mọi game trước — không cần ảnh AI mới để chơi được ngay:**
+- Vốn từ chỉ có đúng 6 màu (nhỏ hơn hẳn 10+ của các game khác) nên hiện
+  ĐỦ CẢ 6 con bướm mỗi vòng (không phải 4 trong N từ lớn hơn như forest/
+  farm/bill/kitchen) — đúng tinh thần "tìm đúng giữa nhiều lựa chọn cùng
+  hiện" mà không cần chuyển động thật.
+- 6 con bướm vẽ bằng **SVG nội tuyến** (không phải ảnh PNG) — tô ĐÚNG mã
+  màu hex của từng từ (`BUTTERFLY_HEX` trong `butterflygarden.js`), đảm
+  bảo "con bướm đỏ" chắc chắn là màu đỏ thật, việc ảnh AI khó cam kết
+  tuyệt đối. Vị trí 6 "chỗ đậu" (`BUTTERFLY_SPOTS`) cũng là số liệu cố
+  định (dàn vòng quanh linh vật dẫn đường ở giữa), không cần đo trên ảnh
+  thật như `GLOW_ASSETS` của Kitchen.
+- Màn chơi dùng tạm nền cỏ cây/trời xanh dùng chung ở Trang chủ
+  (`worldBg()` không tham số) thay vì ảnh nền riêng — ảnh nền vườn hoa
+  riêng đưa sang hạng mục NÂNG CẤP SAU (không bắt buộc), xem Bước 21
+  trong PROMPT.md.
+- Linh vật dẫn đường (3 trạng thái cảm xúc) CHƯA có ảnh thật, dùng tạm 1
+  emoji chung 🦋 cho cả 3 trạng thái (Unicode không có sẵn bộ emoji bướm
+  vui/buồn riêng như bộ mèo 🐱/😻/😿 của Kitchen) — người dùng có thể tự
+  tạo ảnh theo đúng 3 prompt ở Bước 21 khi rảnh, code đã trỏ sẵn đúng 3
+  tên file, ảnh về là tự hiện luôn không cần sửa gì thêm.
+
+Nhờ vậy game đã CHẠY ĐƯỢC ĐẦY ĐỦ ngay hôm nay — không phải chờ thêm 1
+vòng tạo ảnh mới có game chơi được, khác hẳn Kitchen (bắt buộc phải có
+ảnh nền thật mới đo được toạ độ mới viết được code).
+
+Cơ chế phản hồi đúng/sai tái dùng gần nguyên vẹn kỹ thuật đã kiểm chứng
+ở Kitchen (Vòng 43): dấu ✓/✗ to rõ ràng + tiếng "ting"/"buzz" + phát sáng
+viền xanh/đỏ — chỉ thêm 1 hiệu ứng riêng cho game này (bật/tắt nhịp vỗ
+cánh, phóng to xoay nhẹ lúc đúng, lắc ngang lúc sai). Khác Kitchen/Bill:
+KHÔNG cần thay slot/tái tạo DOM khi qua vòng mới (đủ cả 6 màu cố định
+suốt lượt chơi) — chỉ cần xoá lớp đúng/sai + dấu ✓/✗ cũ rồi chọn lại từ
+mục tiêu trong đúng 6 từ đang có, đơn giản hơn hẳn.
+
+Kiểm thử bằng Playwright (viewport 390×780, giả lập TTS để tự động chơi):
+xác nhận đủ 6 con bướm hiện đúng nhãn màu, chơi hết 10 vòng trả lời đúng
+tới màn thắng cuộc; riêng luồng trả lời sai xác nhận đúng con bị bấm sai
+sáng viền đỏ + dấu ✗, con đúng sáng viền xanh + dấu ✓, linh vật chuyển
+tâm trạng buồn, qua vòng mới thì toàn bộ lớp/dấu cũ được dọn sạch đúng
+như thiết kế. Trang chủ hiện đúng ô game mới (nền gradient pastel tạm +
+mặt bướm lắc lư, rơi về fallback emoji đúng như dự kiến vì ảnh linh vật
+chưa tồn tại). 29 unit test vẫn pass nguyên.
+
+## Vòng 48 — Butterfly Garden: ảnh bướm AI thật + chuẩn bị âm thanh thu sẵn (VoiceStudio)
+
+Hai nhánh việc liên tiếp từ phản hồi người dùng:
+
+**1. "Con bướm bạn làm đơn điệu và không đẹp"** — 6 con bướm SVG vẽ tạm
+ở Vòng 46 bị chê đơn điệu, người dùng muốn ảnh AI đẹp hơn, có hiệu ứng
+lấp lánh (con thích phong cách này). Đã viết prompt tạo ảnh riêng cho
+từng màu ở Bước 22 trong PROMPT.md (nhấn mạnh màu cánh chủ đạo phải rõ
+ràng, lấp lánh chỉ là phụ — tránh lấn át mục tiêu dạy màu, nhất là con
+đen dễ bị lấp lánh biến thành màu khác). Đồng thời sửa trước
+`hotspotsHtml()` trong `butterflygarden.js` để ưu tiên hiện ảnh thật
+`assets/butterflies/<id>.png`, rơi về SVG cũ nếu ảnh chưa tồn tại —
+người dùng gửi ảnh qua Git là tự động lên, không cần báo lại.
+
+Trong lúc sửa, phát hiện + sửa luôn 2 lỗi: (1) animation xoay/phóng to
+gắn thẳng lên nút bấm khiến vùng bấm liên tục đổi theo animation, kém ổn
+định khi chạm (Playwright báo phần tử "not stable" — dấu hiệu thật của
+rủi ro tương tự trên tay bé) — tách animation ra 1 lớp con
+`.butterflyvisual` bên trong, giữ nút bấm đứng yên; (2) thiếu CSS
+`[hidden]{ display:none }` cho `.butterflyimg` khiến icon "ảnh vỡ" vẫn
+hiện dù đã set `hidden=true` trong JS (cùng lỗi/cách sửa đã gặp với
+`.billfallback[hidden]`/`.kitchenfallback[hidden]` trước đây).
+
+**2. Muốn dùng VoiceStudio (app TTS chạy máy tính, có MCP) để tạo âm
+thanh chất lượng cao thay cho giọng Web Speech API hiện tại** (vốn phụ
+thuộc giọng máy, từng gây lỗi đọc lạ như "rice cooker" — xem Vòng 43).
+Người dùng ban đầu hiểu nhầm phiên làm việc đang trò chuyện = máy tính/
+Claude Desktop thật của họ, muốn nhờ cài VoiceStudio + gắn MCP "thẳng
+vào Claude app trên desktop này" — đã giải thích rõ đây là môi trường
+đám mây tách biệt, không có quyền truy cập máy/Claude Desktop thật của
+người dùng, và người dùng xác nhận chọn hướng tự cài trên máy thật (qua
+AskUserQuestion).
+
+Chuẩn bị sẵn phía code trước khi có file âm thanh thật, đúng tinh thần
+đã làm với ảnh — viết `createFileFirstAudioProvider()` trong
+`engine/audio-provider.js` (đúng điểm mở rộng đã ghi chú sẵn từ trước:
+"1 provider trả file audio thu sẵn... cùng interface để có thể hoán đổi
+mà không đổi code gọi nó"):
+- `slugifyAudioText(text)`: rút gọn CHÍNH CÂU đang đọc (không phải "id"
+  của từ) thành tên file an toàn — khoá theo câu vì đó mới là thứ cần
+  phát ra loa, nhất quán dù ở game nào.
+- `assets/audio/en/manifest.json` (khởi tạo mảng rỗng `[]`): danh sách
+  câu đã có file thật — tra trong bộ nhớ (Set), KHÔNG dò từng câu qua
+  mạng (speak() gọi rất thường xuyên, dò lỗi 404 liên tục sẽ chậm).
+  Manifest rỗng/chưa tồn tại thì game chạy y hệt bản Web Speech thuần
+  hiện tại, không lỗi gì.
+- Câu có trong manifest: phát `assets/audio/en/<slug>.wav` (đúng định
+  dạng VoiceStudio xuất sẵn, không cần đổi định dạng); lỗi phát thật
+  (hiếm) hoặc bị chặn autoplay thì rơi về Web Speech, không im lặng.
+  Câu chưa có: đi thẳng qua Web Speech như cũ.
+
+Viết hướng dẫn đầy đủ ở Bước 23 trong PROMPT.md: cài VoiceStudio, cấu
+hình MCP vào Claude Desktop THẬT trên máy người dùng (ví dụ JSON cấu
+hình cụ thể), rồi nhờ CHÍNH Claude Desktop đó đọc `prompt_audio_text`
+trong mọi `content/packs/*.json`, chọn CỐ ĐỊNH 1 giọng duy nhất, tạo file
+theo đúng quy tắc đặt tên của `slugifyAudioText()`, gửi qua Git — có thể
+gửi từng phần (không cần đủ hết ~150 từ mới gửi) vì cơ chế ưu tiên/rơi về
+đã xử lý đúng cho cả 2 trạng thái.
+
+Kiểm thử bằng Playwright (giả lập TTS + phát bướm màu qua đủ 10 vòng
+đúng/sai, riêng luồng âm thanh xác nhận vẫn phát đúng qua Web Speech khi
+manifest rỗng, không lỗi console): tất cả pass. 29 unit test vẫn pass
+nguyên.
+
+## Vòng 49 — Nhận bàn giao từ máy người dùng: 122 file âm thanh thật + 6 ảnh bướm AI
+
+Người dùng đã tự làm xong Bước 21-23 trên máy Windows thật (VoiceStudio
++ MCP gắn vào cả Claude Desktop lẫn Claude Code) và push thẳng lên
+`main` (không qua tôi) — bao gồm cả việc RÀ SOÁT/SỬA LẠI Bước 23 trong
+PROMPT.md cho đúng thực tế cài bằng bản `.msi` trên Windows (khác bản
+nháp ban đầu viết theo kiểu cài từ mã nguồn), viết mới
+`tools/gen-audio-voicestudio.mjs` (script sinh audio gọi thẳng REST API
+của VoiceStudio, không qua MCP vì `generate_speech` qua MCP trả base64
+tốn token), và `.mcp.json` (cấu hình MCP dùng chung cho Claude Code khi
+mở đúng thư mục repo). Việc của tôi ở vòng này là RÀ SOÁT lại toàn bộ
+trước khi báo đã xong, theo đúng yêu cầu "kiểm tra lại và update tiến
+trình công việc".
+
+**Đã xác minh:**
+- `assets/audio/en/manifest.json` (122 slug) khớp CHÍNH XÁC với 122 file
+  `.wav` thật đang có trong `assets/audio/en/` — không thiếu không thừa.
+- Đối chiếu với TOÀN BỘ trường `prompt_audio_text` trong mọi
+  `content/packs/*.json` (viết script Python so khớp qua `slugifyAudioText`
+  y hệt logic trong `engine/audio-provider.js`): phủ đúng 100% — 122/122
+  câu trong content pack đều có file, không câu nào bị bỏ sót, cũng
+  không có slug thừa (rác từ nội dung cũ đã xoá).
+- Kiểm thử bằng Playwright thật (chặn `speechSynthesis` để phát hiện có
+  rơi về Web Speech hay không, theo dõi request mạng tới
+  `assets/audio/en/`): vào Butterfly Garden phát đúng file
+  `white.wav`/`blue.wav`, vào Help Bill! phát đúng file
+  `i_want_a_ball.wav` (câu dài, không phải từ đơn) — CẢ HAI đều 0 lần
+  rơi về Web Speech. 6 ảnh bướm AI (Bước 22, tạo bằng Google Flow) hiện
+  đúng qua `<img>` thật (900×900, không rơi về fallback SVG) — nhìn đẹp
+  và lấp lánh rõ rệt hơn hẳn bản SVG cũ. 29 unit test vẫn pass nguyên.
+- Chất lượng giọng: người dùng đã tự phát hiện giọng mặc định
+  `demo0001` (giọng kể chuyện điện ảnh có sẵn) đọc "lướt", không hợp để
+  bé tập nghe từng từ — tự đo đạc kỹ (âm lượng dB, phát hiện file rỗng
+  tiếng) rồi chuyển sang giọng nữ clone từ 1 mẫu ElevenLabs 19,7 giây,
+  đọc chậm hơn (speed 0.85). Kết quả đo lại: 0/122 file rỗng tiếng, âm
+  lượng đều hơn (-23,4..-12,0 dB so với -29,1..-17,5 dB của bộ cũ).
+
+**2 điểm cần lưu ý, đã báo lại người dùng thay vì tự xử lý:**
+1. `tools/gen-audio-voicestudio.mjs` vẫn có `PROFILE = ... || 'demo0001'`
+   làm mặc định — nếu sau này thêm từ mới vào content pack rồi chạy lại
+   script mà QUÊN truyền `VS_PROFILE=<id giọng đã clone>`, từ mới sẽ bị
+   đọc bằng giọng demo0001 cũ, lệch giọng với 122 từ hiện có. Tài liệu
+   Bước 23 chưa cập nhật lại theo đúng giọng mới đang dùng thật trong
+   repo — cần người dùng tự bổ sung ID giọng đã clone vào ghi chú khi
+   rảnh (tôi không có quyền truy cập danh sách giọng trên máy họ).
+2. `assets/howmany/calculator.jpeg` (ảnh gốc máy tính bấm tay cho nút
+   xác nhận "How Many?", Bước 16.4) đã được gửi lên nhưng CHƯA xử lý —
+   `games/how-many/howmany.js` vẫn đang trỏ tới `calculator.png` cũ, chưa
+   bị ảnh hưởng gì. Xử lý ảnh này (xoá nền + xuất .png, ghi đè lên
+   `calculator.png` đã tồn tại sẵn trong repo) thuộc diện phải hỏi xác
+   nhận trước theo đúng quy tắc trong CLAUDE.md ("Bắt buộc hỏi trước khi
+   chỉnh sửa ảnh có sẵn") — chưa tự ý làm, chờ người dùng xác nhận.
+
+## Vòng 50 — Xử lý 2 việc còn tồn ở Vòng 49
+
+Người dùng xác nhận xử lý cả 2 điểm tồn đọng.
+
+**1. `calculator.png`** — chạy `tools/process-incoming-images.mjs
+assets/howmany assets/howmany --yes` để xoá nền `calculator.jpeg` mới
+gửi, xuất `calculator.png` (900×900, nền trong suốt, đã kiểm alpha=0 ở
+4 góc). Trong lúc chạy phát hiện NGAY 1 lỗi thật: vì nguồn=đích cùng là
+`assets/howmany`, script xử lý LUÔN CẢ 4 ẢNH CŨ đã xong từ trước
+(daisy/rose/sunflower/tulip) dù người dùng chỉ xác nhận cho đúng 1 ảnh
+calculator — cơ chế dedup cũ (thêm ở Vòng 48 trước, xem commit
+`d671500`) chỉ loại được trường hợp 2 file cùng stem khác đuôi
+(`calculator.jpeg` + `calculator.png` cũ), không loại được 4 file `.png`
+ĐƠN LẺ (không có bản gốc `.jpg/.jpeg/.webp` đi kèm) đã qua xử lý từ
+trước — các file này vẫn lọt qua bộ lọc và bị xử lý lại vô ích, có nguy
+cơ xấu dần do xoá nền/co nhỏ nhiều lần mất chi tiết (đúng rủi ro mà
+chính script đã ghi chú ở lần sửa trước). Phát hiện qua `git status`
+ngay sau khi chạy (thấy 5 file đổi thay vì đúng 1), khôi phục lại 4 ảnh
+không liên quan bằng `git restore` trước khi commit gì cả — không có ảnh
+nào bị mất/hỏng thật sự vì đã bắt kịp trước khi push.
+
+Sửa tận gốc: khi nguồn=đích, bỏ hẳn file `.png` ĐƠN LẺ khỏi danh sách xử
+lý (không có gì mới để làm với nó) — chỉ giữ lại các trường hợp có bản
+gốc non-png thật sự mới cần xử lý. Chạy lại xác nhận đúng 1 file
+(calculator) được xử lý. Kiểm bằng Playwright vào "How Many?": nút xác
+nhận hiện đúng, không lỗi console.
+
+**2. `VS_PROFILE` mặc định ngầm trong `gen-audio-voicestudio.mjs`** —
+bỏ giá trị mặc định `'demo0001'`, thêm kiểm tra bắt buộc ngay đầu script
+(trước cả bước gọi mạng tới VoiceStudio): thiếu cả `VS_PROFILE` lẫn
+`VS_INSTRUCT` thì thoát ngay với thông báo rõ ràng, nhắc đúng lý do
+(giọng thật đang dùng là giọng clone ElevenLabs, không phải demo0001) và
+cách tra ID giọng đã lưu (`curl http://127.0.0.1:3900/profiles`). Cập
+nhật lại Bước 23.3 trong PROMPT.md cho khớp — không còn ví dụ chạy lệnh
+trần trụi không kèm `VS_PROFILE` nữa.
+
+29 unit test vẫn pass nguyên qua cả 2 việc.
+
+## Vòng 51 — Butterfly Garden: bỏ hẳn linh vật dẫn đường giữa màn
+
+Người dùng phản hồi: giữa màn chơi có 1 con bướm KHÔNG bấm được (linh
+vật dẫn đường, hiện tạm bằng emoji 🦋 vì chưa có ảnh 3 trạng thái) — dễ
+gây hiểu nhầm là 1 lựa chọn thứ 7, không cần thiết. Hỏi luôn "loại bỏ
+được không, hay cần ảnh nền mới thay thế" — xác nhận đây thuần là vấn đề
+code (linh vật là 1 phần tử UI riêng, không liên quan gì tới ảnh nền),
+không cần thêm ảnh gì cả, xử lý gọn bằng cách bỏ hẳn linh vật:
+
+- Xoá `butterflyMascotHtml()`, `setButterflyMood()`, `BUTTERFLY_MOOD_IMG`,
+  `.butterflymascotwrap`/`.butterflyfallback` trong `butterflygarden.js`/
+  `.css`, cùng mọi lời gọi `setButterflyMood('idle'/'happy'/'sad')` ở
+  `startButterflyGardenGame()`/`handleButterflyAnswer()`/
+  `advanceButterflyRound()` — phản hồi đúng/sai vẫn đủ rõ ràng qua badge
+  ✓/✗ + tiếng ting/buzz, không phụ thuộc mascot đổi tâm trạng.
+- Nhân dịp bỏ mascot (trước đây 6 con bướm phải dàn thành 1 vòng NÉ
+  vùng giữa dành cho mascot), dàn lại `BUTTERFLY_SPOTS` thành lưới 3
+  cột × 2 hàng đều đặn, tận dụng hết không gian trống ở giữa — đồng thời
+  tăng kích thước mỗi ô (22vw/92px → 26vw/108px) vì giờ không còn phải
+  chừa chỗ cho mascot.
+- Giữ nguyên icon linh vật nhỏ (fallback 🦋) ở ô chọn game trên Trang chủ
+  (`gameTileHtml()`) — đây là chỗ KHÁC, không phải thứ người dùng phàn
+  nàn, dùng chung pattern với mọi game khác nên không đụng vào.
+
+Kiểm thử bằng Playwright: xác nhận `.butterflymascotwrap` không còn tồn
+tại trong DOM, đo toạ độ thật của lưới 3×2 (đúng vị trí, không chồng
+lấn, nằm gọn trong khung `.butterflystage`), chụp ảnh xác nhận 6 con
+bướm AI thật hiện đầy đủ và đẹp mắt (ảnh chụp đầu tiên ở mốc 600ms sau
+khi vào màn bị dính lỗi chụp giữa lúc ảnh đang paint — chụp lại ở 2s xác
+nhận không phải lỗi thật, chỉ là ảnh chưa kịp vẽ xong lúc chụp). Chơi
+thử luồng trả lời sai (viền đỏ+✗ đúng vị trí bấm sai, viền xanh+✓ đúng
+vị trí đáp án) và chơi hết trọn 10 vòng trả lời đúng tới màn thắng cuộc
+(dùng kỹ thuật chặn `new Audio()` để dò đúng từ đang phát, vì giờ game
+phát audio thật thay vì Web Speech nên cách giả lập `speechSynthesis` cũ
+không còn bắt được nữa) — tất cả đúng như thiết kế, không lỗi console.
+29 unit test vẫn pass nguyên.
+
+## Vòng 52 — Sửa lỗi hệ thống: câu đọc lại bị cắt ngang khi chuyển màn quá nhanh
+
+Người dùng phát hiện lỗi thật ở TẤT CẢ các game: sau khi bé chọn đáp án
+(đúng hoặc sai), app đọc lại câu/từ đó — nhưng màn chuyển sang câu tiếp
+theo quá nhanh, cắt ngang audio đang đọc dở. Ví dụ cụ thể: "Help Bill!"
+đọc "I want a notebook", bé bấm đúng notebook, đọc lại chỉ nghe được "I
+want a note" rồi mất tiếng vì đã chuyển câu. Đúng như người dùng đoán —
+nguyên nhân là mọi game đều dùng 1 mốc `setTimeout` THỜI GIAN CỐ ĐỊNH
+(700-3200ms tuỳ game/tuỳ đúng-sai) để quyết định lúc nào chuyển màn,
+hoàn toàn không liên quan gì tới audio ĐANG PHÁT thật sự dài bao lâu —
+mốc đó được ước lượng theo câu NGẮN nên câu dài (nhất là các câu đầy đủ
+"I want a ___." ở Bill, hoặc bất kỳ audio thật nào đọc lâu hơn ước
+lượng) bị cắt ngang.
+
+**Sửa tận gốc, áp dụng cho TẤT CẢ 8 game** (forest/farm/bill/kitchen/
+butterflygarden/abcvui/wordsafari/howmany): thêm hàm dùng chung
+`speakThenProceed(speakFn, text, minDelayMs, callback)` trong
+`engine/ui-shared.js` — chờ ĐỒNG THỜI 2 điều kiện trước khi gọi
+callback (chuyển màn): (1) audio đọc THẬT SỰ đọc xong (qua tham số
+`onEnd` sẵn có của `speak()`, xem `engine/audio-provider.js`), và (2)
+đã trôi qua đủ 1 mốc thời gian TỐI THIỂU (giữ nguyên các giá trị cũ làm
+sàn, không phải trần) — để giữ nhịp xem hợp lý cho câu quá ngắn (không
+chuyển màn ngay tắp lự chỉ vì audio đọc xong trong tích tắc). Có thêm
+lưới an toàn 8 giây phòng trường hợp `onEnd` vì lý do nào đó không được
+gọi (chưa gặp thật, nhưng thà cắt ngang muộn còn hơn treo màn mãi mãi).
+
+Thay mọi cặp `ctx.speak(text); ... setTimeout(fn, N);` (fire-and-forget,
+đua tranh với timer riêng) bằng `speakThenProceed(ctx.speak, text, N,
+fn);` ở đúng cả 2 nhánh đúng/sai của từng game. Riêng 2 trường hợp đặc
+biệt:
+- **`abcvui.js`** (có 2 lần đọc liên tiếp khi lật thẻ lộ từ mới): tên
+  chữ cái vẫn đọc NGAY không cần chờ (câu ngắn, không phải điểm gây lỗi)
+  — chỉ gate việc chuyển màn vào audio đọc SAU CÙNG (tên từ lật ra).
+- **`howmany.js`** (không có audio xác nhận ở nhánh đúng, chỉ nhánh sai
+  đọc lại câu đúng sau 1200ms trễ để tránh chồng câu vừa nghe lúc bấm
+  hoa): giữ nguyên độ trễ 1200ms, gate phần chuyển màn còn lại vào
+  `speakThenProceed`.
+
+Kiểm thử bằng Playwright — dựng lại ĐÚNG kịch bản lỗi người dùng báo:
+giả lập giọng đọc "chậm" (buộc `onEnd` chỉ gọi sau 2000ms, mô phỏng câu
+dài đọc lâu hơn mốc cố định cũ), vào Help Bill!, bấm đúng "notebook":
+- Ở mốc 900ms (đúng mốc cố định CŨ của nhánh đúng — nếu còn bug thì màn
+  đã chuyển rồi) — xác nhận màn CHƯA chuyển, badge còn nguyên.
+- Ở mốc 2200ms (sau khi audio giả lập đọc xong) — xác nhận màn ĐÃ
+  chuyển đúng lúc, câu vòng mới bắt đầu phát ngay sau, không chồng
+  audio.
+
+Chạy thêm smoke test qua cả 7/8 game còn lại (forest/farm/bill/kitchen/
+butterflygarden/abcvui/howmany — riêng wordsafari cần đủ tiến độ từ
+vựng mới mở khoá nên bỏ qua ở hồ sơ test trống, nhưng dùng chung đúng 1
+hàm `speakThenProceed` đã kiểm chứng đúng ở 7 game kia): bấm 1 đáp án,
+đợi 4-4.2 giây, xác nhận không game nào bị "treo" ở màn phản hồi (dấu
+hiệu callback không bao giờ được gọi) và không lỗi console. Chạy lại
+toàn bộ luồng thắng cuộc 10 vòng của Butterfly Garden (dùng audio thật)
+— vẫn đúng như trước. 29 unit test vẫn pass nguyên.
+
+## Vòng 53 — "Mystic Jungle": bỏ audio thật cho 20 từ động vật hoang dã, rơi về giọng API
+
+Người dùng phản hồi: game "Mystic Jungle" (Khu rừng kỳ bí) nghe lạ —
+câu mở đầu ("Catch the tiger!", luôn dùng Web Speech API vì không có
+file thu sẵn cho cả câu) nghe bình thường, nhưng tên con vật đọc lại
+sau khi bé chọn (vd "tiger", dùng file `.wav` thu sẵn vì có trong
+manifest) nghe không tốt. Xác nhận qua AskUserQuestion: đúng là lần đọc
+2 (câu xác nhận) bị, muốn chuyển về giọng API cho toàn bộ game này.
+
+Đã phân tích waveform 20 file `.wav` liên quan (tiger/lion/elephant/
+giraffe/zebra/monkey/bear/kangaroo/panda/crocodile/penguin/raccoon/
+squirrel/peacock/koala/rhino/hippo/deer/fox/wolf) — không phát hiện bất
+thường về âm lượng/rè/vỡ tiếng qua số liệu (RMS, peak, số mẫu bị clip),
+nhưng không tự nghe được nên không thể loại trừ hoàn toàn — tin theo
+đúng nhận định bằng tai của người dùng.
+
+**Cách sửa**: xoá đúng 20 slug động vật hoang dã đó khỏi
+`assets/audio/en/manifest.json` (kiểm tra trước: 20 từ này CHỈ dùng cho
+riêng nhóm "wild" trong `animals-v1.json`, không đụng tới game nào
+khác) — không cần sửa code gì cả, `createFileFirstAudioProvider()`
+(Vòng 47) đã có sẵn cơ chế rơi về Web Speech cho câu không có trong
+manifest, đúng ngay cơ chế cần dùng ở đây. File `.wav` vẫn giữ nguyên
+trong `assets/audio/en/` (không xoá) phòng khi sau này muốn dùng lại
+(vd thu lại bằng giọng khác).
+
+Kiểm thử bằng Playwright (theo dõi request mạng tới
+`assets/audio/en/` + số lần gọi Web Speech): vào Mystic Jungle, cả câu
+mở đầu LẪN câu xác nhận sau khi chọn đều đi qua Web Speech, không còn
+request file `.wav` nào cho từ động vật hoang dã. 29 unit test vẫn pass
+nguyên.

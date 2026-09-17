@@ -30,7 +30,7 @@
 import { wordsInCat } from '../../engine/content-loader.js';
 import { buildRound, applyAnswer, shuffle } from '../../engine/learning-engine.js';
 import { saveProgress } from '../../engine/progress-store.js';
-import { starIcon, CLOSE_SVG, worldBg } from '../../engine/ui-shared.js';
+import { starIcon, CLOSE_SVG, worldBg, speakThenProceed } from '../../engine/ui-shared.js';
 
 var HOWMANY_WIN_TARGET = 10;
 
@@ -328,9 +328,13 @@ export function createHowManyGame(ctx) {
       setOwlMood('sad');
       // Đợi câu vừa nghe (lúc bấm hoa) đọc xong rồi mới đọc tiếp câu đúng,
       // tránh chồng 2 câu lên nhau (đúng lỗi đã sửa ở
-      // engine/audio-provider.js, ở đây chủ động giãn cách thêm cho chắc).
-      setTimeout(function () { ctx.speak(round.options[round.correctIdx].phrase); }, 1200);
-      setTimeout(function () { renderHowMany(); }, 3600);
+      // engine/audio-provider.js, ở đây chủ động giãn cách thêm cho chắc)
+      // — rồi CHỜ ĐỌC XONG câu đúng đó mới sang câu tiếp (speakThenProceed),
+      // không còn đoán 1 mốc cố định như trước (lỗi thật: câu dài bị cắt
+      // ngang giữa chừng, xem Vòng 51 trong ROADMAP.md).
+      setTimeout(function () {
+        speakThenProceed(ctx.speak, round.options[round.correctIdx].phrase, 2400, function () { renderHowMany(); });
+      }, 1200);
     }
   }
 

@@ -31,7 +31,7 @@
 import { wordsInCat } from '../../engine/content-loader.js';
 import { buildRound, applyAnswer, classifyAnswer, getSkillProgress, wrongRate } from '../../engine/learning-engine.js';
 import { saveProgress } from '../../engine/progress-store.js';
-import { starIcon, CLOSE_SVG, SPEAK_SVG, worldBg } from '../../engine/ui-shared.js';
+import { starIcon, CLOSE_SVG, SPEAK_SVG, worldBg, speakThenProceed } from '../../engine/ui-shared.js';
 
 var ABC_WIN_TARGET = 10;
 
@@ -312,7 +312,6 @@ export function createAbcVuiGame(ctx) {
       applyAnswer(store.words, targetWord.id, 'listen', outcome);
       saveProgress(store);
       state.correct++;
-      ctx.speak(targetWord.promptAudioText || targetWord.en);
       tileEls[idx].classList.add('correct');
       playDing();
       setAbcMood('happy');
@@ -328,30 +327,31 @@ export function createAbcVuiGame(ctx) {
       var revealWord = pickWordForLetter(targetWord.en);
       var isDone = state.correct >= ABC_WIN_TARGET;
 
+      function proceedNext() {
+        if (isDone) { state.screen = 'abcvuiSummary'; ctx.render(); }
+        else advanceAbcRound(state.targetIdx);
+      }
+
       if (revealWord) {
+        // Tên chữ cái đọc NGAY, không cần chờ đọc xong mới lật/đọc tiếp —
+        // câu này ngắn (1 chữ cái), chuyển màn chỉ cần chờ đúng câu đọc SAU
+        // CÙNG (tên từ được lật ra) đọc xong, xem speakThenProceed().
+        ctx.speak(targetWord.promptAudioText || targetWord.en);
         setTimeout(function () {
           flipTileToReveal(tileEls[idx], revealWord);
-          setTimeout(function () { ctx.speak(revealWord.en); }, 400);
+          speakThenProceed(ctx.speak, revealWord.en, isDone ? 1400 : 1800, proceedNext);
         }, 500);
-        setTimeout(function () {
-          if (isDone) { state.screen = 'abcvuiSummary'; ctx.render(); }
-          else advanceAbcRound(state.targetIdx);
-        }, isDone ? 2300 : 2700);
       } else {
-        setTimeout(function () {
-          if (isDone) { state.screen = 'abcvuiSummary'; ctx.render(); }
-          else advanceAbcRound(state.targetIdx);
-        }, isDone ? 700 : 900);
+        speakThenProceed(ctx.speak, targetWord.promptAudioText || targetWord.en, isDone ? 700 : 900, proceedNext);
       }
     } else {
       applyAnswer(store.words, targetWord.id, 'listen', 'wrong');
       saveProgress(store);
       tileEls[idx].classList.add('wrong');
       tileEls[state.targetIdx].classList.add('correct');
-      ctx.speak(targetWord.promptAudioText || targetWord.en);
       setAbcMood('sad');
       flyLetterToMascot(tileEls[state.targetIdx], targetWord, function () { showHeldLetter(targetWord); });
-      setTimeout(function () { advanceAbcRound(state.targetIdx); }, 3000);
+      speakThenProceed(ctx.speak, targetWord.promptAudioText || targetWord.en, 3000, function () { advanceAbcRound(state.targetIdx); });
     }
   }
 

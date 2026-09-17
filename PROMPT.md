@@ -1600,3 +1600,446 @@ trước (đã biết trước toạ độ vì dùng thẻ/icon rời, không ph
 lên ảnh nền). Nếu ảnh AI ra không đúng bố cục 3 tầng như mô tả (vd 2 món
 bị chồng lên nhau), cứ gửi qua tôi xem thử — có thể vẫn xác định được
 toạ độ, hoặc sẽ nhờ bạn tạo lại prompt với chỉnh sửa cụ thể hơn.
+
+<a id="buoc-21"></a>
+## Bước 21 — Nhân vật cho game #8 "Butterfly Garden" (Màu sắc)
+
+Game #8 dạy 6 màu cơ bản (đỏ/xanh dương/vàng/xanh lá/đen/trắng) — nghe
+tên màu tiếng Anh, bấm đúng 1 trong 6 con bướm màu hiện sẵn trên màn.
+**Khác mọi game trước**: 6 con bướm KHÔNG cần ảnh AI — vẽ thẳng bằng
+code (SVG), tô ĐÚNG mã màu của từng từ, để chắc chắn "con bướm đỏ" phải
+THẬT SỰ là màu đỏ (ảnh AI khó đảm bảo đúng tuyệt đối như vậy). Vì vậy
+game đã chạy được đầy đủ ngay từ hôm nay, chỉ còn thiếu 1 nhóm ảnh duy
+nhất: **linh vật dẫn đường** (3 trạng thái cảm xúc, đúng cơ chế đã làm ở
+Bước 12/16/18/19/20) — đây là hạng mục NÂNG CẤP THÊM (không bắt buộc để
+chơi được, hiện đang dùng tạm 1 emoji 🦋 chung cho cả 3 trạng thái).
+
+Chủ đề chọn: **bướm dẫn đường** — khác hẳn 7 linh vật đã có (hổ/chó/bạn
+nhỏ/cú/chồn đất/gà con/mèo đầu bếp). Vì 6 con bướm màu trong game đã
+dùng đúng 6 màu cơ bản (đỏ/xanh dương/vàng/xanh lá/đen/trắng), linh vật
+dẫn đường nên có cánh **nhiều màu sắc/hoạ tiết** (kiểu bướm chúa
+monarch: cam + đen + đốm trắng) để không trùng với bất kỳ màu nào trong
+6 màu đang được hỏi, tránh gây nhầm lẫn cho bé.
+
+### 21.1 — Nhân vật bướm dẫn đường (3 trạng thái)
+
+#### Khung phong cách (dán trước, dùng chung cho cả 3 trạng thái)
+
+```
+Cute chibi-style baby butterfly character illustration for a children's
+mobile learning game, flat vector cartoon art style with soft
+cel-shading and gentle gradient highlights, oversized round fluffy head
+with a much smaller compact round body (chibi/baby proportions),
+extremely large glossy round eyes with a bright white catchlight
+sparkle, two large decorative wings spread behind the head like a cape
+(monarch-butterfly pattern: warm orange with bold black vein lines and
+small white spot dots along the black wing edges), two thin curled
+antennae on top of the head, tiny stub arms/legs, smooth rounded shapes
+with no sharp edges, thin clean dark outline around the whole character
+and around each wing, saturated warm and cheerful color palette,
+standing/hovering pose facing slightly to the side, centered on a plain
+solid white (#FFFFFF) background, no ground shadow, no scenery, no
+other characters, no text, no watermark, no logo, square 1:1
+composition, character fills about 75-85% of the frame.
+Avoid: realistic or photographic proportions, photographic texture,
+scary or fierce look, background scenery, multiple characters in
+frame, cropped body parts, text or watermark.
+```
+
+#### Prompt riêng: chờ đợi (ảnh mặc định — cũng dùng làm icon Trang chủ)
+
+```
+The butterfly hovering calmly upright in a relaxed neutral pose, wings
+held gently open and still, head tilted slightly to one side as if
+thinking, a soft closed-mouth content smile, calm patient and attentive
+expression — like it's waiting to show the way to the next flower.
+```
+
+Lưu thành `butterfly-idle.png`.
+
+#### Prompt riêng: vui (bé chọn đúng)
+
+```
+The butterfly hovering with wings spread wide and fluttering with
+excitement (motion-blur hint at the very wing tips only), big bright
+sparkling eyes, a cheerful wide open-mouth happy expression, rosy cheek
+blush marks, as if it just found the sweetest flower.
+```
+
+Lưu thành `butterfly-happy.png`.
+
+#### Prompt riêng: buồn (bé chọn sai)
+
+```
+The butterfly hovering with wings drooping low and half-closed, big
+sparkling eyes now looking slightly downcast with a small furrowed
+brow, antennae drooping a little, a gentle disappointed but still cute
+and sympathetic (not scary) expression.
+```
+
+Lưu thành `butterfly-sad.png`.
+
+Lưu cả 3 ảnh vào `assets/_raw_incoming/` với đúng 3 tên trên, gửi qua
+Git theo đúng quy trình ở Bước 11 — tôi sẽ xoá nền + tối ưu + lưu vào
+`assets/characters/`, sau đó cập nhật `games/butterfly-garden/
+butterflygarden.js` để dùng ảnh thật thay cho emoji tạm 🦋 (không cần
+sửa gì khác — `<img>` đã trỏ sẵn đúng 3 tên file này, ảnh về là tự động
+hiện, không còn rơi về fallback nữa).
+
+### 21.2 — Ảnh nền "vườn hoa"
+
+Tỉ lệ khung hình **dọc (portrait) 9:16**, giống mọi ảnh nền khác. Khác
+Kitchen (bấm thẳng lên ảnh, phải đúng bố cục 3 tầng cụ thể để đo toạ
+độ): ảnh này CHỈ trang trí — 6 con bướm trong game định vị theo toạ độ
+% cố định (`BUTTERFLY_SPOTS` trong `butterflygarden.js`), không phụ
+thuộc bố cục ảnh — nên KHÔNG cần theo layout chính xác nào, chỉ cần
+tránh quá rối ở vùng giữa/trên (nơi linh vật dẫn đường + vòng bướm nằm
+đè lên).
+
+```
+Vibrant, cheerful flat-vector cartoon illustration of a sunny flower
+garden/meadow, background art for a children's mobile learning game, in
+the same cute soft cel-shaded style as a chibi character illustration
+(smooth rounded shapes, no sharp or scary edges, thin clean outlines,
+warm saturated pastel colors, gentle gradient lighting, bright even
+daytime lighting). Portrait orientation, 9:16 aspect ratio, full-bleed
+edge-to-edge illustration filling the entire frame. A soft gradient sky
+in the upper background (warm pale yellow fading into soft mint green),
+a few fluffy white clouds. Lush green grass covering the lower half of
+the frame with gentle rolling hills. Colorful flowers (daisies, tulips,
+sunflowers, roses in mixed bright colors) scattered mostly along the
+LEFT and RIGHT edges and the very BOTTOM edge of the frame, growing
+thicker and denser toward the corners — leave the CENTER and UPPER-
+MIDDLE area of the frame calm, open and uncluttered (low flower density,
+mostly plain grass/sky there), since this open space is reserved for
+game characters that will be placed on top later. A couple of small
+butterflies and a ladybug may be scattered decoratively among the
+flowers near the edges only. No people, no readable text, no logo, no
+watermark anywhere in the image.
+Avoid: photographic or realistic rendering, 3D render look, dark or
+moody lighting, cluttered or busy center composition, any human
+character, any text/letters/watermark, cropped or off-center
+composition.
+```
+
+Không cần xoá nền — giữ nguyên làm 1 ảnh nền đầy khung. Gửi thẳng vào
+`assets/backgrounds/butterfly-bg.jpg` qua Git (không qua
+`_raw_incoming/`, giống cách làm ở Bước 7/9/14/18.2/19.2/20.2 — ảnh nền
+full-bleed không cần xử lý gì thêm). Sau khi có ảnh, tôi chỉ cần đổi 1
+dòng CSS (`worldBg()` → `worldBg('butterflyphoto')` trong
+`butterflygarden.js` + khai báo `.world-bg.butterflyphoto` trong
+`butterflygarden.css`) — không cần đo lại toạ độ nào cả vì 6 con bướm đã
+định vị cố định sẵn, khác hẳn kitchen-bg.jpg.
+
+<a id="buoc-22"></a>
+## Bước 22 — 6 con bướm màu lấp lánh cho Butterfly Garden
+
+Người dùng phản hồi: 6 con bướm hiện tại (vẽ tạm bằng code/SVG cho game
+chạy được ngay, xem Vòng 46 trong ROADMAP.md) "đơn điệu và không đẹp",
+muốn có ảnh AI đẹp hơn, có **hiệu ứng lấp lánh** (con thích phong cách
+này). Code đã sẵn sàng dùng ảnh thật ngay khi có — chỉ cần đúng tên file
+dưới đây, không cần báo lại hay sửa gì thêm.
+
+**Mỗi con bướm ứng với ĐÚNG 1 trong 6 màu bé đang học** (đỏ/xanh dương/
+vàng/xanh lá/đen/trắng, xem `content/packs/colors-v1.json`) — màu cánh
+CHỦ ĐẠO phải rõ ràng, dễ nhận ra ngay là đúng màu đó (mục tiêu là DẠY
+MÀU, lấp lánh chỉ là hiệu ứng phụ trang trí thêm, không được để hiệu ứng
+lấn át khiến màu chính khó nhận ra — nhất là con bướm đen, dễ bị
+"lấp lánh" biến thành màu khác nếu làm quá tay).
+
+### Khung phong cách (dán trước, dùng chung cho cả 6 con)
+
+```
+Cute, sparkly, magical cartoon butterfly icon for a children's mobile
+learning game, flat vector illustration with soft cel-shading, glossy
+gradient highlights, and delicate glittering sparkle accents scattered
+over the wings (small four-pointed star-shaped sparkles and tiny
+glowing light dots, concentrated near the wing edges, NOT covering the
+whole wing so the main wing color still reads clearly at a glance).
+Two large rounded symmetric upper wings and two smaller rounded lower
+wings, a thin delicate lace-like scalloped pattern along the outer wing
+edge, a small round fuzzy body, two thin curled antennae with tiny
+round glowing tips, thin clean dark outline around the whole silhouette
+and around each wing. Symmetrical wings spread open flat, viewed
+straight-on from the front/top (NOT a side profile view) so the full
+shape reads clearly at small sizes. No face, no eyes on the butterfly
+itself (pure decorative wing-icon shape, not a character). Centered on
+a plain solid white (#FFFFFF) background, no shadow, no scenery, no
+other elements, no text, no watermark, no logo, square 1:1 composition,
+butterfly fills about 80-90% of the frame.
+Avoid: photographic texture, realistic moth/insect anatomy,
+asymmetrical wings, side-profile view, cropped wings, a face or eyes on
+the butterfly, text or watermark, dull or muddy colors, sparkle effect
+so heavy it hides the main wing color.
+```
+
+### Prompt riêng cho từng màu
+
+```
+Đỏ (red):
+The wings are a rich, vivid ruby red as the clearly dominant color,
+with warm gold sparkle accents and a few tiny pink-gold glitter dots
+near the wing tips, a soft warm pink glow along the scalloped edge.
+
+Xanh dương (blue):
+The wings are a bright, vivid sapphire blue as the clearly dominant
+color, with silvery-white sparkle accents and a few tiny icy-blue
+glitter dots near the wing tips, a soft pale cyan glow along the
+scalloped edge.
+
+Vàng (yellow):
+The wings are a bright, vivid sunshine yellow as the clearly dominant
+color, with warm golden-orange sparkle accents and a few tiny amber
+glitter dots near the wing tips, a soft warm gold glow along the
+scalloped edge.
+
+Xanh lá (green):
+The wings are a bright, vivid emerald green as the clearly dominant
+color, with lime-gold sparkle accents and a few tiny yellow-green
+glitter dots near the wing tips, a soft fresh lime glow along the
+scalloped edge.
+
+Đen (black):
+The wings are a deep, rich black as the clearly dominant color (the
+black must stay clearly readable as black, not faded into grey or
+purple), with extra-generous silvery-white star sparkle accents and a
+subtle cool violet-blue iridescent sheen along the very edge only (like
+a real black butterfly's wing shimmer), a soft cool white glow along
+the scalloped edge.
+
+Trắng (white):
+The wings are a soft pearlescent white as the clearly dominant color,
+with a gentle rainbow/opal iridescent shimmer and extra-generous
+silvery sparkle accents so the white wings stay clearly visible against
+a white background, plus a thin pale gold-tan outline around the whole
+silhouette (slightly warmer/darker than pure white) so the shape reads
+clearly.
+```
+
+**Lưu ý quan trọng — tạo trong 1 cuộc trò chuyện MỚI**, tách riêng khỏi
+đoạn chat vừa tạo ảnh nền vườn hoa (Bước 21.2) hay bất kỳ ảnh nào khác:
+nhiều công cụ AI ảnh (kể cả Google Flow) sẽ "nhớ" màu/phong cách của ảnh
+vừa tạo trước đó rồi lặp lại hoặc pha trộn vào ảnh tiếp theo dù prompt
+không hề nhắc tới (đúng lỗi đã gặp với ảnh bút chì ở Bước 13) — với 6
+con bướm cần màu THẬT KHÁC NHAU rõ ràng, lỗi "dính màu" giữa các lần tạo
+liên tiếp sẽ rất dễ nhận ra và làm hỏng cả bộ.
+
+Lưu 6 file theo đúng tên `red`, `blue`, `yellow`, `green`, `black`,
+`white` vào `assets/_raw_incoming/`, rồi chạy:
+
+```bash
+node tools/process-incoming-images.mjs assets/butterflies
+```
+
+Script tự co nhỏ về 900px, xoá nền thành trong suốt và xuất `.png` vào
+`assets/butterflies/`; ảnh sẽ tự động hiện lên thay cho 6 con bướm SVG
+tạm, không cần sửa gì thêm ở code. File gốc trong `_raw_incoming/` không
+bị đụng tới, giữ lại để sau này muốn xử lý lại (đổi ngưỡng xoá nền...)
+thì không phải tạo ảnh lại từ đầu.
+
+> **ĐÃ LÀM XONG (16/09/2026), tạo bằng Google Flow, model Nano Banana 2,
+> tỉ lệ 1:1, x2 ảnh mỗi màu rồi chọn con tốt hơn.** Vài điều rút ra:
+>
+> - **Flow tải về file `.jpeg`, KHÔNG phải `.png`** như mục này viết ban
+>   đầu. Không sao — script trên nhận cả `.jpeg`/`.jpg`/`.webp` và xuất
+>   ra `.png` trong suốt. Đừng mất công đổi đuôi bằng tay.
+> - **Chọn bản "1K (kích thước gốc)" khi tải**, đừng chọn 2K — 2K là ảnh
+>   phóng to nội suy, mà game resize về 900px nên chỉ tổ nặng thêm.
+> - Mỗi màu tạo trong **1 project Flow riêng** đúng như lưu ý ở trên. Đo
+>   lại màu chủ đạo của cả 6 ảnh bằng máy thì không con nào dính màu của
+>   con trước.
+> - Trong 2 ảnh mỗi lần tạo, con **không có quầng sáng** quanh người thì
+>   xoá nền sạch hơn hẳn. Quầng sáng loang dần ra nền trắng làm thuật
+>   toán tô loang khó biết dừng ở đâu.
+> - Con **trắng** phụ thuộc hoàn toàn vào cái viền vàng-nâu mà prompt yêu
+>   cầu: không có viền đó thì cánh trắng dính liền nền trắng và sẽ bị xoá
+>   mất luôn. Nếu tạo lại, kiểm tra kỹ ảnh trắng trước khi xử lý.
+> - Google có lúc trả về lỗi *"Chúng tôi nhận thấy có hoạt động bất
+>   thường"* cho 1 trong 2 ảnh (không bị trừ tín dụng). Tạo lại là được.
+
+<a id="buoc-23"></a>
+## Bước 23 — Tạo âm thanh thu sẵn bằng VoiceStudio (thay cho giọng máy)
+
+**Bối cảnh:** hiện tại app đọc từ bằng Web Speech API — giọng đọc do
+trình duyệt/hệ điều hành của TỪNG máy tự chọn, chất lượng không kiểm
+soát được (đã gặp trường hợp đọc lạ, vd "rice cooker" nghe như "rice cờ
+cờ"). Người dùng muốn dùng
+[VoiceStudio](https://github.com/debpalash/VoiceStudio) — app TTS chạy
+trên máy tính (Mac/Windows/Linux), miễn phí mã nguồn mở, có chế độ MCP
+để gắn thẳng vào Claude Desktop — để tự tạo trước 1 bộ file âm thanh cố
+định cho mọi từ trong game.
+
+> **ĐÃ LÀM XONG trên máy Windows của bạn (16/09/2026).** Phần dưới đã
+> được cập nhật theo đúng những gì thực sự chạy được trên máy này —
+> khác vài chỗ so với bản nháp ban đầu (bản nháp viết theo kiểu cài từ
+> mã nguồn; ở đây cài bằng bộ cài .msi nên cách gắn MCP khác). Toàn bộ
+> 122 file `.wav` đã nằm trong `assets/audio/en/` và `manifest.json` đã
+> được cập nhật — không cần làm lại, giữ phần này để sau cài lại máy
+> hoặc đổi giọng thì có đường đi sẵn.
+
+### 23.1 — Cài VoiceStudio (Windows)
+
+Tải bộ cài từ trang
+[Releases](https://github.com/debpalash/VoiceStudio/releases/latest) —
+có 2 bản:
+
+| File | Phạm vi | Cần quyền admin |
+|---|---|---|
+| `VoiceStudio_<ver>_x64_en-US.msi` | Cả máy | Có |
+| `VoiceStudio_Current_User_<ver>_x64_en-US.msi` | Chỉ user hiện tại | **Không** |
+
+Máy này dùng bản **Current User** (không cần admin), cài vào
+`%LOCALAPPDATA%\VoiceStudio (Current User)`. Nên đối chiếu SHA256 của
+file tải về với `SHA256SUMS-Windows.x64.txt` trong cùng trang Releases
+trước khi chạy.
+
+Không cần cài sẵn Python/CUDA gì cả — lần mở app đầu tiên nó tự dựng môi
+trường Python riêng (qua `uv`) và tự tải model. Cần chuẩn bị:
+- **~10 GB trống** trên ổ C (riêng cache của `uv` đã hơn 7 GB).
+- Mạng ổn định cho lần đầu (tải PyTorch CUDA + model ~0.8 GB).
+- GPU NVIDIA thì tự nhận CUDA (máy này: RTX 3060 → sinh 1 câu ~1 giây).
+  Không có GPU NVIDIA vẫn chạy được bằng CPU, chỉ chậm hơn.
+
+Mở app, bấm qua 2 màn hình đầu (**System check** → **Models & engines**),
+tải model bắt buộc **VoiceStudio TTS (k2-fsa/OmniVoice)**.
+
+> **Bẫy đã gặp — tải model đứng giữa chừng:** nếu lúc kiểm tra mạng mà
+> DNS tới `huggingface.co` chập chờn 1 nhịp, app sẽ tự chuyển sang mirror
+> `hf-mirror.com` (mirror dành cho Trung Quốc) và từ đó tải hỏng liên
+> tục, báo lỗi kiểu *"cannot find the requested files in the local
+> cache"*. Chữa: vào **Settings → mục HF mirror** chọn lại
+> *Hugging Face (official)*, hoặc gọi thẳng API của app:
+> ```bash
+> curl -X PUT http://127.0.0.1:3900/api/settings/hf-mirror -H "Content-Type: application/json" -d "{\"url\":\"\",\"mode\":\"manual\"}"
+> ```
+> rồi bấm Download lại (nó tải tiếp phần dở, không mất công tải lại từ đầu).
+
+### 23.2 — Gắn VoiceStudio làm MCP server vào Claude Desktop
+
+Backend VoiceStudio phải đang CHẠY thì Claude Desktop mới nối vào được —
+tức là **cứ mở app VoiceStudio lên và để đó** mỗi khi muốn dùng.
+
+Bản cài .msi KHÔNG có sẵn mã nguồn nên **không dùng được** cách
+`python -m backend.mcp_shim` mà tài liệu gốc của VoiceStudio mô tả (cách
+đó chỉ đúng khi bạn clone repo về build từ nguồn). Thay vào đó nối
+thẳng qua HTTP — backend đã tự gắn sẵn MCP tại `/mcp/`.
+
+Mở `%APPDATA%\Claude\claude_desktop_config.json`, thêm vào (giữ nguyên
+các phần khác đang có):
+
+```json
+{
+  "mcpServers": {
+    "voicestudio": {
+      "type": "http",
+      "url": "http://127.0.0.1:3900/mcp/",
+      "headers": {
+        "X-VoiceStudio-Client-Id": "claude-desktop"
+      }
+    }
+  }
+}
+```
+
+> **Nhớ dấu `/` ở cuối `/mcp/`.** Viết `http://127.0.0.1:3900/mcp`
+> (thiếu dấu gạch chéo) thì server trả về lỗi `405 Method Not Allowed`
+> và Claude Desktop sẽ báo không kết nối được.
+
+Lưu file, **khởi động lại Claude Desktop**. Khi đúng, Claude Desktop sẽ
+liệt kê 7 công cụ: `generate_speech`, `list_voices`, `list_personalities`,
+`list_languages`, `transcribe`, `check_health`, `clone_voice`.
+
+Repo cũng có sẵn `.mcp.json` ở thư mục gốc — Claude Code khi mở đúng
+thư mục repo này sẽ tự đọc và nối vào cùng server đó, không cần cấu hình
+thêm.
+
+Kiểm tra nhanh bằng tay (không cần Claude):
+
+```bash
+curl -X POST http://127.0.0.1:3900/mcp/ -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" -d "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"2025-06-18\",\"capabilities\":{},\"clientInfo\":{\"name\":\"test\",\"version\":\"1\"}}}"
+```
+
+Trả về `"serverInfo":{"name":"VoiceStudio"...}` là ngon.
+
+> **Lưu ý về `generate_speech` qua MCP:** mặc định nó trả file WAV dạng
+> base64 nhét thẳng vào cuộc trò chuyện — rất tốn token, làm cả trăm câu
+> thì không kham nổi. Vì vậy bộ âm thanh hiện tại KHÔNG tạo bằng MCP mà
+> tạo bằng REST API của chính backend đó (xem 23.3), file ghi thẳng ra
+> đĩa. MCP để dành cho việc lẻ tẻ (thử 1-2 câu, hỏi xem có giọng gì).
+
+### 23.3 — Tạo bộ âm thanh cho game
+
+Việc này KHÔNG làm qua MCP (lý do ở cuối 23.2: trả base64 vào chat thì
+tốn token khủng khiếp), mà chạy 1 script gọi thẳng REST API của
+VoiceStudio, ghi file ra đĩa:
+
+```bash
+VS_PROFILE=<id giọng đang dùng thật> node tools/gen-audio-voicestudio.mjs
+```
+
+> **Cập nhật quan trọng (Vòng 48 trong ROADMAP.md):** script KHÔNG còn
+> giọng mặc định ngầm nữa — bắt buộc phải truyền `VS_PROFILE` (hoặc
+> `VS_INSTRUCT`) mỗi lần chạy, thiếu thì script báo lỗi rõ ràng ngay từ
+> đầu thay vì âm thầm chạy. Lý do: 122 file `.wav` ĐANG CÓ trong
+> `assets/audio/en/` không còn dùng giọng `demo0001` (giọng demo có sẵn
+> của VoiceStudio) nữa — đã đổi sang 1 giọng nữ **CLONE từ mẫu
+> ElevenLabs** (đọc chậm rãi hơn, hợp để bé tập nghe từng từ, xem lý do
+> đổi ở Vòng 47/48). Nếu giữ giọng mặc định ngầm như bản nháp ban đầu,
+> lỡ quên truyền `VS_PROFILE` khi thêm từ mới sau này thì từ đó sẽ bị
+> đọc lệch hẳn giọng so với 122 từ cũ mà không có cảnh báo gì — bắt buộc
+> truyền tay để LUÔN phải tự kiểm tra đúng giọng trước khi sinh thêm.
+>
+> Xem danh sách giọng đã lưu trên máy này (tìm đúng ID giọng clone kể
+> trên — **tự ghi chú lại ID này ở đây khi bạn xác định được**, để lần
+> sau khỏi phải tra lại):
+> ```bash
+> curl http://127.0.0.1:3900/profiles
+> ```
+
+Script tự làm đủ các việc mà 23.2 bản nháp mô tả:
+
+1. Dùng **ĐÚNG 1 giọng cố định + 1 seed cố định** cho MỌI câu (giọng do
+   `VS_PROFILE` chỉ định, xem lưu ý trên), để nghe nhất quán từ đầu tới
+   cuối game.
+2. Đọc TOÀN BỘ `"prompt_audio_text"` trong mọi `content/packs/*.json`
+   (bỏ trùng lặp) — hiện là **122 câu**, gồm cả chữ cái đơn (`"A"`), từ
+   (`"rice cooker"`) lẫn cả câu (`"I want a pencil."`).
+3. Đặt tên file đúng quy tắc `slugifyAudioText()` trong
+   `engine/audio-provider.js`: chữ thường, mọi ký tự không phải chữ/số
+   thành `_`, bỏ `_` thừa ở hai đầu. `"rice cooker"` → `rice_cooker.wav`,
+   `"I want a pencil."` → `i_want_a_pencil.wav`.
+4. Ghi thẳng vào `assets/audio/en/` rồi cập nhật luôn `manifest.json`.
+
+Chạy lại được nhiều lần: câu nào đã có file `.wav` hợp lệ thì bỏ qua, nên
+dừng giữa chừng rồi chạy tiếp cũng không sao — vẫn cần truyền đúng
+`VS_PROFILE` mỗi lần chạy dù chỉ để sinh thêm vài từ mới.
+
+**Muốn đổi hẳn sang giọng khác:** xoá hết `assets/audio/en/*.wav` rồi
+chạy lại với đúng `VS_PROFILE` mới (và `VS_ENGINE` nếu đổi engine).
+
+Engine `kittentts` (cài thêm ~0.1 GB trong Model Catalogue) cho 8 giọng
+preset tiếng Anh chạy CPU: `expr-voice-2-m/f`, `expr-voice-3-m/f`,
+`expr-voice-4-m/f`, `expr-voice-5-m/f`. Ví dụ:
+
+```bash
+VS_ENGINE=kittentts VS_PROFILE=expr-voice-3-f node tools/gen-audio-voicestudio.mjs
+```
+
+Tốc độ tham khảo trên máy này (RTX 3060): ~1 giây/câu → cả 122 câu mất
+khoảng **2 phút**. Lần gọi ĐẦU TIÊN sau khi mở app lâu hơn nhiều (vài
+phút) vì phải nạp model lên GPU — đừng tưởng bị treo.
+
+### 23.4 — Kết quả trong repo
+
+Đã có sẵn trong repo, không cần làm gì thêm:
+- `assets/audio/en/*.wav` — 122 file, WAV 24 kHz mono, tổng ~7,4 MB.
+- `assets/audio/en/manifest.json` — danh sách 122 slug đã có file thật.
+- `tools/gen-audio-voicestudio.mjs` — script tạo lại/đổi giọng.
+- `.mcp.json` — cấu hình MCP VoiceStudio cho Claude Code.
+
+**KHÔNG cần sửa gì ở code** — `engine/audio-provider.js` đã được viết sẵn
+để ưu tiên phát file thật cho những câu có trong `manifest.json`, câu nào
+chưa có file thì tự rơi về Web Speech (xem `createFileFirstAudioProvider()`).
+Nghĩa là có thể bổ sung từng phần: thêm từ mới vào `content/packs/`, chạy
+lại script, chỉ những câu mới được sinh thêm — game vẫn chạy đúng ở cả 2
+trạng thái.
