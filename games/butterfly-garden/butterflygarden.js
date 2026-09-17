@@ -93,10 +93,28 @@ export function createButterflyGardenGame(ctx) {
     }
   }, true);
 
-  // Y hệt pickTargetIndex() của forest.js/farm.js/bill.js/abcvui.js/
+  // Giống pickTargetIndex() của forest.js/farm.js/bill.js/abcvui.js/
   // kitchen.js — ưu tiên từ đã đến hạn ôn, trong đó ưu tiên tỉ lệ sai cao
   // hơn, LV thấp hơn, có yếu tố ngẫu nhiên khi ngang điểm.
-  function pickTargetIndex(slots) {
+  //
+  // KHÁC 1 điểm so với các game kia: có thêm excludeIdx (= màu vừa hỏi ở
+  // vòng trước) để tránh hỏi LẶP LẠI ĐÚNG 1 màu liên tục nhiều vòng liền —
+  // bug thật đã gặp: LV0 (chưa thuộc) theo thiết kế "luôn đến hạn ngay"
+  // (xem applyAnswer trong learning-engine.js), nên hễ bé bấm SAI 1 màu ở
+  // LV0, next = now (đến hạn ngay lập tức) và màu đó cứ đứng đầu bảng xếp
+  // hạng "due" mãi cho tới khi bé bấm ĐÚNG màu đó — ở forest/bill/kitchen
+  // điều này vô hại vì mỗi vòng có thay 1 trong 4 ô hiện (pickReplacementWord)
+  // nên màu "kẹt due" có lúc bị xoay ra khỏi màn hình; còn Butterfly Garden
+  // luôn hiện ĐỦ CẢ 6 màu cố định suốt ván (xem comment ở BUTTERFLY_SPOTS),
+  // nên màu đó không bao giờ bị xoay khỏi màn và cứ được hỏi lại liên tục —
+  // đúng triệu chứng người dùng báo: "ra 6 con bướm, nhưng đáp án luôn chỉ
+  // có 1 con. Cả 10 câu đều chỉ hỏi về 1 con." Không sửa learning-engine.js
+  // dùng chung (sẽ đổi hành vi LV0 của cả 7 game khác) — chỉ chặn LẶP LIÊN
+  // TIẾP ngay tại đây: nếu màu đứng đầu bảng xếp hạng trùng đúng màu vừa
+  // hỏi vòng trước, lấy màu đứng thứ 2 thay thế (màu bị kẹt vẫn được hỏi
+  // lại rất sớm ở vòng SAU đó vì vẫn đứng đầu bảng xếp hạng, chỉ không còn
+  // hỏi liên tục không nghỉ).
+  function pickTargetIndex(slots, excludeIdx) {
     var store = ctx.getStore();
     var now = Date.now();
     var scored = slots.map(function (w, i) {
@@ -107,6 +125,9 @@ export function createButterflyGardenGame(ctx) {
     scored.sort(function (a, b) {
       return (b.due - a.due) || (b.wr - a.wr) || (a.level - b.level) || (a.rnd - b.rnd);
     });
+    if (typeof excludeIdx === 'number' && scored.length > 1 && scored[0].i === excludeIdx) {
+      return scored[1].i;
+    }
     return scored[0].i;
   }
 
@@ -317,7 +338,7 @@ export function createButterflyGardenGame(ctx) {
   // suốt cả lượt chơi) — chỉ cần xoá lớp đúng/sai + dấu ✓/✗ cũ, chọn lại
   // targetIdx trong đúng 6 từ đang có, đọc lại câu mới.
   function advanceButterflyRound() {
-    state.targetIdx = pickTargetIndex(state.slots);
+    state.targetIdx = pickTargetIndex(state.slots, state.targetIdx);
     state.answered = false;
 
     var hotspotEls = document.querySelectorAll('#butterflyField .butterflyhotspot');

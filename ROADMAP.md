@@ -2403,3 +2403,45 @@ Kiểm thử bằng Playwright (theo dõi request mạng tới
 mở đầu LẪN câu xác nhận sau khi chọn đều đi qua Web Speech, không còn
 request file `.wav` nào cho từ động vật hoang dã. 29 unit test vẫn pass
 nguyên.
+
+## Vòng 54 — Sửa lỗi Butterfly Garden: đáp án bị "kẹt" mãi 1 màu suốt cả ván
+
+Người dùng phản hồi (lần 2, sau khi lần đầu tưởng là lỗi cache trình
+duyệt — Vòng 50): "ra 6 con bướm, nhưng đáp án luôn chỉ có 1 con. Cả 10
+câu đều chỉ hỏi về 1 con." Ban đầu nghi ảnh 6 con bướm quá nặng
+(~4.4MB, có thể nén giảm ~77% bằng palette PNG không đổi chất lượng
+nhìn thấy được) gây lỗi tải — nhưng người dùng xác nhận đây KHÔNG phải
+vấn đề tải ảnh (6 con vẫn hiện đủ, chỉ có mục tiêu câu hỏi bị kẹt).
+
+**Nguyên nhân thật**: `pickTargetIndex()` (dùng chung cấu trúc với
+forest/farm/bill/kitchen/abcvui/wordsafari/howmany) ưu tiên từ "đến hạn
+ôn" (`due`) làm tiêu chí xếp hạng CAO NHẤT. Theo thiết kế Learning
+Engine, LV0 (chưa thuộc) "luôn đến hạn ngay" — mỗi lần trả lời SAI ở
+LV0, `applyAnswer()` giữ nguyên LV0 và đặt `next = now` (đến hạn ngay
+lập tức), nên từ đó cứ đứng đầu bảng xếp hạng `due` mãi cho tới khi bé
+trả lời ĐÚNG từ đó. Ở forest/farm/bill/kitchen, hiệu ứng này vô hại vì
+mỗi vòng chỉ thay 1 trong 4 ô hiển thị (rút từ kho từ lớn hơn) — từ bị
+"kẹt due" có lúc bị xoay ra khỏi màn hình. Butterfly Garden thì khác
+hẳn: cả vốn từ CHỈ có đúng 6 màu, hiện ĐỦ CẢ 6 cố định suốt ván, KHÔNG
+xoay ô nào — nên từ bị kẹt "due" không bao giờ rời khỏi màn và bị hỏi
+lại liên tục không nghỉ, y hệt triệu chứng người dùng báo. Dễ gặp nhất
+với bé mới chơi lần đầu: đoán ngẫu nhiên dễ trả lời sai màu đầu tiên,
+màu đó lập tức bị "khoá" làm câu hỏi duy nhất cho tới khi may mắn bấm
+đúng.
+
+**Cách sửa**: không sửa `learning-engine.js` dùng chung (sẽ đổi hành vi
+LV0 của cả 7 game khác, rủi ro không cần thiết) — chỉ thêm tham số
+`excludeIdx` vào `pickTargetIndex()` của riêng `butterflygarden.js`:
+nếu từ xếp hạng cao nhất trùng đúng mục tiêu của vòng TRƯỚC, lấy từ xếp
+thứ 2 thay thế. `advanceButterflyRound()` truyền `state.targetIdx` cũ
+làm `excludeIdx`. Từ bị "kẹt due" vẫn được ưu tiên hỏi lại sớm (đúng
+tinh thần ôn tập ngắt quãng), chỉ không còn hỏi liên tục 2 vòng liền —
+đủ để phá vòng lặp "10 câu chỉ 1 màu".
+
+Kiểm thử bằng Playwright: mô phỏng 10 vòng chơi, CHỦ Ý bấm sai mỗi vòng
+(để tái hiện đúng lỗi) — trước khi sửa sẽ ra đúng 1 màu suốt cả 10 vòng
+(xác nhận qua kịch bản tương tự), sau khi sửa ra kết quả xen kẽ 2 màu
+bị kẹt (`blue`/`red`), không vòng nào lặp lại liên tiếp ("Max
+consecutive repeats: 1"). Chạy thêm smoke test lại 7/8 game (trừ
+wordsafari cần vốn từ mở khoá riêng, không liên quan file vừa sửa) —
+không game nào lỗi console, không game nào bị treo màn phản hồi.
