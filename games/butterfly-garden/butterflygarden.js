@@ -93,28 +93,42 @@ export function createButterflyGardenGame(ctx) {
     }
   }, true);
 
-  // Giống pickTargetIndex() của forest.js/farm.js/bill.js/abcvui.js/
-  // kitchen.js — ưu tiên từ đã đến hạn ôn, trong đó ưu tiên tỉ lệ sai cao
-  // hơn, LV thấp hơn, có yếu tố ngẫu nhiên khi ngang điểm.
+  // LỊCH SỬ 2 lần sửa lỗi ở đây, cả 2 đều thật (xem Vòng 54/55 trong
+  // ROADMAP.md) — quan trọng để hiểu vì sao code cuối cùng KHÔNG giống
+  // pickTargetIndex() của forest/farm/bill/abcvui/kitchen nữa:
   //
-  // KHÁC 1 điểm so với các game kia: có thêm excludeIdx (= màu vừa hỏi ở
-  // vòng trước) để tránh hỏi LẶP LẠI ĐÚNG 1 màu liên tục nhiều vòng liền —
-  // bug thật đã gặp: LV0 (chưa thuộc) theo thiết kế "luôn đến hạn ngay"
-  // (xem applyAnswer trong learning-engine.js), nên hễ bé bấm SAI 1 màu ở
-  // LV0, next = now (đến hạn ngay lập tức) và màu đó cứ đứng đầu bảng xếp
-  // hạng "due" mãi cho tới khi bé bấm ĐÚNG màu đó — ở forest/bill/kitchen
-  // điều này vô hại vì mỗi vòng có thay 1 trong 4 ô hiện (pickReplacementWord)
-  // nên màu "kẹt due" có lúc bị xoay ra khỏi màn hình; còn Butterfly Garden
-  // luôn hiện ĐỦ CẢ 6 màu cố định suốt ván (xem comment ở BUTTERFLY_SPOTS),
-  // nên màu đó không bao giờ bị xoay khỏi màn và cứ được hỏi lại liên tục —
-  // đúng triệu chứng người dùng báo: "ra 6 con bướm, nhưng đáp án luôn chỉ
-  // có 1 con. Cả 10 câu đều chỉ hỏi về 1 con." Không sửa learning-engine.js
-  // dùng chung (sẽ đổi hành vi LV0 của cả 7 game khác) — chỉ chặn LẶP LIÊN
-  // TIẾP ngay tại đây: nếu màu đứng đầu bảng xếp hạng trùng đúng màu vừa
-  // hỏi vòng trước, lấy màu đứng thứ 2 thay thế (màu bị kẹt vẫn được hỏi
-  // lại rất sớm ở vòng SAU đó vì vẫn đứng đầu bảng xếp hạng, chỉ không còn
-  // hỏi liên tục không nghỉ).
-  function pickTargetIndex(slots, excludeIdx) {
+  // 1) Bản đầu dùng ĐÚNG scoring "due trước, wrongRate trước, LV thấp
+  //    trước" như 5 game kia — nhưng vì LV0 "luôn đến hạn ngay" (xem
+  //    applyAnswer trong learning-engine.js: mỗi lần trả lời SAI ở LV0,
+  //    next=now), 1 màu bị bấm sai 1 lần sẽ đứng đầu bảng "due" MÃI MÃI
+  //    cho tới khi bấm đúng — ở forest/bill/kitchen vô hại vì mỗi vòng có
+  //    thay 1/4 ô hiện (pickReplacementWord xoay màu đó ra khỏi màn được),
+  //    còn Butterfly Garden hiện ĐỦ CẢ 6 màu cố định suốt ván nên màu đó
+  //    không bao giờ bị xoay khỏi màn — đúng lỗi "cả 10 câu chỉ hỏi 1 con".
+  // 2) Sửa lần 1 (excludeIdx, chỉ chặn LẶP LIÊN TIẾP đúng 1 màu vừa hỏi)
+  //    thu hẹp lỗi nhưng KHÔNG hết: nếu có ĐÚNG 2 màu cùng bị "kẹt due"
+  //    (vd bé bấm sai cả 2 màu đó ở đầu ván), 2 màu này luôn xếp hạng
+  //    "due" cao hơn 4 màu còn lại (chưa từng hỏi, due=0) — nên dù không
+  //    lặp liên tiếp, thuật toán vẫn chỉ XOAY VÒNG GIỮA ĐÚNG 2 MÀU đó mãi
+  //    mãi, 4 màu kia không bao giờ có cơ hội — đúng lỗi người dùng báo
+  //    tiếp: "chọn đúng, nhưng chỉ quay đi quay lại 2 con thôi".
+  //
+  // Gốc rễ: kiểu xếp hạng "due luôn thắng tuyệt đối" chỉ hợp với kho từ
+  // LỚN (chỉ hiện 4/N từ, việc 1-2 từ bị kẹt due không đáng ngại vì luôn
+  // còn rất nhiều từ khác để xoay slot) — không hợp với kho từ NHỎ CỐ ĐỊNH
+  // hiện đủ 100% như game này (N=6 màu = 6 slot, nếu 2 màu bị kẹt due thì
+  // đã chiếm 33% "chỗ" xếp hạng, đủ để loại hẳn 4 màu còn lại ra khỏi mọi
+  // vòng chơi). Không vá thêm lần 2 kiểu "exclude 2 màu gần nhất" (vá được
+  // 2 màu kẹt thì lại hở nếu có 3+ màu kẹt — vẫn cùng 1 lỗi, chỉ khác
+  // ngưỡng) — đổi hẳn sang mô hình khác PHÙ HỢP với kho từ nhỏ cố định:
+  // "túi xoay vòng" (round-robin theo lô/bag, giống kiểu chia quân domino
+  // hoặc random-bag của Tetris) — MỌI màu trong 6 màu được hỏi ĐỦ 1 LẦN
+  // rồi mới bắt đầu lô mới, tuyệt đối không có màu nào bị bỏ sót dù kẹt
+  // due bao nhiêu màu đi nữa. Vẫn giữ được tinh thần ưu tiên ôn màu khó
+  // hơn: dùng ĐÚNG cách xếp hạng due/wrongRate/level cũ để quyết định THỨ
+  // TỰ 6 màu trong mỗi lô (màu khó hơn được hỏi SỚM hơn trong lô đó), chỉ
+  // khác là không loại hẳn màu nào ra khỏi lô như trước.
+  function buildTargetQueue(slots, avoidFirstIdx) {
     var store = ctx.getStore();
     var now = Date.now();
     var scored = slots.map(function (w, i) {
@@ -125,21 +139,25 @@ export function createButterflyGardenGame(ctx) {
     scored.sort(function (a, b) {
       return (b.due - a.due) || (b.wr - a.wr) || (a.level - b.level) || (a.rnd - b.rnd);
     });
-    if (typeof excludeIdx === 'number' && scored.length > 1 && scored[0].i === excludeIdx) {
-      return scored[1].i;
+    var queue = scored.map(function (s) { return s.i; });
+    // Tránh lặp ngay ở RANH GIỚI 2 lô liền nhau (màu cuối lô trước trùng
+    // màu đầu lô sau) — chỉ cần hoán đổi phần tử đầu với phần tử kế tiếp.
+    if (typeof avoidFirstIdx === 'number' && queue.length > 1 && queue[0] === avoidFirstIdx) {
+      var tmp = queue[0]; queue[0] = queue[1]; queue[1] = tmp;
     }
-    return scored[0].i;
+    return queue;
   }
 
   // Khác forest/bill/kitchen: vốn từ CHỈ có đúng 6 màu, hiện ĐỦ CẢ 6 mỗi
   // vòng (không phải 4 trong N từ lớn hơn) nên KHÔNG cần
-  // pickReplacementWord()/advance thay slot — hết vòng chỉ cần chọn lại
-  // targetIdx trong đúng 6 từ đang có sẵn.
+  // pickReplacementWord()/advance thay slot — hết vòng chỉ cần lấy màu
+  // tiếp theo trong "túi xoay vòng" (xem buildTargetQueue() ở trên).
   function startButterflyGardenGame() {
     var store = ctx.getStore();
     var pool = wordsInCat(ctx.getWords(), 'color');
     state.slots = shuffle(pool.slice());
-    state.targetIdx = pickTargetIndex(state.slots);
+    state.targetQueue = buildTargetQueue(state.slots);
+    state.targetIdx = state.targetQueue.shift();
     state.correct = 0;
     state.answered = false;
     state.screen = 'butterflygarden';
@@ -335,10 +353,14 @@ export function createButterflyGardenGame(ctx) {
   }
 
   // Khác kitchen.js/bill.js: KHÔNG thay slot nào cả (đủ cả 6 màu hiện sẵn
-  // suốt cả lượt chơi) — chỉ cần xoá lớp đúng/sai + dấu ✓/✗ cũ, chọn lại
-  // targetIdx trong đúng 6 từ đang có, đọc lại câu mới.
+  // suốt cả lượt chơi) — chỉ cần xoá lớp đúng/sai + dấu ✓/✗ cũ, lấy màu
+  // tiếp theo trong túi xoay vòng (hết túi thì đóng túi mới, xem
+  // buildTargetQueue() — tránh lặp ngay ở ranh giới 2 túi).
   function advanceButterflyRound() {
-    state.targetIdx = pickTargetIndex(state.slots, state.targetIdx);
+    if (!state.targetQueue.length) {
+      state.targetQueue = buildTargetQueue(state.slots, state.targetIdx);
+    }
+    state.targetIdx = state.targetQueue.shift();
     state.answered = false;
 
     var hotspotEls = document.querySelectorAll('#butterflyField .butterflyhotspot');

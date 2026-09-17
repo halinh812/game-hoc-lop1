@@ -2445,3 +2445,60 @@ bị kẹt (`blue`/`red`), không vòng nào lặp lại liên tiếp ("Max
 consecutive repeats: 1"). Chạy thêm smoke test lại 7/8 game (trừ
 wordsafari cần vốn từ mở khoá riêng, không liên quan file vừa sửa) —
 không game nào lỗi console, không game nào bị treo màn phản hồi.
+
+## Vòng 55 — Butterfly Garden: sửa TIẾP lỗi kẹt (lần 2, đổi hẳn sang "túi xoay vòng") + bỏ hẳn audio thu sẵn
+
+**1. Bug Vòng 54 chưa hết hẳn.** Người dùng phản hồi: "mặc dù tôi chọn
+đúng, nhưng nó lại chỉ quay đi quay lại 2 con thôi, không chạy ra các
+con khác". Đúng như lo ngại — bản vá Vòng 54 (`excludeIdx`, chỉ chặn
+LẶP LIÊN TIẾP đúng 1 màu vừa hỏi) thu hẹp lỗi nhưng không triệt để: nếu
+có ĐÚNG 2 màu cùng bị "kẹt due" (vd bé bấm sai cả 2 màu đó ở đầu ván),
+2 màu này luôn xếp hạng `due` cao hơn 4 màu còn lại (due=0, chưa từng
+hỏi) — nên dù không lặp liên tiếp, thuật toán vẫn CHỈ xoay vòng giữa
+đúng 2 màu đó mãi mãi, 4 màu kia không bao giờ có lượt.
+
+Gốc rễ: kiểu xếp hạng "due luôn thắng tuyệt đối" chỉ hợp với kho từ LỚN
+(chỉ hiện 4/N từ — 1-2 từ bị kẹt due không đáng ngại vì còn rất nhiều
+từ khác để xoay slot), không hợp với kho từ NHỎ CỐ ĐỊNH hiện đủ 100%
+như Butterfly Garden (N=6, 2 màu kẹt due đã chiếm 33% "chỗ", đủ loại
+hẳn 4 màu còn lại). Vá thêm kiểu "loại 2 màu gần nhất" chỉ dời ngưỡng
+lỗi (hở nếu có 3+ màu kẹt) — đổi hẳn sang mô hình phù hợp hơn: **"túi
+xoay vòng"** (round-robin theo lô, kiểu random-bag của Tetris) trong
+`pickTargetIndex()` → đổi tên thành `buildTargetQueue(slots,
+avoidFirstIdx)`. Mỗi lô là TOÀN BỘ 6 màu xếp theo đúng thứ tự ưu tiên
+cũ (due/wrongRate/level — màu khó hơn được hỏi SỚM hơn trong lô), lấy
+lần lượt hết lô này mới đóng lô mới — đảm bảo TUYỆT ĐỐI mọi màu đều
+được hỏi trong mỗi 6 vòng, không có ngưỡng nào lọt lưới nữa dù bao
+nhiêu màu bị kẹt due. `avoidFirstIdx` (màu cuối lô trước) chỉ để tránh
+lặp ngay ở ranh giới 2 lô. `state.targetQueue` lưu trong state, đóng
+lại ở `startButterflyGardenGame()`, lấy dần ở `advanceButterflyRound()`.
+
+Kiểm thử bằng Playwright: mô phỏng đúng kịch bản lỗi — 2 vòng đầu bấm
+SAI cố ý (tạo 2 màu kẹt due), 8 vòng sau bấm ĐÚNG hoàn toàn (đúng như
+"tôi chọn đúng" người dùng báo) — xác nhận đủ **6/6 màu** được hỏi
+trong 10 vòng (trước đây với bản vá Vòng 54 sẽ mãi kẹt ở 2 màu). 29
+unit test vẫn pass nguyên.
+
+**2. Bỏ hẳn audio thu sẵn, quay lại 100% Web Speech.** Người dùng đánh
+giá giọng nữ clone ElevenLabs hiện tại (122 file, dùng từ Vòng 48) nghe
+không tốt, muốn xoá hẳn để dùng lại giọng máy trong lúc chuẩn bị nguồn
+giọng mới (ElevenLabs mẫu giọng trẻ em rõ ràng + clone lại qua
+VoiceStudio — đã tư vấn cách setup riêng, chưa thực hiện). Khác lần
+yêu cầu tương tự trước đó (đã dừng giữa chừng, khôi phục lại) — lần này
+yêu cầu rõ ràng và có lý do nhất quán, thực hiện luôn:
+
+- Xoá toàn bộ 122 file `.wav` trong `assets/audio/en/` (`git rm`).
+- Reset `assets/audio/en/manifest.json` về `[]`.
+- KHÔNG xoá code hạ tầng `createFileFirstAudioProvider()`/
+  `slugifyAudioText()` trong `engine/audio-provider.js` — cơ chế "manifest
+  rỗng → mọi câu tự rơi về Web Speech" đã có sẵn từ Vòng 47, đúng ngay
+  nhu cầu hiện tại mà không cần sửa code gì thêm; giữ nguyên hạ tầng để
+  khi có bộ giọng mới (từ ElevenLabs + VoiceStudio) chỉ cần đưa file
+  `.wav` mới + cập nhật manifest là dùng lại được ngay, không cần viết
+  lại từ đầu.
+
+Kiểm thử bằng Playwright (theo dõi request mạng tới `assets/audio/en/*.wav`
++ số lần gọi Web Speech): vào cả Butterfly Garden (từ đơn) lẫn Help
+Bill! (câu dài "I want a bag.") — cả câu mở đầu lẫn câu xác nhận sau
+khi chọn đều đi qua Web Speech, **0 request** `.wav` nào. 29 unit test
+vẫn pass nguyên.
