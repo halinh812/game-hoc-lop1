@@ -15,31 +15,18 @@
 .world-bg.kitchenphoto{ background:#F5DCC3; }
 
 /* ---------- "bàn cờ" chính: ảnh bếp + vùng bấm ---------- */
-/* .content mặc định có padding-top:100px (dành chỗ cho linh vật nổi ở
-   TRÊN topbar của nền trang trí mặc định — xem index.html) nhưng Kitchen
-   dùng nền 1 màu đặc riêng (.world-bg.kitchenphoto phía trên), không có
-   linh vật nổi kiểu đó — 100px gần như lãng phí hoàn toàn, khiến khung
-   ảnh mất bớt chiều cao đáng lẽ được dùng. Ghi đè xuống mức tối thiểu chỉ
-   đủ cho topbar, dành TOÀN BỘ khoảng trống còn lại cho ảnh. */
-.content.kitchencontent{ padding-top:14px; padding-bottom:8px; }
-/* Bọc ngoài chiếm HẾT khoảng trống còn lại (flex:1) giữa topbar và nút
-   loa — .kitchenstage bên trong được ĐO BẰNG JS (fitKitchenStage() trong
-   kitchen.js) để to hết mức có thể vừa khít khung này, không đoán trước
-   bằng công thức CSS cố định (lỗi thật đã gặp — xem chi tiết trong
-   kitchen.js). min-height:0 là bắt buộc để flex:1 chịu co đúng theo
-   không gian thật còn lại thay vì tự giãn theo nội dung. */
-.kitchenstagewrap{
-  flex:1; min-height:0; display:flex; align-items:center; justify-content:center;
-}
 /* Bé bấm ĐÚNG TOẠ ĐỘ trong ảnh (xem GLOW_ASSETS trong kitchen.js), nên
    ảnh KHÔNG được phép bị crop lệch theo tỉ lệ màn hình thật (khác
-   worldBg() mặc định vốn chỉ trang trí, cắt thoải mái) — kích thước
-   (width/height) do JS gán trực tiếp, giữ đúng tỉ lệ khung hình gốc
-   1536:2752 nên object-fit:cover ở đây không bao giờ phải crop bớt gì,
-   % toạ độ của từng đồ vật luôn khớp đúng vị trí thật. */
+   worldBg() mặc định vốn chỉ trang trí, cắt thoải mái). Khoá cứng đúng
+   tỉ lệ khung hình gốc (1536:2752 ≈ 0.5581) bằng aspect-ratio +
+   object-fit:cover trên 1 khung ĐÃ đúng sẵn tỉ lệ đó — nhờ vậy cover
+   không bao giờ phải crop bớt, % toạ độ của từng đồ vật luôn khớp đúng
+   vị trí thật bất kể kích thước màn hình. */
 .kitchenstage{
-  position:relative; border-radius:18px; overflow:hidden;
+  position:relative; margin:4px auto 0; border-radius:18px; overflow:hidden;
   box-shadow:0 8px 20px rgba(20,40,25,.3);
+  width:min(100%, calc((100vh - 210px) * 0.5581));
+  aspect-ratio:1536 / 2752;
 }
 .kitchenimg{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
 
