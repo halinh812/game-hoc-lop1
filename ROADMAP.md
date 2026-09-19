@@ -2502,3 +2502,91 @@ Kiểm thử bằng Playwright (theo dõi request mạng tới `assets/audio/en/
 Bill! (câu dài "I want a bag.") — cả câu mở đầu lẫn câu xác nhận sau
 khi chọn đều đi qua Web Speech, **0 request** `.wav` nào. 29 unit test
 vẫn pass nguyên.
+
+## Vòng 56 — Game #9 "Bunny Run Home" (Đưa thỏ con về tổ) — mê cung + hướng đi
+
+Game MỚI hoàn toàn theo yêu cầu người dùng: thỏ con đi trong mê cung về
+tổ, bé bấm 4 nút lên/xuống/trái/phải theo hiệu lệnh; đi sai thì cáo nhảy
+ra hù rồi ẩn đi, đi đúng thì thỏ reo lên một câu vui.
+
+**Vốn từ MỚI — lấp đúng chỗ trống của app:** tạo
+`content/packs/directions-v1.json` (category `direction` 🧭) với 4 từ
+`up/down/left/right`, `prompt_audio_text` kiểu `"Go left."` (đúng pattern
+câu-mang-từ của objects-v1.json, từ cần học nằm ở cuối câu nên nghe rõ
+nhất). Đây là bộ từ chưa game nào có, và là loại từ bé dùng được ngay
+ngoài đời. Skill = **Nghe** (nghe hiệu lệnh tiếng Anh → chọn đúng hướng).
+
+**Khác hẳn 8 game trước về CƠ CHẾ** (8 game cũ đều là "nghe/nhìn 1 từ rồi
+bấm đúng 1 trong N ô đang hiện" — chỉ khác chủ đề và hình vẽ): đây là
+game ĐIỀU KHIỂN NHÂN VẬT. Đúng phần "cơ chế chơi mới" đã bàn ở vòng ý
+tưởng trước, thay vì lại thêm 1 game bấm-chọn nữa.
+
+**Hướng TUYỆT ĐỐI, không phải tương đối:** yêu cầu ban đầu có nhắc "rẽ
+trái/phải, đi thẳng/đi lùi" — nhưng rẽ trái/phải theo hướng NHÂN VẬT
+đang quay bắt bé phải xoay hình trong đầu, việc này khó thật với trẻ 6-7
+tuổi và sẽ biến game dạy TỪ VỰNG thành bài tập xoay hình. 4 nút khớp 1-1
+với 4 hướng trên màn hình (đúng ý "ấn 4 nút lên xuống trái phải"), nên
+thứ duy nhất bé phải nghĩ là: từ tiếng Anh vừa nghe nghĩa là hướng nào.
+
+**Mê cung sinh ngẫu nhiên mỗi ván, có kiểm chứng bằng unit test.** Hàm
+`buildBunnyPath()` (hàm THUẦN, export riêng để test bằng Node) dựng đường
+đi 10 bước không tự cắt trên lưới 5×6 bằng **quay lui (DFS + backtracking)**
+— quay lui là điểm mấu chốt: đi tham lam ngẫu nhiên có thể tự dồn vào góc
+cụt rồi phải bỏ cuộc, còn quay lui thì chắc chắn tìm ra đường nếu đường
+tồn tại, không cần vòng lặp "thử lại tới khi may mắn" (dễ treo, khó kiểm
+chứng). 3 ràng buộc gài sẵn trong thuật toán:
+- **Đủ cả 4 hướng trong mọi ván** — rút kinh nghiệm xương máu từ Butterfly
+  Garden (Vòng 54/55): kho từ nhỏ mà thuật toán chọn thiên lệch thì bé
+  không bao giờ gặp các từ còn lại. Ở đây ràng buộc nằm ngay trong cách
+  sinh đường chứ không phó mặc cho điểm ưu tiên.
+- **Không quá 2 bước cùng hướng liên tiếp** — 3 lần "Go up" liền nhau vừa
+  chán vừa dễ bị hiểu nhầm là game lỗi lặp.
+- **Trừ điểm ô nằm sát cạnh đường cũ** — để đường vẽ ra ngoằn ngoèo rõ
+  ràng thay vì dính thành 1 mảng đất to bè.
+Thêm điểm ưu tiên theo Learning Engine (từ hay sai / tới hạn ôn thì được
+đi qua nhiều hơn). **6 unit test mới** phủ đúng các ràng buộc trên, mỗi
+test chạy lặp 200 ván vì thuật toán có yếu tố ngẫu nhiên — 1 ván đúng
+không chứng minh được gì. Tổng **35 test** (29 cũ + 6 mới) đều pass.
+
+`applyAnswer(..., { skipDueGate: true })` — kho từ chỉ có ĐÚNG 4 hướng,
+còn nhỏ hơn cả "How Many?" (10 số), nên luật "chưa tới hạn ôn thì không
+tăng LV" sẽ chặn oan tiến độ hợp lệ y như lỗi thật ở Vòng 36.
+
+**Toàn bộ hình là SVG nội tuyến** (thỏ, cáo, tổ/hang, đường mòn, bụi cỏ,
+4 mũi tên) — không cần chờ ảnh AI nào, game chạy đầy đủ ngay, giống cách
+Butterfly Garden làm ở Vòng 47.
+
+**3 lỗi thật phát hiện trong lúc kiểm thử, đã sửa hết:**
+1. **Bàn cờ ra kích thước 0×0 (màn chơi trắng trơn).** Bản đầu dùng thuần
+   CSS `aspect-ratio:5/6` + `height:100%`; trong flex column, chiều cao %
+   của con không quy chiếu được về khung cha vốn chưa có chiều cao tường
+   minh nên bàn cờ co lại còn đúng 0×0 (Playwright đo được `w:0,h:0`).
+   Sửa bằng cách ĐO THẬT bằng JS (`fitBunnyBoard()` +
+   `getBoundingClientRect`), đúng cách đã kiểm chứng ở `fitKitchenStage()`
+   (Vòng 46) — cũng đo lại khi xoay/đổi kích thước màn hình. Đo lại sau
+   khi sửa: đúng tỉ lệ 0,833 và ô vuông chằn chặn (72×72 / 61×61 / 80×80)
+   ở cả 3 cỡ máy 390×780, 360×640, 430×900, không tràn, không phải cuộn.
+2. **Đọc vọng sang màn khác.** Bé bấm nút về Trang chủ ngay sau khi trả
+   lời đúng thì hiệu lệnh của vòng SAU vẫn được đọc lên ở Trang chủ (tái
+   hiện được bằng Playwright). Sửa: chốt chặn `state.screen !== 'bunnymaze'`
+   trong callback của `speakThenProceed` (cùng chốt chặn đã có ở nhánh cáo
+   hù).
+3. **Vỡ JS khi bấm "Nghe lại" ở bước cuối.** Sau bước đúng cuối cùng, màn
+   chơi còn nằm lại ~1 giây chờ đọc xong câu reo mừng; bấm "Nghe lại"
+   đúng lúc đó thì tra từ vượt quá đường đi → `Cannot read properties of
+   undefined (reading 'promptAudioText')`. Sửa: `speakBunnyCommand()`
+   thoát sớm khi không còn bước nào, và nút "Nghe lại" bỏ qua khi đang
+   chạy hiệu ứng.
+
+Ngoài ra chỉnh kích thước nhân vật cho vừa trong ô (tổ 20% × nhịp thở
+1,07 lần bị mép bàn cờ cắt mất ở máy 360px — đo được, đã hạ xuống 17%),
+và cho cáo nhảy ra ở ô KỀ BÊN thay vì đè lên đúng ô của thỏ (bản đầu cáo
+che kín mất con thỏ, thấy rõ trên ảnh chụp màn hình — vừa mất dấu thỏ vừa
+dễ làm bé sợ thật thay vì buồn cười).
+
+Kiểm thử Playwright: chơi trọn 10 bước tới màn thắng, cố ý bấm sai để xác
+nhận cáo hiện ra → tự ẩn sau 1,5s → nút đúng phát sáng gợi ý (để bé không
+kẹt mãi 1 bước) và KHÔNG được cộng sao; đo bố cục ở 3 cỡ màn hình; Trang
+chủ 9 ô vẫn không phải cuộn cả trang; Trang phụ huynh hiện đúng bộ từ mới
+"🧭 Hướng đi". Smoke test lại 8 game cũ: không game nào lỗi console hay
+treo màn phản hồi.

@@ -1,0 +1,197 @@
+/* CSS RIÊNG của game "Bunny Run Home" (Đưa thỏ con về tổ) — phần dùng
+   chung với các game khác (thanh sao, màn kết quả, nút chunkybtn...) nằm ở
+   engine/catch-game.css. Nạp qua <link> trong index.html
+   (games/bunny-maze/bunnymaze.css). Không có url() ảnh nào trong file này
+   (toàn bộ hình là SVG nội tuyến do bunnymaze.js sinh ra) nên không phải
+   lo đường dẫn tương đối như games/nong-trai-cua-be/farm.css. */
+
+/* .content mặc định chừa padding-top:100px cho linh vật nổi phía trên
+   topbar — màn này không có linh vật đó, mà lại cần rất nhiều chiều dọc
+   cho mê cung + bàn phím hướng, nên ghi đè xuống mức tối thiểu (cùng cách
+   .content.kitchencontent đã làm ở Vòng 46). */
+.content.bunnycontent{ padding-top:14px; padding-bottom:10px; gap:8px; }
+
+/* Khung chứa mê cung chiếm HẾT chỗ trống còn lại giữa topbar và bàn phím
+   (flex:1 + min-height:0). Kích thước THẬT của bàn cờ do JS đo và gán bằng
+   pixel (fitBunnyBoard() trong bunnymaze.js) — KHÔNG đoán trước bằng công
+   thức CSS cố định kiểu calc(100vh - 210px) (đó là lỗi thật đã gặp ở
+   Kitchen, xem Vòng 46: con số đoán chỉ đúng ở 1 cỡ màn hình). Cũng KHÔNG
+   dùng aspect-ratio + height:100%: đã thử và bị lỗi thật — trong flex
+   column, chiều cao % của con không quy chiếu được về khung cha vốn chưa
+   có chiều cao tường minh, nên bàn cờ co lại còn ĐÚNG 0×0 (Playwright đo
+   được w=0 h=0, màn chơi trắng trơn). Đo bằng JS là cách đã kiểm chứng ở
+   Kitchen cho đúng bài toán này. */
+.bunnystagewrap{ flex:1; min-height:0; display:flex; align-items:center; justify-content:center; }
+.bunnyboard{
+  position:relative; border-radius:20px; overflow:hidden;
+  background:#A8D98F; box-shadow:0 8px 20px rgba(20,40,25,.28), inset 0 0 0 3px rgba(255,255,255,.4);
+}
+
+/* Mỗi ô lưới định vị bằng % (left/top/width/height do JS tính theo số
+   cột/hàng) nên tự đúng ở mọi kích thước bàn cờ. */
+.bunnycell{ position:absolute; }
+
+/* Ô CỎ (ngoài đường đi): bụi cỏ tròn nhỏ, chỉ để trang trí — không bấm
+   được, không phải đáp án. */
+.bunnygrass{ display:flex; align-items:center; justify-content:center; }
+.bunnybush{
+  width:62%; height:62%; border-radius:50% 50% 45% 45%;
+  background:radial-gradient(circle at 35% 30%, #7FC177, #4E9A54);
+  box-shadow:inset 0 -4px 6px rgba(20,60,25,.25);
+}
+
+/* ĐƯỜNG MÒN = các "nút" bo tròn ở tâm mỗi ô trên đường + "thanh nối" giữa
+   2 ô liên tiếp (xem trailHtml() trong bunnymaze.js). Ghép lại thành 1 con
+   đường đất liền mạch ngoằn ngoèo — đây mới là thứ làm bàn cờ đọc ra là
+   "mê cung có đường về tổ". Cách cũ (tô nguyên cả ô vuông) đã dựng thử và
+   hỏng về mặt nhìn: chỗ nào đường chạy sát cạnh chính nó thì các ô dính
+   liền thành 1 mảng đất to bè, mất hẳn hình con đường. */
+.bunnytrail, .bunnylink{ position:absolute; background:#E5CFA4; }
+.bunnytrail{ transform:translate(-50%,-50%); border-radius:10px; z-index:1; }
+/* Ô TỔ sáng hơn + quầng vàng nhẹ, để bé thấy ngay "đích ở đằng kia". */
+.bunnytrail.isnest{ background:#F6E7C4; box-shadow:0 0 0 3px rgba(244,169,59,.5); }
+
+/* Tổ + thỏ + cáo đều neo theo TÂM ô (JS set left/top) rồi tự lùi lại 1 nửa
+   kích thước của chính mình, nên luôn nằm giữa ô. */
+.bunnynest, .bunnyactor, .bunnyfox{
+  position:absolute; transform:translate(-50%,-50%); pointer-events:none;
+}
+/* Kích thước 1 ô là 20% bề ngang (5 cột) × 16,67% chiều cao (6 hàng) — mọi
+   nhân vật phải NHỎ HƠN ô kể cả lúc animation phóng to nhất, nếu không thì
+   con nào rơi vào ô sát mép bàn cờ sẽ bị overflow:hidden cắt mất một bên
+   (lỗi thật đã đo được: tổ để 20% × 1,07 lần nhịp thở = tràn ra ngoài ở
+   màn hình 360px). Tổ: 17% × 1,06 = 18% < 20% ✓. */
+.bunnynest{ width:17%; height:14.2%; z-index:2; animation:bunnyNestGlow 2.4s ease-in-out infinite; }
+@keyframes bunnyNestGlow{ 0%,100%{ transform:translate(-50%,-50%) scale(1); } 50%{ transform:translate(-50%,-50%) scale(1.06); } }
+.bunnyactor{ width:15%; height:12.5%; z-index:3; transition:left .34s ease, top .34s ease; }
+.bunnyfox{ width:17%; height:14%; z-index:4; }
+/* [hidden] không tự thắng được display/positioning đã đặt ở trên — phải
+   ghi đè rõ ràng, đúng lỗi đã gặp với .butterflyimg[hidden] và
+   .billfallback[hidden] trước đây. */
+.bunnyfox[hidden]{ display:none; }
+
+/* Thỏ quay mặt theo hướng vừa đi (chỉ lật khi đi ngang). Lật đặt trên
+   .bunnyhop (lớp BÊN TRONG), không đặt lên .bunnyactor — .bunnyactor đang
+   giữ transform:translate(-50%,-50%) để canh giữa ô, thêm scaleX vào đó sẽ
+   đè mất phép canh giữa. */
+.bunnyhop{ display:block; width:100%; height:100%; transform-origin:center; }
+.bunnyactor.faceleft .bunnyhop{ transform:scaleX(-1); }
+.bunnyhop.hopping{ animation:bunnyHop .34s ease-out; }
+.bunnyactor.faceleft .bunnyhop.hopping{ animation:bunnyHopLeft .34s ease-out; }
+/* 2 biến thể nhảy (thường / đã lật ngang) vì animation ghi đè transform:
+   bản lật phải tự mang theo scaleX(-1) ở mọi khung hình, nếu không thỏ sẽ
+   quay ngoắt mặt lại trong lúc nhảy. */
+/* Nhảy cao vừa phải (-18%, phóng to 1,06) để thỏ ở HÀNG TRÊN CÙNG lúc bật
+   lên vẫn không bị mép bàn cờ (overflow:hidden) cắt mất tai — cùng lý do
+   giới hạn kích thước như ghi ở .bunnynest. */
+@keyframes bunnyHop{
+  0%{ transform:translateY(0) scale(1); }
+  45%{ transform:translateY(-18%) scale(1.06); }
+  100%{ transform:translateY(0) scale(1); }
+}
+@keyframes bunnyHopLeft{
+  0%{ transform:translateY(0) scaleX(-1) scaleY(1); }
+  45%{ transform:translateY(-18%) scaleX(-1.06) scaleY(1.06); }
+  100%{ transform:translateY(0) scaleX(-1) scaleY(1); }
+}
+
+/* Bong bóng thoại của thỏ khi bấm ĐÚNG ("Yay!", "Good job!"...). Nổi phía
+   trên đầu thỏ, không chắn đường nhìn vào mê cung. */
+.bunnybubble{
+  position:absolute; left:50%; bottom:100%; transform:translate(-50%,-6px);
+  background:#FFFDF7; color:#233A2A; border:2px solid rgba(35,58,42,.18);
+  border-radius:999px; padding:3px 10px; white-space:nowrap;
+  font-family:'Baloo 2', sans-serif; font-weight:800; font-size:.8rem;
+  box-shadow:0 4px 10px rgba(20,40,25,.25); z-index:5;
+}
+.bunnybubble[hidden]{ display:none; }
+.bunnybubble.pop{ animation:bunnyBubblePop .4s cubic-bezier(.34,1.56,.64,1); }
+@keyframes bunnyBubblePop{
+  0%{ transform:translate(-50%,-6px) scale(.4); opacity:0; }
+  100%{ transform:translate(-50%,-6px) scale(1); opacity:1; }
+}
+
+/* Cáo nhảy ra hù khi bấm SAI: bật vọt lên từ trong bụi cỏ rồi nhún nhẹ.
+   Đứng ở ô KỀ BÊN thỏ (xem foxSpot() trong bunnymaze.js) nên không che
+   mất thỏ. Nhỉnh lên trên tâm ô một chút cho ra dáng "vừa nhô lên". */
+.bunnyfox{ transform:translate(-50%,-58%); }
+.bunnyfox.pop{ animation:bunnyFoxPop .5s cubic-bezier(.34,1.56,.64,1); }
+@keyframes bunnyFoxPop{
+  0%{ transform:translate(-50%,20%) scale(.3) rotate(-12deg); opacity:0; }
+  60%{ transform:translate(-50%,-64%) scale(1.1) rotate(6deg); opacity:1; }
+  100%{ transform:translate(-50%,-58%) scale(1) rotate(0deg); opacity:1; }
+}
+.bunnyboard.shake{ animation:bunnyBoardShake .45s ease; }
+@keyframes bunnyBoardShake{
+  0%,100%{ transform:translateX(0); }
+  20%{ transform:translateX(-7px); }
+  50%{ transform:translateX(6px); }
+  80%{ transform:translateX(-4px); }
+}
+
+/* ---------- bàn phím hướng (hình chữ thập 3×3) ---------- */
+/* Ô giữa chữ thập là nút "nghe lại" (thay cho nút loa tròn riêng ở cuối
+   màn của các game khác) — màn này đã tốn nhiều chiều dọc cho mê cung nên
+   tận dụng đúng ô vốn đang trống, lại vừa tầm ngón cái. 4 góc bỏ trống. */
+.bunnydpad{
+  flex:none; display:grid; gap:8px; margin:0 auto;
+  grid-template-columns:repeat(3, 62px); grid-template-rows:repeat(3, 56px);
+  justify-content:center;
+}
+.bunnykey-up{ grid-area:1 / 2; }
+.bunnykey-left{ grid-area:2 / 1; }
+.bunnykey-listen{ grid-area:2 / 2; }
+.bunnykey-right{ grid-area:2 / 3; }
+.bunnykey-down{ grid-area:3 / 2; }
+.bunnykey{
+  border:none; padding:0; cursor:pointer; border-radius:16px;
+  background:var(--glass); border:1px solid var(--glass-border); color:var(--coral);
+  box-shadow:0 4px 0 rgba(20,40,25,.18), 0 8px 14px rgba(20,40,25,.16);
+  display:flex; align-items:center; justify-content:center;
+}
+.bunnykey:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(20,40,25,.18); }
+.bunnykey-listen{ background:#FFF3D6; color:var(--coral); }
+/* Animation phản hồi đặt trên .bunnykeyface (lớp trong), KHÔNG đặt lên
+   chính nút bấm: animation transform trên nút làm vùng bấm thật của nó
+   liên tục xê dịch, bấm trúng kém ổn định hẳn (lỗi thật đã gặp ở
+   Butterfly Garden — xem Vòng 47 trong ROADMAP.md). */
+.bunnykeyface{ display:flex; align-items:center; justify-content:center; width:100%; height:100%; }
+.bunnykey.good .bunnykeyface{ animation:bunnyKeyGood .5s ease; }
+@keyframes bunnyKeyGood{
+  0%{ transform:scale(1); } 45%{ transform:scale(1.25); } 100%{ transform:scale(1); }
+}
+.bunnykey.good{ background:#DFF3E6; color:var(--success); }
+.bunnykey.wrong{ background:#F8DEDC; color:#B24A43; }
+.bunnykey.wrong .bunnykeyface{ animation:bunnyKeyWrong .4s ease; }
+@keyframes bunnyKeyWrong{
+  0%,100%{ transform:translateX(0); } 30%{ transform:translateX(-6px); } 70%{ transform:translateX(6px); }
+}
+/* Gợi ý nút ĐÚNG sau khi cáo hù xong, để bé không kẹt mãi 1 bước (cùng
+   tinh thần "bấm sai thì hiện đáp án" của forest/bill/kitchen). */
+.bunnykey.hint{ background:#FFF0C4; color:#E4952A; animation:bunnyKeyHint 1.1s ease-in-out infinite; }
+@keyframes bunnyKeyHint{
+  0%,100%{ box-shadow:0 4px 0 rgba(20,40,25,.18), 0 8px 14px rgba(20,40,25,.16); }
+  50%{ box-shadow:0 4px 0 rgba(20,40,25,.18), 0 0 0 4px rgba(244,169,59,.55); }
+}
+
+/* ---------- màn kết quả ---------- */
+.bunnywin{ width:96px; height:96px; margin:2px auto 4px; animation:bunnyWinBounce 1.6s ease-in-out infinite; }
+@keyframes bunnyWinBounce{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-8px); } }
+
+/* ---------- ô icon ở lưới chọn trò chơi (Trang chủ) ---------- */
+.gametile.bunny-tile{
+  position:relative; overflow:hidden; border:1px solid var(--glass-border);
+  background:linear-gradient(160deg, #DDF3CE 0%, #F4FBE7 60%, #FFF6DA 100%);
+}
+.gametile.bunny-tile .name{ position:relative; z-index:1; color:var(--ink); }
+.bunnytile-face{
+  position:relative; z-index:1; display:block; width:66px; height:66px;
+  animation:tileSway 2.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .bunnyhop.hopping,.bunnyactor.faceleft .bunnyhop.hopping,.bunnyfox.pop,.bunnyboard.shake,
+  .bunnybubble.pop,.bunnykey.good .bunnykeyface,.bunnykey.wrong .bunnykeyface,.bunnykey.hint,
+  .bunnywin,.bunnytile-face,.bunnynest{ animation:none !important; }
+  .bunnyactor{ transition:none; }
+}

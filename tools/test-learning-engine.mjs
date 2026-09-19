@@ -22,6 +22,7 @@ import {
   pickOptions,
   shuffle
 } from '../engine/learning-engine.js';
+import { buildBunnyPath, BUNNY_COLS, BUNNY_ROWS, BUNNY_WIN_TARGET } from '../games/bunny-maze/bunnymaze.js';
 
 var tests = [];
 function test(name, fn) { tests.push({ name: name, fn: fn }); }
@@ -321,6 +322,83 @@ test('shuffle: giữ nguyên tập phần tử, chỉ đổi thứ tự', functi
 
 test('SKILLS: đúng 5 kỹ năng theo thiết kế', function () {
   assert.deepEqual(SKILLS, ['listen', 'speak', 'read', 'write', 'see']);
+});
+
+// --- Mê cung của game "Bunny Run Home" (games/bunny-maze/bunnymaze.js) ---
+// buildBunnyPath() là hàm THUẦN (không đụng DOM) nên chạy thẳng được ở đây.
+// Chạy lặp nhiều lần vì thuật toán có yếu tố ngẫu nhiên — 1 lần chạy đúng
+// không chứng minh được gì, phải đúng ở MỌI lần sinh.
+
+function bunnyStepOf(a, b) {
+  return { dc: b.c - a.c, dr: b.r - a.r };
+}
+
+test('buildBunnyPath: đúng 10 bước, 11 ô, mọi ô nằm trong lưới', function () {
+  for (var n = 0; n < 200; n++) {
+    var path = buildBunnyPath();
+    assert.equal(path.moves.length, BUNNY_WIN_TARGET);
+    assert.equal(path.cells.length, BUNNY_WIN_TARGET + 1);
+    path.cells.forEach(function (cell) {
+      assert.ok(cell.c >= 0 && cell.c < BUNNY_COLS, 'cột ngoài lưới: ' + cell.c);
+      assert.ok(cell.r >= 0 && cell.r < BUNNY_ROWS, 'hàng ngoài lưới: ' + cell.r);
+    });
+  }
+});
+
+test('buildBunnyPath: đường đi KHÔNG tự cắt (không ô nào đi qua 2 lần)', function () {
+  for (var n = 0; n < 200; n++) {
+    var path = buildBunnyPath();
+    var seen = {};
+    path.cells.forEach(function (cell) {
+      var k = cell.c + ',' + cell.r;
+      assert.ok(!seen[k], 'ô bị đi qua 2 lần: ' + k);
+      seen[k] = true;
+    });
+  }
+});
+
+test('buildBunnyPath: mỗi bước đi đúng 1 ô kề, khớp đúng tên hướng', function () {
+  var expected = { up: { dc: 0, dr: -1 }, down: { dc: 0, dr: 1 }, left: { dc: -1, dr: 0 }, right: { dc: 1, dr: 0 } };
+  for (var n = 0; n < 200; n++) {
+    var path = buildBunnyPath();
+    path.moves.forEach(function (moveId, i) {
+      assert.deepEqual(bunnyStepOf(path.cells[i], path.cells[i + 1]), expected[moveId],
+        'bước "' + moveId + '" không khớp toạ độ');
+    });
+  }
+});
+
+test('buildBunnyPath: LUÔN dùng đủ cả 4 hướng (không bỏ sót từ nào)', function () {
+  for (var n = 0; n < 200; n++) {
+    var path = buildBunnyPath();
+    var used = {};
+    path.moves.forEach(function (m) { used[m] = true; });
+    assert.deepEqual(Object.keys(used).sort(), ['down', 'left', 'right', 'up'],
+      'thiếu hướng, chỉ có: ' + Object.keys(used).join(','));
+  }
+});
+
+test('buildBunnyPath: không quá 2 bước cùng hướng liên tiếp', function () {
+  for (var n = 0; n < 200; n++) {
+    var path = buildBunnyPath();
+    var run = 1;
+    for (var i = 1; i < path.moves.length; i++) {
+      run = path.moves[i] === path.moves[i - 1] ? run + 1 : 1;
+      assert.ok(run <= 2, 'có ' + run + ' bước "' + path.moves[i] + '" liên tiếp');
+    }
+  }
+});
+
+test('buildBunnyPath: trọng số ưu tiên làm hướng "yếu" xuất hiện nhiều hơn', function () {
+  var countWeighted = 0, countPlain = 0;
+  for (var n = 0; n < 120; n++) {
+    countWeighted += buildBunnyPath({ weights: { up: 1, down: 1, left: 1, right: 6 } })
+      .moves.filter(function (m) { return m === 'right'; }).length;
+    countPlain += buildBunnyPath()
+      .moves.filter(function (m) { return m === 'right'; }).length;
+  }
+  assert.ok(countWeighted > countPlain,
+    'trọng số không có tác dụng (có trọng số: ' + countWeighted + ', không: ' + countPlain + ')');
 });
 
 // --- runner ---
