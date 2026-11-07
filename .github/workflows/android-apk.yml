@@ -1,0 +1,89 @@
+# Tự build file APK của app Android mỗi khi có code mới đẩy lên GitHub, rồi
+# đăng lên mục Releases của repo — mở trang Releases trên điện thoại, bấm file
+# .apk là cài được, KHÔNG cần máy tính. Cùng cách với dự án hoc-tieng-anh.
+#
+# APK nhúng sẵn toàn bộ phần game web (index.html, engine/, games/, assets/...)
+# nên sửa game web cũng phải build lại APK -> workflow chạy với MỌI thay đổi,
+# không chỉ khi sửa thư mục android/.
+name: Build APK
+
+on:
+  push:
+    branches: [main, "claude/**"]
+    paths-ignore:
+      - "**.md"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Đẩy liên tiếp nhiều lần thì huỷ bản build cũ đang chạy dở, chỉ build bản mới nhất.
+concurrency:
+  group: apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # Không đóng gói APK nếu Learning Engine đang hỏng.
+      - name: Test Learning Engine
+        run: node tools/test-learning-engine.mjs
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # Báo lỗi sớm + dễ hiểu nếu chưa cài mật khẩu chữ ký vào GitHub Secrets.
+      - name: Check signing password
+        env:
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+        run: |
+          if [ -z "$SIGNING_STORE_PASSWORD" ]; then
+            echo "::error::Chưa có secret SIGNING_STORE_PASSWORD. Thêm tại Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+      - name: Build APK
+        working-directory: android
+        env:
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleRelease --no-daemon
+
+      - name: Rename APK
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/release/app-release.apk "out/VoHocTiengAnh-1.0.${{ github.run_number }}.apk"
+          ls -la out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VoHocTiengAnh-apk
+          path: out/*.apk
+
+      # Bản build từ nhánh khác main được đánh dấu "Pre-release" (bản thử).
+      - name: Publish release (download on your phone)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-v1.0.${{ github.run_number }}
+          name: Vở học Tiếng Anh 1.0.${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          prerelease: ${{ github.ref_name != 'main' }}
+          files: out/*.apk
+          body: |
+            Build từ nhánh `${{ github.ref_name }}` (commit ${{ github.sha }}).
+
+            **Cách cài:** mở trang này trên điện thoại Android → bấm file `.apk` ở mục Assets bên dưới → cho phép cài ứng dụng từ nguồn này nếu máy hỏi → Cài đặt.
+
+            Bản mới cài đè lên bản cũ được, không mất tiến độ học của bé.

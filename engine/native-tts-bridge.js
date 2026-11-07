@@ -1,5 +1,5 @@
 // Cầu nối âm thanh giữa trang web (chạy trong WebView của app Android) và
-// phần native của app.
+// phần native của app (android/app/src/main/java/.../MainActivity.kt).
 //
 // VÌ SAO CẦN: WebView của Android KHÔNG có Web Speech API
 // (window.speechSynthesis). Mà sau Vòng 55 thì toàn bộ app đọc tiếng Anh
@@ -9,14 +9,14 @@
 //
 // CÁCH LÀM: file này dựng 1 bản "giả" của window.speechSynthesis +
 // SpeechSynthesisUtterance, giao diện y hệt bản thật, nhưng ruột bên trong
-// không tự đọc mà CHUYỂN LỆNH sang phần native của app (mobile/App.js),
-// nơi dùng expo-speech để đọc bằng bộ đọc của chính máy Android.
+// không tự đọc mà CHUYỂN LỆNH sang phần native của app (MainActivity.kt),
+// nơi dùng TextToSpeech của Android để đọc bằng bộ đọc của chính máy.
 // engine/audio-provider.js KHÔNG phải sửa 1 dòng nào — nó vẫn tưởng đang
 // nói chuyện với Web Speech API bình thường.
 //
 // CHẠY TRÊN WEB THƯỜNG THÌ SAO: không làm gì cả. Cả file nằm trong 1 câu
-// lệnh if kiểm tra window.ReactNativeWebView (biến chỉ tồn tại bên trong
-// WebView của app). Mở bằng trình duyệt như xưa nay thì file này thoát ra
+// lệnh if kiểm tra window.AndroidTTS (đối tượng do MainActivity.kt gắn vào
+// WebView, chỉ tồn tại bên trong app). Mở bằng trình duyệt như xưa nay thì file này thoát ra
 // ngay lập tức, Web Speech thật vẫn chạy y như cũ.
 //
 // VÌ SAO NẰM Ở ĐÂY MÀ KHÔNG PHẢI TRONG app: để chỉ có ĐÚNG 1 BẢN, và để
@@ -32,7 +32,7 @@
 (function () {
   if (typeof window === 'undefined') return;
   // Không ở trong app -> không làm gì, để Web Speech thật của trình duyệt chạy.
-  if (!window.ReactNativeWebView) return;
+  if (!window.AndroidTTS) return;
   if (window.__nativeTtsBridgeInstalled) return;
   window.__nativeTtsBridgeInstalled = true;
 
@@ -41,7 +41,7 @@
 
   function post(msg) {
     try {
-      window.ReactNativeWebView.postMessage(JSON.stringify(msg));
+      window.AndroidTTS.postMessage(JSON.stringify(msg));
     } catch (e) { /* không gửi được thì thôi, đừng phá UI */ }
   }
 
@@ -127,7 +127,7 @@
     onvoiceschanged: null
   };
 
-  // Phần native gọi ngược vào 2 hàm này (xem mobile/App.js).
+  // Phần native gọi ngược vào 2 hàm này (xem MainActivity.kt).
   window.__nativeTtsDone = function (id) { finish(id, 'end'); };
   window.__nativeTtsError = function (id) { finish(id, 'error'); };
 
