@@ -318,7 +318,6 @@ export function createMatchItGame(ctx) {
     return sharedAudioCtx;
   }
   function playDing() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try {
       var ctxAudio = audioCtx();
       var now = ctxAudio.currentTime;
@@ -339,7 +338,6 @@ export function createMatchItGame(ctx) {
     } catch (e) { /* Web Audio không khả dụng — bỏ qua, không phá UI */ }
   }
   function playBuzz() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try {
       var ctxAudio = audioCtx();
       var now = ctxAudio.currentTime;

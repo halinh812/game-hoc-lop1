@@ -143,7 +143,6 @@ export function createBillGame(ctx) {
   // lên C5-E5-G5-C6, 2 lớp (thân + lấp lánh) mỗi nốt cho tiếng đầy hơn.
   var sharedAudioCtx = null;
   function playDing() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try {
       if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
       var ctxAudio = sharedAudioCtx;

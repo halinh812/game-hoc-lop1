@@ -237,7 +237,6 @@ export function createHowManyGame(ctx) {
   // Chuông "ting" khi bấm đúng — y hệt 3 game kia.
   var sharedAudioCtx = null;
   function playDing() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try {
       if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
       var ctxAudio = sharedAudioCtx;

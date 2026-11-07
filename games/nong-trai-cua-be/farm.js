@@ -107,7 +107,6 @@ export function createFarmGame(ctx) {
   // lánh" nhỏ (sine cao hơn 1 quãng 8) chồng lên.
   var sharedAudioCtx = null;
   function playDing() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try {
       if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
       var ctxAudio = sharedAudioCtx;

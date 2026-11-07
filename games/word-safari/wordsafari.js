@@ -184,7 +184,6 @@ export function createWordSafariGame(ctx) {
   // sao riêng theo đúng quy ước đã có, xem howmany.js/bill.js).
   var sharedAudioCtx = null;
   function playDing() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try {
       if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
       var ctxAudio = sharedAudioCtx;

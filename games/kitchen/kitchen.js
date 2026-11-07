@@ -195,7 +195,6 @@ export function createKitchenGame(ctx) {
   // bản sao riêng theo đúng quy ước đã có).
   var sharedAudioCtx = null;
   function playDing() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try {
       if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
       var ctxAudio = sharedAudioCtx;
@@ -234,7 +233,6 @@ export function createKitchenGame(ctx) {
   // toàn im lặng — theo phản hồi người dùng, chỉ đổi màu xanh/đỏ khó nhận
   // ra, cần thêm âm thanh cho rõ ràng hơn).
   function playBuzz() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try {
       if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
       var ctxAudio = sharedAudioCtx;

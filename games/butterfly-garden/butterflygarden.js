@@ -251,7 +251,6 @@ export function createButterflyGardenGame(ctx) {
   // game tự giữ 1 bản sao riêng theo đúng quy ước đã có).
   var sharedAudioCtx = null;
   function playDing() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try {
       if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
       var ctxAudio = sharedAudioCtx;
@@ -287,7 +286,6 @@ export function createButterflyGardenGame(ctx) {
 
   // Tiếng "buzz" trầm khi bấm sai — y hệt kitchen.js.
   function playBuzz() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try {
       if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
       var ctxAudio = sharedAudioCtx;

@@ -107,7 +107,6 @@ export function createForestGame(ctx) {
   // rõ hơn hẳn, giống hiệu ứng "ăn điểm" quen thuộc trong game.
   var sharedAudioCtx = null;
   function playDing() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     try {
       if (!sharedAudioCtx) sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
       var ctxAudio = sharedAudioCtx;
