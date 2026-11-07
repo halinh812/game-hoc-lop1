@@ -23,6 +23,7 @@ import {
   shuffle
 } from '../engine/learning-engine.js';
 import { pickMatchWords } from '../games/match-it/matchit.js';
+import { numberRainMax, pickRainTargets, NUMBER_WORDS } from '../games/number-rain/numberrain.js';
 
 // progress-store.js dùng localStorage — giả lập bằng 1 Map trong bộ nhớ.
 var memStorage = new Map();
@@ -380,6 +381,25 @@ test('pickMatchWords: đủ số từ, không trùng, chỉ từ có ảnh, ưu 
   ['a1', 'a2', 'a3', 'a4'].forEach(function (id) {
     assert.ok(picked.some(function (w) { return w.id === id; }), id + ' phải được ưu tiên');
   });
+});
+
+test('Number Rain: bắt đầu 1-5, mở thêm số khi mọi số đang mở đạt LV Nghe >= 2', function () {
+  var map = {};
+  assert.equal(numberRainMax(map), 5);
+  ['one', 'two', 'three', 'four'].forEach(function (id) { map[id] = { skills: { listen: { level: 2 } } }; });
+  assert.equal(numberRainMax(map), 5, 'five chưa đạt thì chưa mở six');
+  map.five = { skills: { listen: { level: 3 } } };
+  assert.equal(numberRainMax(map), 6);
+  NUMBER_WORDS.forEach(function (id) { map[id] = { skills: { listen: { level: 5 } } }; });
+  assert.equal(numberRainMax(map), 10);
+});
+
+test('Number Rain: đủ 10 lượt, không 2 lượt liền cùng 1 số, chỉ số trong phạm vi', function () {
+  var pool = NUMBER_WORDS.slice(0, 5).map(function (id) { return { id: id, en: id }; });
+  var t = pickRainTargets(pool, {}, { rng: seededRng(3) });
+  assert.equal(t.length, 10);
+  for (var i = 1; i < t.length; i++) assert.notEqual(t[i].id, t[i - 1].id);
+  assert.ok(t.every(function (w) { return NUMBER_WORDS.indexOf(w.id) < 5; }));
 });
 
 // --- runner ---

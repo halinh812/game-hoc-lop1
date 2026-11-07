@@ -31,6 +31,7 @@ import { createAbcVuiGame } from './games/abc-vui/abcvui.js';
 import { createKitchenGame } from './games/kitchen/kitchen.js';
 import { createButterflyGardenGame } from './games/butterfly-garden/butterflygarden.js';
 import { createMatchItGame } from './games/match-it/matchit.js';
+import { createNumberRainGame } from './games/number-rain/numberrain.js';
 
 var CONTENT_PACKS = [
   'content/packs/colors-v1.json',
@@ -52,7 +53,8 @@ var GAMES = [
   { id: 'abcvui', title: 'ABC', emoji: '🐥', skill: 'listen', available: true },
   { id: 'kitchen', title: 'Kitchen', emoji: '🍳', skill: 'listen', available: true },
   { id: 'butterflygarden', title: 'Butterfly Garden', emoji: '🦋', skill: 'listen', available: true },
-  { id: 'matchit', title: 'Match It!', emoji: '🔗', skill: 'read', available: true }
+  { id: 'matchit', title: 'Match It!', emoji: '🔗', skill: 'read', available: true },
+  { id: 'numberrain', title: 'Number Rain', emoji: '🌧️', skill: 'listen', available: true }
 ];
 
 // Ghi chiều cao THẬT đang nhìn thấy được của trình duyệt vào biến CSS
@@ -178,6 +180,14 @@ var matchItGame = createMatchItGame({
   render: render,
   owlMascot: owlMascot
 });
+var numberRainGame = createNumberRainGame({
+  state: state,
+  getStore: function () { return store; },
+  getWords: function () { return WORDS; },
+  speak: speak,
+  render: render,
+  owlMascot: owlMascot
+});
 
 function render() {
   if (state.screen === 'loading') renderLoading();
@@ -203,6 +213,8 @@ function render() {
   else if (state.screen === 'butterflygardenSummary') butterflyGardenGame.renderButterflyGardenSummary();
   else if (state.screen === 'matchit') matchItGame.renderMatchIt();
   else if (state.screen === 'matchitSummary') matchItGame.renderMatchItSummary();
+  else if (state.screen === 'numberrain') numberRainGame.renderNumberRain();
+  else if (state.screen === 'numberrainSummary') numberRainGame.renderNumberRainSummary();
   else if (state.screen === 'parent') renderParent();
 }
 
@@ -319,6 +331,7 @@ function renderHome() {
       if (g.id === 'kitchen') return kitchenGame.gameTileHtml(g.title);
       if (g.id === 'butterflygarden') return butterflyGardenGame.gameTileHtml(g.title);
       if (g.id === 'matchit') return matchItGame.gameTileHtml(g.title);
+      if (g.id === 'numberrain') return numberRainGame.gameTileHtml(g.title);
       return '<button type="button" class="gametile" data-id="' + g.id + '">' +
         '<span class="emoji">' + g.emoji + '</span><span class="name">' + g.title + '</span></button>';
     }
@@ -360,6 +373,7 @@ function renderHome() {
     else if (id === 'kitchen') kitchenGame.startKitchenGame();
     else if (id === 'butterflygarden') butterflyGardenGame.startButterflyGardenGame();
     else if (id === 'matchit') matchItGame.startMatchItGame();
+    else if (id === 'numberrain') numberRainGame.startNumberRainGame();
   });
 }
 
