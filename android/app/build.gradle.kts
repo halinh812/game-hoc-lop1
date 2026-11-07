@@ -56,9 +56,10 @@ android {
     // SẠCH tiến độ học của bé. Nên KHÔNG BAO GIỜ được build bằng chữ ký tạm.
     //
     // File chữ ký (android/keystore/release.jks) nằm trong repo nhưng bị khoá
-    // bằng mật khẩu. Mật khẩu KHÔNG nằm trong code mà cất trong GitHub Secrets
-    // (tên SIGNING_STORE_PASSWORD) — repo này công khai, ai cũng đọc được code,
-    // nhưng không ai đọc được Secrets. Không có mật khẩu thì file chữ ký vô dụng.
+    // bằng mật khẩu. Mật khẩu do NGƯỜI DÙNG TỰ ĐẶT trong GitHub Secrets (tên
+    // SIGNING_STORE_PASSWORD), không nằm trong code — repo này công khai, ai
+    // cũng đọc được code, nhưng không ai đọc được Secrets. File chữ ký do
+    // GitHub Actions tự tạo ở lần build đầu (xem .github/workflows/android-apk.yml).
     signingConfigs {
         create("release") {
             storeFile = rootProject.file("keystore/release.jks")

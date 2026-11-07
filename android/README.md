@@ -36,8 +36,9 @@ giọng tiếng Anh.
 
 ## Chữ ký app
 
-`keystore/release.jks` khoá bằng mật khẩu cất trong GitHub Secrets
-(`SIGNING_STORE_PASSWORD`), **không nằm trong code**. Thiếu secret thì build
+`keystore/release.jks` khoá bằng mật khẩu **do chủ repo tự đặt** trong GitHub
+Secrets (`SIGNING_STORE_PASSWORD`), **không nằm trong code**. File chữ ký do
+GitHub Actions tự tạo bằng mật khẩu đó ở lần build đầu tiên rồi lưu vào repo. Thiếu secret thì build
 dừng hẳn, không bao giờ ra bản chữ ký tạm — vì bản chữ ký khác không cài đè
 được, phải gỡ app, và gỡ app là mất tiến độ.
 

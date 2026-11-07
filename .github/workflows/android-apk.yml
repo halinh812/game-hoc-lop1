@@ -53,6 +53,28 @@ jobs:
             exit 1
           fi
 
+      # Lần build ĐẦU TIÊN: chưa có file chữ ký -> tạo bằng chính mật khẩu
+      # người dùng tự đặt trong Secrets (không ai khác, kể cả người viết code,
+      # biết mật khẩu này), rồi lưu file chữ ký (đã khoá) vào repo để MỌI lần
+      # build sau dùng lại đúng 1 chữ ký. Lưu thất bại thì dừng luôn, KHÔNG
+      # build tiếp — APK ký bằng 1 chữ ký không được lưu lại thì bản sau không
+      # cài đè lên được.
+      - name: Create signing key (first build only)
+        if: hashFiles('android/keystore/release.jks') == ''
+        env:
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+        run: |
+          mkdir -p android/keystore
+          keytool -genkeypair -keystore android/keystore/release.jks -storetype PKCS12 \
+            -alias vohoctienganh -keyalg RSA -keysize 2048 -validity 36500 \
+            -storepass "$SIGNING_STORE_PASSWORD" -keypass "$SIGNING_STORE_PASSWORD" \
+            -dname "CN=Vo hoc Tieng Anh cua Bong, O=halinh812"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add android/keystore/release.jks
+          git commit -m "Tạo chữ ký app cố định (tự động, lần build đầu) [skip ci]"
+          git push origin "HEAD:${{ github.ref_name }}"
+
       - name: Build APK
         working-directory: android
         env:
