@@ -30,6 +30,7 @@ import { createWordSafariGame } from './games/word-safari/wordsafari.js';
 import { createAbcVuiGame } from './games/abc-vui/abcvui.js';
 import { createKitchenGame } from './games/kitchen/kitchen.js';
 import { createButterflyGardenGame } from './games/butterfly-garden/butterflygarden.js';
+import { createFlipMatchGame } from './games/flip-match/flipmatch.js';
 
 var CONTENT_PACKS = [
   'content/packs/colors-v1.json',
@@ -50,7 +51,8 @@ var GAMES = [
   { id: 'wordsafari', title: 'Word Safari', emoji: '🔤', skill: 'read', available: true },
   { id: 'abcvui', title: 'ABC', emoji: '🐥', skill: 'listen', available: true },
   { id: 'kitchen', title: 'Kitchen', emoji: '🍳', skill: 'listen', available: true },
-  { id: 'butterflygarden', title: 'Butterfly Garden', emoji: '🦋', skill: 'listen', available: true }
+  { id: 'butterflygarden', title: 'Butterfly Garden', emoji: '🦋', skill: 'listen', available: true },
+  { id: 'flipmatch', title: 'Flip & Match', emoji: '🃏', skill: 'read', available: true }
 ];
 
 // Ghi chiều cao THẬT đang nhìn thấy được của trình duyệt vào biến CSS
@@ -168,6 +170,14 @@ var butterflyGardenGame = createButterflyGardenGame({
   render: render,
   owlMascot: owlMascot
 });
+var flipMatchGame = createFlipMatchGame({
+  state: state,
+  getStore: function () { return store; },
+  getWords: function () { return WORDS; },
+  speak: speak,
+  render: render,
+  owlMascot: owlMascot
+});
 
 function render() {
   if (state.screen === 'loading') renderLoading();
@@ -190,6 +200,8 @@ function render() {
   else if (state.screen === 'kitchenSummary') kitchenGame.renderKitchenSummary();
   else if (state.screen === 'butterflygarden') butterflyGardenGame.renderButterflyGarden();
   else if (state.screen === 'butterflygardenSummary') butterflyGardenGame.renderButterflyGardenSummary();
+  else if (state.screen === 'flipmatch') flipMatchGame.renderFlipMatch();
+  else if (state.screen === 'flipmatchSummary') flipMatchGame.renderFlipMatchSummary();
   else if (state.screen === 'parent') renderParent();
 }
 
@@ -286,6 +298,7 @@ function renderHome() {
       if (g.id === 'abcvui') return abcVuiGame.gameTileHtml(g.title);
       if (g.id === 'kitchen') return kitchenGame.gameTileHtml(g.title);
       if (g.id === 'butterflygarden') return butterflyGardenGame.gameTileHtml(g.title);
+      if (g.id === 'flipmatch') return flipMatchGame.gameTileHtml(g.title);
       return '<button type="button" class="gametile" data-id="' + g.id + '">' +
         '<span class="emoji">' + g.emoji + '</span><span class="name">' + g.title + '</span></button>';
     }
@@ -327,6 +340,7 @@ function renderHome() {
     else if (id === 'abcvui') abcVuiGame.startAbcVuiGame();
     else if (id === 'kitchen') kitchenGame.startKitchenGame();
     else if (id === 'butterflygarden') butterflyGardenGame.startButterflyGardenGame();
+    else if (id === 'flipmatch') flipMatchGame.startFlipMatchGame();
   });
 }
 
