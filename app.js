@@ -11,7 +11,7 @@
 // thấy — chỉ trang phụ huynh mới có số liệu.
 
 import { loadContentPacks } from './engine/content-loader.js';
-import { loadProgress, saveProgress, setProfile, getProfile, CURRENT_VERSION } from './engine/progress-store.js';
+import { loadProgress, saveProgress, setProfile, getProfile, CURRENT_VERSION, listPlayers, switchPlayer, addPlayer } from './engine/progress-store.js';
 import {
   SKILLS,
   SKILL_LABELS,
@@ -183,6 +183,7 @@ function render() {
   if (state.screen === 'loading') renderLoading();
   else if (state.screen === 'error') renderError();
   else if (state.screen === 'onboarding') renderOnboarding();
+  else if (state.screen === 'players') renderPlayers();
   else if (state.screen === 'home') renderHome();
   else if (state.screen === 'forest') forestGame.renderForest();
   else if (state.screen === 'forestSummary') forestGame.renderForestSummary();
@@ -224,7 +225,10 @@ function renderError() {
 
 function renderOnboarding() {
   var avatars = getAvatars();
-  var existing = getProfile(store);
+  // state.addingPlayer = đang tạo hồ sơ cho 1 bé MỚI (từ màn "Ai đang
+  // chơi?") — ô trống, có nút Huỷ, bấm Bắt đầu thì tạo người chơi mới chứ
+  // không sửa hồ sơ của bé đang chơi.
+  var existing = state.addingPlayer ? null : getProfile(store);
   if (existing && !state.onboardAvatar) {
     state.onboardName = existing.name;
     state.onboardAvatar = existing.avatarId;
@@ -243,6 +247,7 @@ function renderOnboarding() {
     '<input type="text" id="nameInput" class="nameinput" placeholder="Nhập tên của bé" maxlength="20" value="' + (state.onboardName || '') + '">' +
     '<div class="avatargrid" id="avatarGrid" style="max-height:230px;">' + avatarTiles + '</div>' +
     '<button class="chunkybtn coral" id="startPlayBtn" disabled>Bắt đầu chơi! 🎉</button>' +
+    (state.addingPlayer || existing ? '<button class="ghostbtn" id="onboardCancelBtn" style="margin-top:8px;">Huỷ</button>' : '') +
     '</div>';
 
   var nameInput = document.getElementById('nameInput');
@@ -272,8 +277,23 @@ function renderOnboarding() {
   startBtn.addEventListener('click', function () {
     var name = nameInput.value.trim();
     if (!name || !state.onboardAvatar) return;
-    setProfile(store, { name: name, avatarId: state.onboardAvatar });
+    if (state.addingPlayer) {
+      store = addPlayer({ name: name, avatarId: state.onboardAvatar });
+      state.addingPlayer = false;
+    } else {
+      setProfile(store, { name: name, avatarId: state.onboardAvatar });
+    }
     state.screen = 'home';
+    render();
+  });
+
+  var cancelBtn = document.getElementById('onboardCancelBtn');
+  if (cancelBtn) cancelBtn.addEventListener('click', function () {
+    var wasAdding = state.addingPlayer;
+    state.addingPlayer = false;
+    state.onboardAvatar = null;
+    state.onboardName = '';
+    state.screen = wasAdding ? 'players' : 'home';
     render();
   });
 
@@ -308,8 +328,8 @@ function renderHome() {
   root.innerHTML = worldBg() +
     '<div class="content homepage">' +
     '<div class="profilebar">' +
-    '<button type="button" class="avatarcircle" id="avatarEditBtn" aria-label="Đổi hồ sơ">' + avatarSvg(profile.avatarId, 44) + '</button>' +
-    '<div class="greet">Chào ' + profile.name + '! <span>Chọn trò chơi để bắt đầu nhé</span></div>' +
+    '<button type="button" class="avatarcircle" id="avatarEditBtn" aria-label="Đổi người chơi">' + avatarSvg(profile.avatarId, 44) + '<span class="swapbadge" aria-hidden="true">⇄</span></button>' +
+    '<div class="greet">Chào ' + escapeHtml(profile.name) + '! <span>Chọn trò chơi để bắt đầu nhé</span></div>' +
     '<div class="starsbadge" title="Tổng số sao đã đạt được">' + starIcon('#FFD25A', 20, '#E4952A') + '<span>' + totalStars(store.words) + '</span></div>' +
     '</div>' +
     '<div class="gamegrid-scroll"><div class="gamegrid" id="gameGrid">' + tiles + '</div></div>' +
@@ -320,8 +340,7 @@ function renderHome() {
     '</div>';
 
   document.getElementById('avatarEditBtn').addEventListener('click', function () {
-    state.onboardAvatar = null;
-    state.screen = 'onboarding';
+    state.screen = 'players';
     render();
   });
   document.getElementById('parentLink').addEventListener('click', function () {
@@ -341,6 +360,68 @@ function renderHome() {
     else if (id === 'kitchen') kitchenGame.startKitchenGame();
     else if (id === 'butterflygarden') butterflyGardenGame.startButterflyGardenGame();
     else if (id === 'matchit') matchItGame.startMatchItGame();
+  });
+}
+
+// ---------------- Ai đang chơi? (nhiều bé trên cùng 1 máy) ----------------
+// Chạm ảnh đại diện ở Trang chủ để tới đây. Mỗi bé có tiến độ RIÊNG (xem
+// engine/progress-store.js) — chọn bé nào thì tải tiến độ của bé đó.
+
+function renderPlayers() {
+  var players = listPlayers();
+  var cards = players.map(function (p) {
+    var prof = p.store.profile;
+    return '<button type="button" class="playercard' + (p.active ? ' active' : '') + '" data-id="' + p.id + '">' +
+      '<span class="playeravatar">' + avatarSvg(prof.avatarId, 52) + '</span>' +
+      '<span class="playername">' + escapeHtml(prof.name) + '</span>' +
+      '<span class="playerstars">' + starIcon('#FFD25A', 18, '#E4952A') + totalStars(p.store.words) + '</span>' +
+      (p.active ? '<span class="playernow">Đang chơi</span>' : '') +
+      '</button>';
+  }).join('');
+  var me = getProfile(store);
+
+  root.innerHTML = worldBg() +
+    '<div class="content playerspage">' +
+    '<div class="topbar"><button class="iconbtn" id="playersBackBtn" aria-label="Về trang chủ">' + BACK_SVG + '</button></div>' +
+    '<h1 class="onboard-title">Ai đang chơi nhỉ?</h1>' +
+    '<p class="onboard-sub">Chạm vào tên của mình nhé!</p>' +
+    '<div class="playerlist" id="playerList">' + cards +
+    '<button type="button" class="playercard addplayer" id="addPlayerBtn">' +
+    '<span class="playeravatar plus">+</span><span class="playername">Thêm bạn chơi</span></button>' +
+    '</div>' +
+    (me ? '<button class="ghostbtn" id="editProfileBtn" style="margin-top:14px;">✏️ Sửa tên / ảnh của ' + escapeHtml(me.name) + '</button>' : '') +
+    '</div>';
+
+  document.getElementById('playersBackBtn').addEventListener('click', function () {
+    state.screen = 'home'; render();
+  });
+  document.getElementById('playerList').addEventListener('click', function (e) {
+    var card = e.target.closest('.playercard[data-id]');
+    if (!card) return;
+    var id = card.getAttribute('data-id');
+    if (id !== store.playerId) store = switchPlayer(id);
+    state.screen = 'home';
+    render();
+  });
+  document.getElementById('addPlayerBtn').addEventListener('click', function () {
+    state.addingPlayer = true;
+    state.onboardName = '';
+    state.onboardAvatar = null;
+    state.screen = 'onboarding';
+    render();
+  });
+  var editBtn = document.getElementById('editProfileBtn');
+  if (editBtn) editBtn.addEventListener('click', function () {
+    state.addingPlayer = false;
+    state.onboardAvatar = null;
+    state.screen = 'onboarding';
+    render();
+  });
+}
+
+function escapeHtml(text) {
+  return String(text).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
   });
 }
 
@@ -482,7 +563,11 @@ function exportProgress() {
   var dateStr = new Date().toISOString().slice(0, 10);
   var filename = 'tien-do-' + safeName + '-' + dateStr + '.json';
 
-  var blob = new Blob([JSON.stringify(store, null, 2)], { type: 'application/json' });
+  // Bỏ playerId (mã nội bộ của máy này) khỏi file — khôi phục ở máy khác
+  // sẽ gắn vào đúng bé đang chơi bên đó.
+  var copy = Object.assign({}, store);
+  delete copy.playerId;
+  var blob = new Blob([JSON.stringify(copy, null, 2)], { type: 'application/json' });
   var url = URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.href = url;
@@ -524,11 +609,14 @@ function handleImportFile(e) {
     }
     var childName = (parsed.profile && parsed.profile.name) || '(chưa rõ tên)';
     var ok = window.confirm(
-      'Khôi phục sẽ THAY THẾ toàn bộ tiến độ hiện tại trên máy này bằng dữ liệu ' +
-      'trong file (hồ sơ: ' + childName + '). Bạn chắc chắn chứ?'
+      'Khôi phục sẽ THAY THẾ toàn bộ tiến độ của bé đang chơi (' +
+      ((getProfile(store) && getProfile(store).name) || 'bé') + ') bằng dữ liệu ' +
+      'trong file (hồ sơ: ' + childName + '). Các bé khác không bị ảnh hưởng. Bạn chắc chắn chứ?'
     );
     if (!ok) return;
 
+    // Ghi vào ĐÚNG bé đang chơi, không theo mã người chơi ghi trong file.
+    parsed.playerId = store.playerId;
     saveProgress(parsed);
     backupMsg('Đã khôi phục xong! Đang tải lại trang...', 'ok');
     setTimeout(function () { location.reload(); }, 900);

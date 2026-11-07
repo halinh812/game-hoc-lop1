@@ -155,6 +155,37 @@
   }
   .avatarbtn svg{ width:100%; height:100%; }
 
+  /* ---------- Ai đang chơi? (nhiều bé trên cùng 1 máy) ---------- */
+  .profilebar .avatarcircle{ position:relative; }
+  .swapbadge{
+    position:absolute; right:-4px; bottom:-4px; width:22px; height:22px; border-radius:50%;
+    background:#F4A93B; color:#fff; border:2px solid #fff; font-size:13px; font-weight:800; line-height:18px;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(20,40,25,.25);
+  }
+  .playerspage .topbar{ margin-bottom:4px; }
+  .playerlist{ display:grid; grid-template-columns:1fr 1fr; gap:12px; overflow-y:auto; min-height:0; padding:4px 2px 8px; }
+  .playercard{
+    position:relative; display:flex; flex-direction:column; align-items:center; gap:4px;
+    padding:14px 8px 12px; border-radius:22px; cursor:pointer;
+    background:var(--glass); border:2px solid var(--glass-border);
+    box-shadow:0 6px 14px rgba(20,40,25,.16); font:inherit; color:var(--ink);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .playercard.active{ border-color:#F4A93B; box-shadow:0 0 0 3px rgba(244,169,59,.4), 0 6px 14px rgba(20,40,25,.16); }
+  .playeravatar{ width:64px; height:64px; display:flex; align-items:center; justify-content:center; }
+  .playeravatar svg{ width:100%; height:100%; }
+  .playeravatar.plus{
+    border-radius:50%; border:3px dashed var(--ink-soft); color:var(--ink-soft);
+    font-family:'Baloo 2', sans-serif; font-size:2.2rem; font-weight:800; width:58px; height:58px;
+  }
+  .playername{ font-family:'Baloo 2', sans-serif; font-weight:800; font-size:1.1rem; line-height:1.1; text-align:center; overflow-wrap:anywhere; }
+  .playerstars{ display:flex; align-items:center; gap:4px; font-family:'Baloo 2', sans-serif; font-weight:800; font-size:.95rem; }
+  .playernow{
+    position:absolute; top:-9px; left:50%; transform:translateX(-50%); white-space:nowrap;
+    background:#F4A93B; color:#fff; font-size:.7rem; font-weight:800; padding:2px 9px; border-radius:999px;
+  }
+  .playercard.addplayer{ background:rgba(255,255,255,.45); border-style:dashed; justify-content:center; }
+
   /* ---------- home / game grid ---------- */
   .profilebar{ display:flex; align-items:center; gap:10px; margin-bottom:10px; flex:none; }
   .profilebar .avatarcircle{

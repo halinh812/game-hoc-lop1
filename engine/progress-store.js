@@ -28,27 +28,109 @@ function migrate(raw) {
   return raw;
 }
 
-export function loadProgress() {
+// ---------------- Nhiều người chơi trên cùng 1 máy ----------------
+// Mỗi bé có 1 "store" (hồ sơ + tiến độ) RIÊNG, lưu ở 1 khoá localStorage
+// riêng. Danh sách người chơi + ai đang chơi nằm ở PLAYERS_KEY.
+//
+// AN TOÀN CHO TIẾN ĐỘ CŨ: người chơi đầu tiên ('p1') dùng ĐÚNG khoá cũ
+// STORE_KEY — tiến độ đã có trên máy (của Bòng) không bị di chuyển, đổi
+// tên hay chép đi đâu cả. Máy chưa có danh sách người chơi thì coi như chỉ
+// có 1 người là 'p1'. Người chơi thêm sau mới dùng khoá mới STORE_KEY::id.
+//
+// Mỗi store mang theo playerId của chính nó, và saveProgress() ghi theo
+// playerId ĐÓ chứ không theo "ai đang chơi" — nên dù 1 game còn sót lời
+// gọi lưu muộn sau khi đã đổi người, tiến độ vẫn không thể bị ghi nhầm
+// sang hồ sơ của bé kia.
+export var PLAYERS_KEY = 'bo-hoc-tienganh-players-v1';
+export var FIRST_PLAYER_ID = 'p1';
+
+export function playerStoreKey(id) {
+  return !id || id === FIRST_PLAYER_ID ? STORE_KEY : STORE_KEY + '::' + id;
+}
+
+function readRegistry() {
   try {
-    var raw = localStorage.getItem(STORE_KEY);
-    var parsed = raw ? JSON.parse(raw) : null;
-    return migrate(parsed);
+    var raw = JSON.parse(localStorage.getItem(PLAYERS_KEY));
+    if (isPlainObject(raw) && Array.isArray(raw.players) && raw.players.length) {
+      var ids = raw.players.filter(function (id) { return typeof id === 'string' && id; });
+      if (ids.length) {
+        return { activeId: ids.indexOf(raw.activeId) !== -1 ? raw.activeId : ids[0], players: ids };
+      }
+    }
+  } catch (e) { /* hỏng thì dùng mặc định bên dưới */ }
+  return { activeId: FIRST_PLAYER_ID, players: [FIRST_PLAYER_ID] };
+}
+
+function writeRegistry(reg) {
+  try {
+    localStorage.setItem(PLAYERS_KEY, JSON.stringify(reg));
+  } catch (e) { /* bị chặn thì thôi, như saveProgress */ }
+}
+
+function loadPlayerStore(id) {
+  var store;
+  try {
+    var raw = localStorage.getItem(playerStoreKey(id));
+    store = migrate(raw ? JSON.parse(raw) : null);
   } catch (e) {
-    return freshStore();
+    store = freshStore();
   }
+  store.playerId = id;
+  return store;
+}
+
+// Tải store của người ĐANG chơi.
+export function loadProgress() {
+  return loadPlayerStore(readRegistry().activeId);
 }
 
 export function saveProgress(store) {
   try {
-    localStorage.setItem(STORE_KEY, JSON.stringify(store));
+    var id = store.playerId || readRegistry().activeId;
+    store.playerId = id;
+    localStorage.setItem(playerStoreKey(id), JSON.stringify(store));
   } catch (e) {
     // localStorage có thể bị chặn (ẩn danh, hết dung lượng...) — im lặng
     // bỏ qua, trò chơi vẫn chạy được trong phiên hiện tại.
   }
 }
 
+// Danh sách người chơi (kèm store của từng bé để hiện tên/ảnh/số sao).
+// Bỏ qua người chưa đặt tên (chưa có hồ sơ).
+export function listPlayers() {
+  var reg = readRegistry();
+  return reg.players.map(function (id) {
+    return { id: id, active: id === reg.activeId, store: loadPlayerStore(id) };
+  }).filter(function (p) { return !!p.store.profile; });
+}
+
+// Đổi sang bé khác — trả về store của bé đó.
+export function switchPlayer(id) {
+  var reg = readRegistry();
+  if (reg.players.indexOf(id) === -1) return loadProgress();
+  reg.activeId = id;
+  writeRegistry(reg);
+  return loadPlayerStore(id);
+}
+
+// Thêm 1 bé mới (đã có tên + ảnh) và chuyển sang bé đó luôn.
+export function addPlayer(profile) {
+  var reg = readRegistry();
+  var id = 'p' + Date.now().toString(36);
+  while (reg.players.indexOf(id) !== -1) id += 'x';
+  reg.players.push(id);
+  reg.activeId = id;
+  var store = freshStore();
+  store.playerId = id;
+  store.profile = profile;
+  saveProgress(store);
+  writeRegistry(reg);
+  return store;
+}
+
 export function clearProgress() {
   var empty = freshStore();
+  empty.playerId = readRegistry().activeId;
   saveProgress(empty);
   return empty;
 }

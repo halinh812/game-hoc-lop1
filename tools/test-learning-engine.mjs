@@ -22,6 +22,17 @@ import {
   pickOptions,
   shuffle
 } from '../engine/learning-engine.js';
+import { pickMatchWords } from '../games/match-it/matchit.js';
+
+// progress-store.js dùng localStorage — giả lập bằng 1 Map trong bộ nhớ.
+var memStorage = new Map();
+globalThis.localStorage = {
+  getItem: function (k) { return memStorage.has(k) ? memStorage.get(k) : null; },
+  setItem: function (k, v) { memStorage.set(k, String(v)); },
+  removeItem: function (k) { memStorage.delete(k); },
+  clear: function () { memStorage.clear(); }
+};
+var PS = await import('../engine/progress-store.js');
 
 var tests = [];
 function test(name, fn) { tests.push({ name: name, fn: fn }); }
@@ -321,6 +332,54 @@ test('shuffle: giữ nguyên tập phần tử, chỉ đổi thứ tự', functi
 
 test('SKILLS: đúng 5 kỹ năng theo thiết kế', function () {
   assert.deepEqual(SKILLS, ['listen', 'speak', 'read', 'write', 'see']);
+});
+
+test('Nhiều người chơi: tiến độ cũ giữ nguyên khoá cũ, mỗi bé lưu riêng', function () {
+  localStorage.clear();
+  var old = { version: 3, profile: { name: 'Bòng', avatarId: 'panda' }, words: { cat: { skills: { read: { level: 3 } } } } };
+  localStorage.setItem(PS.STORE_KEY, JSON.stringify(old));
+  var s1 = PS.loadProgress();
+  assert.equal(s1.profile.name, 'Bòng');
+  assert.equal(s1.playerId, 'p1');
+
+  var s2 = PS.addPlayer({ name: 'Na', avatarId: 'bear' });
+  assert.notEqual(s2.playerId, 'p1');
+  assert.equal(PS.loadProgress().profile.name, 'Na', 'thêm xong thì đang chơi là bé mới');
+  s2.words.dog = { skills: { read: { level: 1 } } };
+  PS.saveProgress(s2);
+
+  // Lời gọi lưu muộn của store Bòng sau khi đã đổi sang Na vẫn ghi vào Bòng.
+  s1.words.cat.skills.read.level = 4;
+  PS.saveProgress(s1);
+  assert.equal(JSON.parse(localStorage.getItem(PS.STORE_KEY)).words.cat.skills.read.level, 4);
+  assert.equal(PS.loadProgress().words.cat, undefined, 'tiến độ Na không lẫn của Bòng');
+
+  var back = PS.switchPlayer('p1');
+  assert.equal(back.profile.name, 'Bòng');
+  assert.equal(back.words.dog, undefined, 'tiến độ Bòng không lẫn của Na');
+  assert.deepEqual(PS.listPlayers().map(function (p) { return p.store.profile.name + (p.active ? '*' : ''); }), ['Bòng*', 'Na']);
+});
+
+test('Nhiều người chơi: máy mới tinh chỉ có 1 người p1 chưa có hồ sơ', function () {
+  localStorage.clear();
+  var s = PS.loadProgress();
+  assert.equal(s.playerId, 'p1');
+  assert.equal(s.profile, null);
+  assert.deepEqual(PS.listPlayers(), []);
+});
+
+test('pickMatchWords: đủ số từ, không trùng, chỉ từ có ảnh, ưu tiên nghe giỏi-đọc yếu', function () {
+  var pool = [];
+  for (var i = 0; i < 30; i++) pool.push({ id: 'a' + i, en: 'a' + i, image: i === 0 ? '' : 'x.png' });
+  var map = {};
+  for (var j = 1; j <= 4; j++) map['a' + j] = { skills: { listen: { level: 5, seen: true, next: 0 } } };
+  var picked = pickMatchWords(pool, map, { count: 12, rng: seededRng(7) });
+  assert.equal(picked.length, 12);
+  assert.equal(new Set(picked.map(function (w) { return w.id; })).size, 12);
+  assert.ok(picked.every(function (w) { return w.image; }));
+  ['a1', 'a2', 'a3', 'a4'].forEach(function (id) {
+    assert.ok(picked.some(function (w) { return w.id === id; }), id + ' phải được ưu tiên');
+  });
 });
 
 // --- runner ---
