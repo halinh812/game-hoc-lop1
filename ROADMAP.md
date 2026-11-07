@@ -2502,3 +2502,51 @@ Kiểm thử bằng Playwright (theo dõi request mạng tới `assets/audio/en/
 Bill! (câu dài "I want a bag.") — cả câu mở đầu lẫn câu xác nhận sau
 khi chọn đều đi qua Web Speech, **0 request** `.wav` nào. 29 unit test
 vẫn pass nguyên.
+
+## Vòng 56 — App Android (APK) bọc quanh bản web, build bằng GitHub Actions
+
+Người dùng muốn có app Android cài được (APK), nhưng **không có máy tính**.
+
+**Hướng đã chọn (sau khi bàn kỹ các phương án):** KHÔNG viết lại 8 game
+bằng công nghệ khác (đo được ~92% code phải viết lại, mở lại toàn bộ lỗi đã
+sửa qua 55 vòng). Thay vào đó làm 1 vỏ app Android nhỏ bằng Kotlin, bên
+trong là WebView chạy NGUYÊN bản web hiện có. Ban đầu thử Expo (React
+Native) nhưng bỏ vì Expo cần máy tính chạy dev server hoặc tài khoản +
+token Expo. Chuyển sang đúng cách dự án `hoc-tieng-anh` của người dùng đang
+chạy được: **GitHub Actions tự build APK mỗi lần đẩy code** rồi đăng lên mục
+Releases — mở trên điện thoại, bấm file `.apk` là cài. Xem `android/README.md`.
+
+Các điểm kỹ thuật chính:
+- **Phần game được chép nguyên vào APK** mỗi lần build (chơi offline, luôn
+  là bản game mới nhất, không có 2 bản lệch nhau). Phục vụ qua địa chỉ
+  `https://appassets.androidplatform.net` vì ES module và `fetch()` bị chặn
+  với `file:///`; tự khai báo kiểu file `.js` (máy đoán sai là trắng màn hình).
+- **Đọc tiếng Anh:** WebView của Android không có Web Speech API, mà sau
+  Vòng 55 cả 8 game đọc 100% bằng thứ đó. `engine/native-tts-bridge.js`
+  dựng bản giả `speechSynthesis`, chuyển lệnh đọc sang TextToSpeech của
+  Android qua `window.AndroidTTS`, và **báo ngược lúc đọc xong** để giữ
+  đúng bản sửa cắt câu của Vòng 52. Trên web thường file này tự thoát,
+  không ảnh hưởng gì. Phải khai báo `<queries>` TTS_SERVICE trong manifest,
+  thiếu là Android 11+ không thấy bộ đọc.
+- **Mất tiếng ting/rè** (lỗi thật người dùng báo sau bản đầu): Web Audio
+  trong WebView sinh ra ở trạng thái "suspended" còn Chrome thì không. Cầu
+  nối bọc hàm tạo AudioContext để đánh thức lúc tạo và mỗi lần chạm màn
+  hình; vẫn bị chặn thì app hiện thông báo kèm trạng thái để chẩn đoán từ xa.
+- **Chữ ký app cố định** để bản sau cài đè được bản trước (chữ ký khác ->
+  phải gỡ app -> mất tiến độ của bé). File chữ ký do GitHub Actions tự tạo
+  ở lần build đầu bằng **mật khẩu người dùng tự đặt trong GitHub Secrets**
+  — không ai khác biết mật khẩu, kể cả người viết code. Thiếu secret thì
+  build dừng hẳn, không bao giờ ra bản chữ ký tạm.
+- **Chuyển tiến độ từ bản web sang app** bằng file sao lưu có sẵn (Vòng
+  38). Phải tự làm cửa sổ chọn file cho WebView (nó không tự làm), nếu
+  không nút "Khôi phục từ file" trong app bấm không ăn. Đã thử khôi phục
+  đúng file sao lưu thật của bé: từ app trống về đúng hồ sơ, 541 sao.
+- Nút Quay lại của máy bấm hộ nút "Về trang chủ" thay vì thoát app; cỡ chữ
+  hệ thống không làm vỡ bố cục; icon mới từ hình cú mèo linh vật.
+
+Trang chủ: đã kiểm tra lưới trò chơi cuộn được bằng ngón tay khi có thêm
+game (giả lập 14 game) — thanh tên bé và nút phụ huynh vẫn cố định. Sau
+này thêm game không cần sửa gì phần cuộn.
+
+Repo vẫn để **công khai** (để bản web trên GitHub Pages tiếp tục chạy, vì
+tiến độ của bé đang nằm ở bản web cho tới khi chuyển xong sang app).
