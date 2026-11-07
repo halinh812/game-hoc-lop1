@@ -365,6 +365,14 @@
      hiện ra dù trang đã build xong từ lâu. Ảnh trong assets/ KHÔNG áp
      dụng cách này (để giữ cache, vì ảnh nặng hơn nhiều và hiếm khi đổi
      nội dung ở đúng tên file cũ). -->
+<!-- Cầu nối âm thanh cho bản chạy trong app Android (mobile/) — PHẢI nạp
+     đồng bộ và nằm TRƯỚC app.js, vì engine/audio-provider.js kiểm tra
+     'speechSynthesis' in window ngay lúc app.js vừa được nạp; cầu nối tới
+     muộn một nhịp là nó kết luận "máy không đọc được" và im tiếng luôn.
+     Dùng <script src> thường (không phải module, không defer) để chắc chắn
+     chạy xong trước. Mở bằng trình duyệt bình thường thì file này tự thoát
+     ra ngay, không ảnh hưởng gì — xem giải thích trong chính file đó. -->
+<script src="engine/native-tts-bridge.js"></script>
 <script>
   (function () {
     var v = Date.now();
