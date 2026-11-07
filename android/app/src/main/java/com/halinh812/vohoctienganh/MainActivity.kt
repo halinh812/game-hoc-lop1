@@ -263,6 +263,10 @@ class MainActivity : Activity() {
                     main.post { speak(req) }
                 }
                 "tts-cancel" -> main.post { tts?.stop() }
+                // Cầu nối đã thử đánh thức bộ phát tiếng ting/rè mà vẫn không
+                // chạy được. Hiện thông báo kèm trạng thái để phụ huynh chụp
+                // màn hình gửi lại — chỉ báo 1 lần mỗi lần mở app.
+                "audio-blocked" -> toast("Tiếng ting/rè đang bị chặn (" + msg.optString("state") + "). Chụp màn hình này gửi lại giúp nhé.")
             }
         }
     }

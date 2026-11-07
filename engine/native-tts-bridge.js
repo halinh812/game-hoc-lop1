@@ -143,4 +143,53 @@
   }
   install('speechSynthesis', synth);
   install('SpeechSynthesisUtterance', Utterance);
+
+  // ---------- Tiếng "ting" (đúng) / "rè" (sai) ----------
+  // Hai tiếng này KHÔNG đi qua bộ đọc giọng nói mà do chính từng game tự tạo
+  // bằng Web Audio (AudioContext + bộ dao động, xem playDing()/playBuzz()
+  // trong games/*/*.js). Lỗi thật gặp trên máy người dùng: trong app thì
+  // đọc tiếng Anh được nhưng mất hẳn tiếng ting/rè, còn bản web trên CÙNG
+  // máy vẫn kêu bình thường. WebView của Android hay tạo AudioContext ở trạng
+  // thái "suspended" (tạm dừng) — Chrome thì không — mà code game chưa bao
+  // giờ gọi resume() vì trên trình duyệt chưa từng cần.
+  //
+  // Sửa ở đây (chỉ chạy trong app) thay vì sửa 8 game: bọc lại hàm tạo
+  // AudioContext để ghi nhớ mọi bộ phát game tạo ra và đánh thức ngay lúc
+  // tạo, rồi đánh thức lại mỗi lần bé chạm màn hình (lần chạm là "thao tác
+  // người dùng", đúng điều kiện WebView đòi để cho phép phát tiếng).
+  var NativeAudioContext = window.AudioContext || window.webkitAudioContext;
+  if (NativeAudioContext) {
+    var audioContexts = [];
+    var reportedBlocked = false;
+
+    var wake = function (ac) {
+      if (ac.state === 'suspended' && typeof ac.resume === 'function') {
+        try { ac.resume(); } catch (e) { /* bỏ qua, lần chạm sau thử tiếp */ }
+      }
+    };
+
+    var WakingAudioContext = function (options) {
+      var ac = options === undefined ? new NativeAudioContext() : new NativeAudioContext(options);
+      audioContexts.push(ac);
+      wake(ac);
+      // Vẫn không chạy được thì báo về app để hiện thông báo — người viết
+      // code không cầm được máy thật, cần biết chính xác trạng thái thay vì
+      // đoán mò.
+      setTimeout(function () {
+        if (!reportedBlocked && ac.state !== 'running') {
+          reportedBlocked = true;
+          post({ type: 'audio-blocked', state: String(ac.state) });
+        }
+      }, 1500);
+      return ac;
+    };
+    WakingAudioContext.prototype = NativeAudioContext.prototype;
+    install('AudioContext', WakingAudioContext);
+    install('webkitAudioContext', WakingAudioContext);
+
+    var wakeAll = function () { audioContexts.forEach(wake); };
+    ['touchstart', 'pointerdown', 'click'].forEach(function (type) {
+      document.addEventListener(type, wakeAll, { capture: true, passive: true });
+    });
+  }
 })();
