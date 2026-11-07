@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Màu nền trùng màu nền trang game (#E9E2CD, --page-bg trong index.html)
+    <!-- Màu nền trùng màu nền trang game (#E9E2CD, biến page-bg trong index.html)
          để lúc app vừa mở, trước khi trang game kịp vẽ, không bị chớp trắng. -->
     <color name="page_bg">#E9E2CD</color>
     <style name="AppTheme" parent="android:Theme.Material.Light.NoActionBar">
