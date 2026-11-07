@@ -1,0 +1,123 @@
+/* CSS RIÊNG của game "Match It!" (Nối hình với chữ) — màn kết quả, nút bấm
+   dùng chung nằm ở engine/catch-game.css và index.html. Nạp qua danh sách
+   CSS trong index.html. Không có url() ảnh nào trong file này (ảnh thẻ là
+   thẻ <img> trong matchit.js). */
+
+/* Màn chơi cao đúng bằng màn hình thật (--app-vh, xem app.js) để 4 hàng
+   thẻ chia đều chiều cao còn lại, không bắt bé phải cuộn trang. Không có
+   linh vật nổi phía trên topbar nên bỏ khoảng padding-top 100px mặc định
+   (cùng cách .content.kitchencontent đã làm). */
+.content.matchcontent{
+  padding-top:14px; padding-bottom:14px;
+  min-height:0; height:100vh; height:var(--app-vh, 100vh);
+}
+.matchcontent .topbar{ margin-bottom:12px; align-items:center; position:relative; z-index:5; }
+
+/* Tiến độ 3 màn: 3 chấm, chấm đang chơi dài ra. */
+.matchdots{ display:flex; gap:6px; align-items:center; justify-content:center; flex:1; }
+.matchdot{ width:10px; height:10px; border-radius:999px; background:rgba(255,255,255,.55); border:1px solid var(--glass-border); }
+.matchdot.done{ background:var(--success); border-color:var(--success); }
+.matchdot.now{ width:26px; background:#F4A93B; border-color:#E4952A; }
+
+/* Bộ đếm SAO HỌC TẬP THẬT — cùng kiểu viên thuốc kính với .starsbadge ở
+   Trang chủ để bé nhận ra đây chính là con số sao của mình. */
+.matchstars{
+  position:relative; flex:none; display:flex; align-items:center; gap:5px;
+  background:var(--glass); border:1px solid var(--glass-border); border-radius:999px; padding:7px 12px;
+  box-shadow:0 4px 10px rgba(20,40,25,.16);
+  font-family:'Baloo 2', sans-serif; font-weight:800; font-size:1rem; color:var(--ink);
+}
+.matchdelta{
+  position:absolute; right:6px; top:100%; pointer-events:none;
+  font-family:'Baloo 2', sans-serif; font-weight:800; font-size:1.5rem; line-height:1;
+  animation:matchDeltaFly 1.3s ease-out forwards; z-index:6;
+}
+.matchdelta.up{ color:var(--success); text-shadow:0 1px 0 #fff, 0 0 6px rgba(255,255,255,.9); }
+.matchdelta.down{ color:#D2452B; text-shadow:0 1px 0 #fff, 0 0 6px rgba(255,255,255,.9); }
+@keyframes matchDeltaFly{
+  0%{ opacity:0; transform:translateY(14px) scale(.6); }
+  20%{ opacity:1; transform:translateY(4px) scale(1.15); }
+  70%{ opacity:1; transform:translateY(0) scale(1); }
+  100%{ opacity:0; transform:translateY(-8px) scale(1); }
+}
+
+/* Bàn chơi: 2 cột (hình | chữ), khe giữa đủ rộng để thấy đường nối. */
+.matchboard{
+  position:relative; flex:1; min-height:0;
+  display:grid; grid-template-columns:1fr 1fr; column-gap:16%;
+}
+.matchcol{ display:grid; grid-template-rows:repeat(4, 1fr); gap:10px; min-height:0; }
+.matchlines{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:2; overflow:visible; }
+.matchline{ stroke-width:6; stroke-linecap:round; }
+.matchline.good{ stroke:var(--success); }
+.matchline.bad{ stroke:#D2452B; stroke-dasharray:10 9; }
+.matchdotend.good{ fill:var(--success); }
+.matchdotend.bad{ fill:#D2452B; }
+
+/* NÚT BẤM ĐỨNG YÊN, chỉ lớp bên trong (.matchface) lắc/phóng: animation
+   transform đặt thẳng lên nút làm vùng bấm thật liên tục đổi theo, bấm
+   kém ổn định (lỗi thật đã gặp ở Butterfly Garden — Vòng 47). */
+.matchcard{
+  position:relative; border:none; background:transparent; padding:0; margin:0;
+  cursor:pointer; min-height:0; -webkit-tap-highlight-color:transparent;
+}
+.matchface{
+  position:absolute; inset:0; border-radius:18px; overflow:hidden;
+  display:flex; align-items:center; justify-content:center;
+  background:#FFFDF7; border:3px solid #F1E6CC;
+  box-shadow:0 4px 0 rgba(20,40,25,.16), 0 8px 16px rgba(20,40,25,.18);
+  transition:opacity .35s ease, transform .35s ease, border-color .15s, box-shadow .15s;
+}
+.matchcard.pic img{ width:84%; height:84%; object-fit:contain; filter:drop-shadow(0 3px 2px rgba(20,40,25,.2)); }
+.matchcard.text .matchface{ background:#FFF8E3; }
+.matchword{
+  font-family:'Baloo 2', sans-serif; font-weight:800; color:var(--ink);
+  font-size:clamp(20px, 7.5vw, 34px); line-height:1.05; text-align:center;
+  padding:0 6px; overflow-wrap:anywhere;
+}
+
+/* Đang chọn: viền cam sáng + nhấc lên nhẹ. */
+.matchcard.sel .matchface{
+  border-color:#F4A93B; transform:translateY(-3px) scale(1.04);
+  box-shadow:0 0 0 3px rgba(244,169,59,.45), 0 10px 18px rgba(20,40,25,.22);
+}
+/* Nối đúng: viền xanh, rồi mờ dần biến mất (giữ chỗ, các thẻ khác không
+   nhảy vị trí làm bé lạc). */
+.matchcard.good .matchface{
+  border-color:var(--success);
+  box-shadow:0 0 0 3px rgba(47,143,91,.35), 0 0 16px rgba(47,143,91,.55);
+}
+.matchcard.gone{ pointer-events:none; }
+.matchcard.gone .matchface{ opacity:0; transform:scale(.6); }
+/* Nối sai: viền đỏ + lắc. */
+.matchcard.bad .matchface{ border-color:#D2452B; animation:matchShake .45s ease; }
+@keyframes matchShake{
+  0%,100%{ translate:0 0; }
+  25%{ translate:-6px 0; }
+  75%{ translate:6px 0; }
+}
+
+/* ---------- ô ở lưới chọn trò chơi (Trang chủ) ---------- */
+.gametile.match-tile{
+  position:relative; overflow:hidden; border:1px solid var(--glass-border);
+  background:linear-gradient(160deg, #FFF3C9 0%, #FFE2A8 55%, #FBD9C4 100%);
+}
+.gametile.match-tile .name{ position:relative; z-index:1; color:var(--ink); }
+.matchtile-face{ position:relative; display:flex; align-items:center; width:104px; height:76px; }
+.matchtile-card{
+  flex:none; width:44px; height:52px; border-radius:10px;
+  background:#FFFDF7; border:2px solid #F1E6CC;
+  box-shadow:0 3px 8px rgba(20,40,25,.2);
+  display:flex; align-items:center; justify-content:center;
+}
+.matchtile-card.pic img{ width:86%; height:86%; object-fit:contain; }
+.matchtile-card.word{
+  font-family:'Baloo 2', sans-serif; font-weight:800; font-size:17px; color:var(--ink);
+  background:#FFF8E3;
+}
+.matchtile-line{ flex:1; height:4px; border-radius:2px; background:var(--success); margin:0 -2px; }
+
+@media (prefers-reduced-motion: reduce){
+  .matchface{ transition:none; }
+  .matchcard.bad .matchface,.matchdelta{ animation:none !important; }
+}
